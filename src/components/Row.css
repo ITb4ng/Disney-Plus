@@ -107,7 +107,7 @@
 
 
 .swiper-pagination {
-    text-align: right !important;
+    text-align: center !important;
 }
 
 .swiper-pagination-bullet {
@@ -119,12 +119,15 @@
     background-color: white !important;
 }
 
-.swiper-button-prev {
-    color: white !important;
-}
-
+.swiper-button-prev,
 .swiper-button-next {
-    color: white !important;
+    color:#fff !important;
+    opacity: .6;
+}
+.swiper-button-prev:hover,
+.swiper-button-next:hover
+ {
+    opacity: 1;
 }
 
 .swiper-button-next::after, .swiper-button-prev::after {

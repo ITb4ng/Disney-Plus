@@ -58,6 +58,26 @@
     }
 }
 
+@media (min-width:300px) and (max-width:767px) {
+    .banner__contents {
+        width: 100% !important;
+        padding-left: 2.3rem;
+        margin-left: 0px !important;
+    }
+    .banner__title {
+        font-size: 1.5rem !important;
+        transform: translateY(50%);
+        padding-bottom: 1.5rem !important;
+    }
+
+    .banner__description {
+        font-size: 0.8rem !important;
+        width: auto !important;
+        max-width: 300px !important;
+        margin: 0;
+    }
+}
+
 .banner__contents {
     margin-left: 40px;
     padding-top: 140px;

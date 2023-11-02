@@ -48,6 +48,8 @@
 .modal__poster-img {
     width: 100%;
     height: auto;
+    filter: grayscale(1%);
+    opacity: .6;
 }
 
 .modal__content {

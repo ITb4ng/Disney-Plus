@@ -49,7 +49,7 @@ const Banner = () => {
             ></Iframe>
           </HomeContainer>
         </Container>
-        <button className ='closePopup'onClick={() => setIsClicked(false)}> 닫기 </button>
+        <button className ='closePopup' onClick={() => setIsClicked(false)}> 닫기 </button>
       </>
     )
   }
