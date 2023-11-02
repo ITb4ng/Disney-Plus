@@ -6,7 +6,7 @@
 .pnp.js
 
 #api ,firebase
-axios.js
+/axios.js
 
 # testing
 /coverage
