@@ -1,0 +1,357 @@
+
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: clamp(680px, 92vh, 980px);
+  overflow: hidden;
+  color: #fff;
+  padding-bottom: clamp(36px, 6vh, 80px);
+}
+
+/* background */
+.hero__bgStack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero__bgSlide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--fade-ms, 900ms) ease;
+  will-change: opacity;
+}
+
+.hero__bgSlide.is-active {
+  opacity: 1;
+}
+
+.hero__bgImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% center; /* 왼쪽 캡션 중심 */
+  transform: scale(1.02);
+}
+
+/* overlay: left dark */
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.72) 38%,
+    rgba(0, 0, 0, 0.22) 62%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+}
+
+/* content */
+.hero__content {
+  position: relative;
+  z-index: 2;
+
+  min-height: clamp(640px, 86vh, 920px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  width: min(1100px, 100%);
+  margin-left: 150px;
+  padding: clamp(20px, 6vw, 64px);
+  padding-top: clamp(34px, 7vw, 84px);
+}
+
+.hero__contentFade {
+  animation: heroFadeIn var(--fade-ms, 900ms) ease both;
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero__headline {
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-size: clamp(28px, 3.2vw, 56px);
+  margin: 0 0 18px 0;
+}
+
+.hero__logos {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.hero__logo {
+  font-weight: 900;
+  font-size: clamp(18px, 2.2vw, 30px);
+  opacity: 0.95;
+}
+
+.hero__logo--tving {
+  color: #ff2d55;
+}
+
+.hero__logo--wavve {
+  color: #2b7bff;
+}
+
+/* CTAs */
+.hero__ctas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  width: min(760px, 100%);
+  margin: 10px 0 22px 0;
+}
+
+.hero__cta {
+  height: 56px;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 15px;
+  background: #34d6ff;
+  color: #021018;
+}
+
+.hero__cta:hover {
+  filter: brightness(0.95);
+}
+
+/* body text */
+.hero__body {
+  width: min(760px, 100%);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero__p {
+  margin: 0 0 16px 0;
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+.hero__p--small {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.hero__p--xsmall {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 10px;
+}
+
+.hero__body b {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero__body u {
+  cursor: pointer;
+}
+
+/* bottom nav */
+.hero__bottomNav {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(18px, 4vh, 42px);
+  transform: translateX(-50%);
+  z-index: 3;
+
+  width: min(980px, 92vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.hero__thinBars {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero__thinBar {
+  flex: 1;
+  height: 2px; /* 1px 느낌 */
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background 250ms ease, height 250ms ease, opacity 250ms ease;
+  opacity: 0.9;
+}
+
+.hero__thinBar.is-active {
+  background: rgba(255, 255, 255, 0.72);
+  height: 3px;
+  opacity: 1;
+}
+
+.hero__thinBar:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.hero__playPause {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.hero__playPause:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* optional caption bottom-center */
+.hero__caption {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-size: 12px;
+  opacity: 0.65;
+  pointer-events: none;
+}
+/* ===== (3) 왼쪽 고정 플로팅 다운 버튼 ===== */
+.hero__hintArrow {
+  position: absolute;
+  z-index: 4;
+  left: clamp(14px, 2.4vw, 28px);
+  bottom: clamp(22px, 5vh, 58px);
+
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+  opacity: 0.85;
+}
+
+.hero__hintArrow:hover {
+  opacity: 1;
+}
+
+.hero__hintIcon {
+  width: 18px;
+  height: 18px;
+  border-right: 2px solid rgba(255, 255, 255, 0.75);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.75);
+  transform: rotate(45deg);
+  margin-top: -4px;
+}
+
+/* 모바일에서 살짝 위로(사진처럼 공간 확보) */
+@media (max-width: 520px) {
+  .hero__hintArrow {
+    bottom: 86px;
+    left: 12px;
+  }
+}
+
+/* ===== (1)(2) 하단 캡션: 제목+스트리밍 문구만 + fade ===== */
+.hero__captionWrap {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+
+  width: min(520px, 78vw);
+  text-align: center;
+}
+
+.hero__captionFade {
+  animation: heroCaptionFade var(--fade-ms, 900ms) ease both;
+}
+
+@keyframes heroCaptionFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 0.75;
+    transform: translateY(0);
+  }
+}
+
+.hero__captionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  opacity: 0.9;
+}
+
+.hero__captionSub {
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+/* 아주 작은 화면에서 캡션 폭/폰트 보정 */
+@media (max-width: 420px) {
+  .hero__captionWrap {
+    width: 86vw;
+  }
+  .hero__captionTitle,
+  .hero__captionSub {
+    font-size: 11px;
+  }
+}
+
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .hero__content {
+    min-height: auto;
+    padding-top: 56px;
+    padding-bottom: 72px;
+  }
+
+  .hero__ctas {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero__p {
+    font-size: 13px;
+  }
+  .hero__p--small {
+    font-size: 12px;
+  }
+  .hero__playPause {
+    display: none;
+  }
+}
