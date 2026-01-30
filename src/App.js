@@ -25,14 +25,15 @@ const Layout =() => {
 function App() {
   return (
    <div className='app'>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<LoginPage />} />
-          <Route path="main" element={<MainPage />} />
-          <Route path=":movieId" element={<DetailPage />} />
-          <Route path="search" element={<SearchPage />} />
-        </Route>
-      </Routes>
+     <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="main" element={<MainPage />} />
+        <Route path=":movieId" element={<DetailPage />} />
+        <Route path="search" element={<SearchPage />} />
+      </Route>
+    </Routes>
+
    </div>
   )
 }
