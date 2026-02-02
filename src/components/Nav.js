@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components'
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { 
+  GoogleAuthProvider, 
+  onAuthStateChanged, 
+  signInWithPopup, 
+  signOut } 
+  from 'firebase/auth'
+import { auth } from '../firebase' 
 import '../components/Nav.css';
 
 const Nav = () => {
@@ -13,7 +19,6 @@ const Nav = () => {
   const { pathname } = useLocation();
   const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
-  const auth = getAuth();
   const provider = new GoogleAuthProvider();
   const [userData, setUserData] = useState(initialUserData);
 
@@ -37,7 +42,6 @@ const Nav = () => {
     }
   }, [])
 
-  // console.log('useLocation.search', useLocation().search);
 
   const handleScroll = () => {
     if (window.scrollY > 50) {
@@ -76,7 +80,7 @@ const Nav = () => {
   }
 
   return (
-    <NavWrapper show={show}>
+    <NavWrapper $show={show}>
       <Logo>
           <img 
             alt='Disney Plus Logo' src='/images/logo.svg'
@@ -177,7 +181,7 @@ const NavWrapper = styled.nav`
   left: 0;
   right: 0;
   height: 70px;
-  background-color: ${props => props.show ? "#090b13" : "transparent"};
+  background-color: ${props => props.$show ? "#090b13" : "transparent"};
   display: flex;
   justify-content: space-between;
   align-items: center;
