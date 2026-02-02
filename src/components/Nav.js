@@ -23,16 +23,17 @@ const Nav = () => {
   const [userData, setUserData] = useState(initialUserData);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        if (pathname === "/") {
-          navigate("/main");
-        }
+        if (pathname === "/") navigate("/main");
       } else {
         navigate("/");
       }
-    })
-  }, [auth, navigate, pathname])
+    });
+
+    return unsubscribe;
+  }, [navigate, pathname]);
+
 
 
   useEffect(() => {
