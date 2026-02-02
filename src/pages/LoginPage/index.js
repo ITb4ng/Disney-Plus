@@ -6,7 +6,24 @@ import BundlePromo from "./Bundle";
 export default function LoginPage() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [isMd, setIsMd] = useState(() =>
+    typeof window === "undefined" ? false : window.matchMedia("(max-width: 1024px)").matches
+  );
   const total = slides.length;
+
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 1024px)");
+    const onChange = (e) => setIsMd(e.matches);
+
+    // 구형 브라우저 대응까지 하려면 addListener도 같이
+    mql.addEventListener?.("change", onChange);
+    mql.addListener?.(onChange);
+
+    return () => {
+      mql.removeEventListener?.("change", onChange);
+      mql.removeListener?.(onChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (paused) return;
@@ -24,13 +41,16 @@ export default function LoginPage() {
           <div
             key={slide.id}
             className={`hero-bg-slide ${idx === active ? "is-active" : ""}`}
-            style={{ backgroundImage: `url(${slide.image})` }}
+            style={{
+              backgroundImage: `url(${isMd ? slide.image.md : slide.image.xl})`,
+            }}
           />
         ))}
         <div className="hero-overlay" />
       </div>
 
       {/* CONTENT LAYOUT (좌측 promo / 우측은 이미지가 보이게 비워둠) */}
+      
       <div className="hero-layout">
         <div className="hero-left">
           <BundlePromo />
