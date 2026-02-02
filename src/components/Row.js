@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import MovieModal from './MovieModal';
 import "./Row.css";
 
-import { Navigation, Pagination, Scrollbar, A11y, Autoplay, Parallax } from 'swiper/modules';
+import { Navigation, Pagination, Scrollbar, A11y} from 'swiper/modules';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -23,7 +23,6 @@ const Row = ({ title, id, fetchUrl }) => {
 
   const fetchMovieData = useCallback(async () => {
     const response = await axios.get(fetchUrl);
-    // console.log('response', response);
     setMovies(response.data.results);
   }, [fetchUrl])
 

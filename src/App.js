@@ -1,11 +1,6 @@
 import { Outlet, Route, Routes } from 'react-router-dom';
-import styled from 'styled-components';
-import requests from './api/request';
 import './App.css';
-import Banner from './components/banner';
-import Category from './components/category';
 import Nav from './components/Nav';
-import Row from './components/Row';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
 import DetailPage from './pages/DetailPage';
@@ -15,7 +10,6 @@ const Layout =() => {
   return(
     <div>
       <Nav />
-
       <Outlet />
     </div>
   )

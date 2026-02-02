@@ -28,7 +28,6 @@ const DetailPage = ({
 }) => {
   let { movieId } = useParams();
   const [movie, setMovie] = useState({});
-  const [isClicked, setIsClicked] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
