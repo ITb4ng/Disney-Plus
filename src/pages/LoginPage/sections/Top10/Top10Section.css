@@ -1,0 +1,91 @@
+.top10Section,
+.top10RailWrap {
+  overflow-x: hidden;
+}
+
+
+.top10Section {
+  position: relative;
+  margin: 36px 0 44px;
+  padding: 12px 24px 64px;
+  overflow-x: hidden;
+}
+
+.top10TitleWrap {
+  max-width: 1520px;
+  margin: 0 auto 14px;
+  padding: 0 24px;
+}
+
+.top10TitleWrap h2 {
+  text-align: center;
+  font-size: 2rem;
+}
+.top10Card {
+  width: clamp(240px, 18vw, 340px); /* 데스크탑에서 확 커짐 */
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  border: 3px solid rgba(249, 249, 249, 0.1);
+}
+
+.top10Card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 레일레퍼 */
+.top10RailWrap {
+  position: relative;
+  width: 100%;
+  padding: 0 24px;
+}
+
+/* 오른쪽 페이드 마스크: 카드 위로 "덮지 않게" */
+.top10RailWrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 24px;            /* rail padding 고려 */
+  width: 90px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;             /* ✅ 낮게: 컨트롤보다 아래 */
+  background: linear-gradient(to left, rgba(0,0,0,0.55), rgba(0,0,0,0));
+}
+
+
+.top10Controls {
+  position: absolute;
+  right: 24px;
+  bottom: 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 30; /* 레일 위로 */
+}
+
+
+.navBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+
+.navBtn--disabled {
+  cursor: default;
+  pointer-events: none;
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.35);
+}
