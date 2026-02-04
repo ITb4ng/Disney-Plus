@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import "./PricingSection.css";
 import {
   TABS,
@@ -228,7 +228,7 @@ export default function PricingSection() {
 							<span className="fn-mark">†</span>
 							라이브 채널 스트리밍 및 생방송 프로그램에는 광고가 포함될 수 있으며, 모든 멤버십 유형에서 특정 홍보 및 협찬 콘텐츠를 경험하게 될 수 있습니다.
 							자세한 내용은
-								<a className="fn-link" href="https://help.disneyplus.com/ko/article/disneyplus-ko-kr-ads" target="_blank" rel="noopener nofollow">
+								<a className="fn-link" href="https://help.disneyplus.com/ko/article/disneyplus-ko-kr-ads" rel="noopener nofollow">
 										<u>고객센터</u>
 								</a>
 							에서 알아보세요.
