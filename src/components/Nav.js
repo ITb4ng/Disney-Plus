@@ -81,7 +81,7 @@ const Nav = () => {
   }
 
   return (
-    <NavWrapper $show={show}>
+    <NavWrapper className="app-nav" $show={show}>
       <Logo>
           <img 
             alt='Disney Plus Logo' src='/images/logo.svg'
@@ -166,12 +166,12 @@ const Login = styled.a`
 `;
 
 const Input = styled.input`
-    position: fixed;
+    position: absolute;
     left: 50%;
-    transform: translate(-50%, 0);
-    background-color: rgba(0,0,0, 0.582);
+    transform: translateX(-50%);
+    background-color: rgba(0,0,0, .582);
     border-radius: 5px;
-    color: white; 
+    color: white;
     padding: 5px;
     border: none;
 `;
@@ -188,7 +188,7 @@ const NavWrapper = styled.nav`
   align-items: center;
   padding: 0 36px;
   letter-spacing: 16px;
-  z-index: 3;
+  z-index: 10;
 `;
 
 const Logo = styled.a`
