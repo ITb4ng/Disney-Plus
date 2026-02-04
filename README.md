@@ -11,9 +11,10 @@ Originally created three years ago as a Disney+ UI project.
   https://react-disney-project-6834d.web.app/
 
 - **Preview (Renewal / WIP)**  
-  [https://b4ng-disney-plus-esg1ym1bt-itb4ngs-projects.vercel.app/](https://b4ng-disney-plus-d4uu6fn72-itb4ngs-projects.vercel.app/)
+>  https://b4ng-disney-plus-d4uu6fn72-itb4ngs-projects.vercel.app/
+  
 
-> ⚠️ Preview 사이트는 작업 중인 버전으로, UI가 미완성이거나 실험적인 기능이 포함될 수 있습니다.
+⚠️ Preview 사이트는 작업 중인 버전으로, UI가 미완성이거나 실험적인 기능이 포함될 수 있습니다.
 
 ---
 
