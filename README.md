@@ -11,7 +11,7 @@ Originally created three years ago as a Disney+ UI project.
   https://react-disney-project-6834d.web.app/
 
 - **Preview (Renewal / WIP)**  
->  https://b4ng-disney-plus-d4uu6fn72-itb4ngs-projects.vercel.app/
+> https://b4ng-disney-plus-d4uu6fn72-itb4ngs-projects.vercel.app/
   
 
 ⚠️ Preview 사이트는 작업 중인 버전으로, UI가 미완성이거나 실험적인 기능이 포함될 수 있습니다.
@@ -25,6 +25,10 @@ Originally created three years ago as a Disney+ UI project.
   - Login Page Hero 섹션 리뉴얼
   - Today’s Top10 영역 UX 개선
   - 1024px 구간 반응형 이슈 수정
+  - pricing 번들 상품 섹션 개발
+  - faq 아코디언 메뉴 개발
+  - 프록시 서버 구축 보안 최적화
+  - footer 영역 추가
 
 ---
 
