@@ -1,23 +1,27 @@
 export default async function handler(req, res) {
   try {
-    const { path = "" } = req.query;
+    const TMDB_KEY = process.env.TMDB_API_KEY;
+    if (!TMDB_KEY) return res.status(500).json({ error: "TMDB_API_KEY missing" });
 
-    if (!path) {
-      return res.status(400).json({ message: "Missing 'path' query param" });
-    }
+    const { path, ...rest } = req.query;
+    if (!path) return res.status(400).json({ error: "path is required" });
 
-    const base = `https://api.themoviedb.org/3/${path}`;
+    const base = `https://api.themoviedb.org/3/${String(path).replace(/^\//, "")}`;
+    const params = new URLSearchParams({
+      api_key: TMDB_KEY,
+      ...Object.fromEntries(
+        Object.entries(rest).map(([k, v]) => [k, Array.isArray(v) ? v[v.length - 1] : v])
+      ),
+    });
 
-    const params = new URLSearchParams(req.query);
-    params.delete("path");
-    params.set("api_key", process.env.TMDB_API_KEY);
-    params.set("language", params.get("language") || "ko-KR");
+    const url = `${base}?${params.toString()}`;
+    const r = await fetch(url);
 
-    const r = await fetch(`${base}?${params.toString()}`);
-    const data = await r.json();
-
-    return res.status(r.status).json(data);
+    const text = await r.text();
+    res.status(r.status);
+    res.setHeader("Content-Type", r.headers.get("content-type") || "application/json");
+    return res.send(text);
   } catch (e) {
-    return res.status(500).json({ message: "TMDB proxy error" });
+    return res.status(500).json({ error: e?.message || "unknown error" });
   }
 }
