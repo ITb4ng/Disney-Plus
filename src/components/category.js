@@ -34,6 +34,12 @@ const category = () => {
           <source src="/videos/national-geographic.mp4" type='video/mp4' />
         </video>
       </Wrap>
+      <Wrap>
+        <img data-brand="hulu" src="https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/ABD0973AB7BC9CD31EEBA7B9A1DDF29F4F176DFDECACBF1BCDB123F2D5957F9C/compose?aspectRatio=1.78&format=webp&width=600" alt="Hulu" />
+        <video autoPlay loop muted>
+          <source src="https://vod-bgc-oc-east-1.media.dssott.com/bgui/ps01/disney/bgui/2025/11/20/1763651704-xyz.mp4" type='video/mp4' />
+        </video>
+      </Wrap>
     </Container>
   )
 }
@@ -45,18 +51,17 @@ const Container = styled.div`
   padding: 30px 0px 26px;
   display: grid;
   gap: 25px;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
 
   @media (max-width: 768px) {
-    grid-template-columns : repeat(1, 1fr);
+    grid-template-columns : repeat(2, 1fr);
+    gap: 7px;
   }
 `;
 
 const Wrap = styled.div`
   padding-top: 56.25%;
   border-radius: 10px;
-  box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
-              rgb(0 0 0 /73%) 0px 16px 10px -10px;
   cursor: pointer;
   overflow: hidden;
   position: relative;
@@ -68,14 +73,26 @@ const Wrap = styled.div`
     inset: 0px;
     display: block;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     opacity: 1;
     position: absolute;
     transition: opacity 500ms ease-in-out 0s;
     width: 100%;
     z-index: 1;
   }
-
+  img[data-brand="hulu"] {
+    transform: translateY(10px) scale(0.75);
+  }
+  @media (max-width: 1024px) {
+   img[data-brand="hulu"] {
+    transform: translateY(6px) scale(0.75);
+  }
+  }  
+  @media (max-width: 768px) {
+    img[data-brand="hulu"] {
+    transform: translateY(12px) scale(0.75);
+  }
+  }
   video {
     width: 100%;
     height: 100%;

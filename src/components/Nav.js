@@ -166,14 +166,13 @@ const Login = styled.a`
 `;
 
 const Input = styled.input`
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     background-color: rgba(0,0,0, .582);
     border-radius: 5px;
     color: white;
     padding: 5px;
     border: none;
+    width: 150px;
+    height: 30px;
 `;
 
 const NavWrapper = styled.nav`
@@ -198,7 +197,7 @@ const Logo = styled.a`
   max-height: 70px;
   font-size: 0;
   diplay: inline-block;
-
+  cursor: pointer;
   img {
     display: block;
     width: 100%;

@@ -30,19 +30,17 @@ const DetailPage = ({
   const [movie, setMovie] = useState({});
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(
-        `/movie/${movieId}`
+  async function fetchData() {
+    const response = await axios.get("", {
+      params: { path: `movie/${movieId}` },
+    });
 
-      )
-      // console.log('response',response);
-      setMovie(response.data);
-    }
-    fetchData();
-  }, [movieId])
+    setMovie(response.data);
+  }
+  fetchData();
+}, [movieId]);
   
-  if(!movie) return null;
-console.log({vote_average});
+ if (!movie?.backdrop_path) return null;
   return (
     <section>
       <img 

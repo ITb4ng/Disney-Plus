@@ -16,7 +16,7 @@ export default function Top10Section() {
       <div className="top10RailWrap">
         <Top10Row
           id="TOP10"
-          fetchUrl={requests.fetchTrending}
+          fetchParams={requests.fetchTop10KR}
           limit={10}
           onSwiperReady={setSwiper}
           onNavStateChange={setNav} // ✅ 여기로 상태 전달받음

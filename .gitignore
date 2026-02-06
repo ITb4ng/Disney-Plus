@@ -1,12 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
+node_modules/
+server/node_modules/
 /.pnp
 .pnp.js
 
-#api ,firebase
-axios.js
 
 # testing
 /coverage
@@ -24,3 +22,10 @@ axios.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# env
+.env
+.env.local
+.env.*.local
+.vercel
+

@@ -12,7 +12,7 @@
   top: var(--sticky-top);
   z-index: 9999; 
   overflow: visible;
-  background: #05060a; 
+  background: #040714; 
   padding-top: 18px;
   backdrop-filter: blur(6px);
   border-bottom: solid 1px #b7b8bd;
@@ -26,7 +26,6 @@
   right:0;
   top:0;
   height: 17px;
-  background: rgba(5,6,10,0.92);
   z-index: 2;
 }
 
@@ -43,13 +42,9 @@
 
 .pricing-section{
   padding: 110px 0 90px;
-  background:
-    radial-gradient(70% 70% at 50% 10%, rgba(20, 60, 140, 0.22), transparent 70%),
-    radial-gradient(55% 55% at 50% 0%, rgba(0, 210, 255, 0.14), transparent 60%),
-    #05060a;
   color: #e9edf5;
   position: relative;
-  isolation: isolate; /* ✅ 스택 컨텍스트 분리 */
+  isolation: isolate; 
   z-index: 0;
 }
 
@@ -115,8 +110,6 @@
 .pricing-featureEmpty{
   background: transparent;
 }
-
-/* ===== sticky header group ===== */
 
 /* badge row */
 .pricing-rowBadge .pricing-planCell{

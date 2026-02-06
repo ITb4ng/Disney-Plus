@@ -1,30 +1,36 @@
 import axios from "../../../../api/axios";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y } from "swiper/modules";
 import "swiper/css";
 import styled from "styled-components";
 
-const Top10Row = ({ id, fetchUrl, limit = 10, onSwiperReady, onNavStateChange }) => {
+const IMG_BASE = "https://image.tmdb.org/t/p/original";
+
+const Top10Row = ({ id, fetchParams, limit = 10, onSwiperReady, onNavStateChange,}) => {
   const [movies, setMovies] = useState([]);
   const swiperRef = useRef(null);
 
-  const fetchMovieData = useCallback(async () => {
-    const response = await axios.get(fetchUrl);
+  useEffect(() => {
+  const fetchMovieData = async () => {
+    if (!fetchParams?.path) return;
+
+    const response = await axios.get("", {
+      params: fetchParams,
+    });
+
     const results = response?.data?.results ?? [];
     setMovies(results.slice(0, limit));
-  }, [fetchUrl, limit]);
+  };
 
-  useEffect(() => {
-    fetchMovieData();
-  }, [fetchMovieData]);
+  fetchMovieData();
+}, [fetchParams, limit]);
 
-  // ✅ movies가 바뀐 뒤 swiper 상태를 강제로 업데이트 + nav 상태 재계산
+
   useEffect(() => {
     const s = swiperRef.current;
     if (!s) return;
 
-    // 슬라이드 DOM 반영 후 업데이트
     requestAnimationFrame(() => {
       s.update();
       onNavStateChange?.({ isBeginning: s.isBeginning, isEnd: s.isEnd });
@@ -34,6 +40,9 @@ const Top10Row = ({ id, fetchUrl, limit = 10, onSwiperReady, onNavStateChange })
   const reportNavState = (s) => {
     onNavStateChange?.({ isBeginning: s.isBeginning, isEnd: s.isEnd });
   };
+
+  const getImg = (m) => m?.backdrop_path || m?.poster_path || "";
+  const getTitle = (m) => m?.title || m?.name || m?.original_title || m?.original_name || "movie";
 
   return (
     <Container id={id}>
@@ -50,23 +59,34 @@ const Top10Row = ({ id, fetchUrl, limit = 10, onSwiperReady, onNavStateChange })
         onSwiper={(s) => {
           swiperRef.current = s;
           onSwiperReady?.(s);
-          reportNavState(s); // ✅ 초기 상태 반영
+          reportNavState(s);
         }}
-        onInit={(s) => reportNavState(s)}         // ✅ init 때 한 번 더
-        onSlideChange={(s) => reportNavState(s)}  // ✅ 슬라이드 이동 시 갱신
-        onResize={(s) => reportNavState(s)}       // ✅ 브레이크포인트/리사이즈 대응
+        onInit={reportNavState}
+        onSlideChange={reportNavState}
+        onResize={reportNavState}
       >
-        {movies.map((movie) => (
-          <SwiperSlide key={movie.id}>
-            <Card>
-              <img
-                src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
-                alt={movie.title || movie.name || "movie"}
-                loading="lazy"
-              />
-            </Card>
-          </SwiperSlide>
-        ))}
+        {movies
+          .filter((m) => !!getImg(m)) // ✅ 이미지 없는 놈은 제외
+          .map((movie) => {
+            const path = getImg(movie);
+            const title = getTitle(movie);
+
+            return (
+              <SwiperSlide key={movie.id}>
+                <Card>
+                  <img
+                    src={`${IMG_BASE}${path}`}
+                    alt={title}
+                    loading="lazy"
+                    onError={(e) => {
+                      // ✅ 혹시라도 깨지면 카드 숨김 (디자인 지키기)
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </Card>
+              </SwiperSlide>
+            );
+          })}
       </Swiper>
     </Container>
   );

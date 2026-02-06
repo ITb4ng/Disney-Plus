@@ -2,8 +2,8 @@ export const slides = [
   {
     id: 0,
     image: {
-      md: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/2E924F7688AB4145B515E1B514B8AF956307CB3511A5851E0EF0C0992FC38CC7/compose?format=webp&width=1024",
-      xl: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/2824AC39DD1B3F0CFD2B92551C65F7130CB64B111DB7C1E768BD39C653AE600A/compose?format=webp&width=2560",
+      md: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/9E4B6089245A73DD190921FF00B34895BB3251596FDFD1C57169C0ABB319B5AA/compose?format=webp&width=1024",
+      xl: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/6AF207D09623FF42A82CCC08F6B11821412B565949B526EC1B9948F2913D6E15/compose?format=webp&width=2560",
     },
     title: "디즈니+ 티빙 웨이브 번들",
     status: "",

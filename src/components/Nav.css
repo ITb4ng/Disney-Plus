@@ -1,7 +1,6 @@
 @media (min-width:300px) and (max-width:767px) {
 	.nav__input {
         transform: translate(-35%, 15%) !important;
-        text-align: center;
-        outline-color: #fff;
+        outline-color: #fefefe;
     }
 }
