@@ -1,6 +1,289 @@
-.modal__closing {
-    /* position: absolute;
-    border: 5px red;
-    color: #111;
-    transform: translate(10px , 10px); */
+.detail {
+  min-height: 130vh; /* 아래도 있음 느낌 */
+  background: #090b13;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* HERO: 거의 1스크린 */
+.detail__hero {
+  position: relative;
+  min-height: 100vh;
+  padding-top: var(--nav-h, 70px);
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* 공홈 느낌: 가장자리 어둡게 + 스크롤 비네팅 */
+.detail__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    /* 좌측 어둡게 */
+    linear-gradient(to right,
+      rgba(0,0,0,0.85) 0%,
+      rgba(0,0,0,0.55) 20%,
+      rgba(0,0,0,0.25) 40%,
+      rgba(0,0,0,0.15) 55%,
+      rgba(0,0,0,0.05) 65%,
+      rgba(0,0,0,0.15) 75%,
+      rgba(0,0,0,0.45) 90%,
+      rgba(0,0,0,0.75) 100%
+    ),
+
+    /* 상단/하단 암전 */
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.35) 0%,
+      rgba(0,0,0,0.05) 25%,
+      rgba(0,0,0,0.05) 65%,
+      rgba(0,0,0,0.65) 100%
+    );
+
+  transition: opacity 180ms ease;
+}
+/* ✅ 중앙 컨테이너 + 2컬럼 레이아웃 */
+.detail__heroInner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  /* max-width: 1600px; */
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 72px clamp(16px, 4vw, 56px) 48px;
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) minmax(0, 1.1fr);
+  gap: clamp(22px, 4vw, 48px);
+}
+
+/* LEFT COLUMN */
+.detail__left {
+  max-width: none;
+  width: 100%;
+}
+
+.detail__micro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.detail__microStrong {
+  font-weight: 700;
+}
+
+.detail__microDot {
+  opacity: 0.7;
+}
+
+.detail__title {
+  margin: 14px 0 10px;
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+}
+
+.detail__metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 18px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+}
+
+.pill--age {
+  background: rgba(255, 215, 0, 0.18);
+  border-color: rgba(255, 215, 0, 0.32);
+}
+
+.pill--muted {
+  opacity: 0.65;
+}
+
+.metaText {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.55);
+  display: inline-block;
+}
+
+/* 버튼 */
+.detail__actions {
+  margin: 16px 0 18px;
+}
+
+.btn {
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 12px 18px;
+}
+
+.btn--primary {
+  background: #2be0ff;
+  color: #001018;
+}
+
+.detail__overview {
+  max-width: 520px;
+  font-size: 14px;
+  line-height: 1.55;
+  opacity: 0.9;
+}
+
+/* ✅ wide section: heroInner 전체폭 행 */
+.detail__wideSection {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 22px;
+}
+
+/* divider */
+.detail__divider {
+  margin: 18px 0 18px;
+  height: 1px;
+  background: rgba(255,255,255,0.18);
+  width: 100%;
+}
+
+.detail__sectionLabel {
+  font-size: 14px;
+  font-weight: 800;
+  opacity: 0.9;
+  margin-bottom: 18px;
+}
+
+/* ✅ 3분할(레퍼런스처럼 “텍스트 3컬럼”) */
+.detail__infoGrid3--clean {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: clamp(28px, 5vw, 72px);
+  align-items: start;
+
+  /* 패널 느낌 제거 */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  backdrop-filter: none;
+}
+
+/* 좌측 타이틀/설명 */
+.detail__infoTitle {
+  margin: 0 0 12px;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.2px;
+}
+
+.detail__infoBody {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 14px;
+  line-height: 1.7;
+  opacity: 0.92;
+}
+
+.detail__infoCol--main {
+  min-width: 0;
+}
+
+/* ✅ 중/우: dt 위 dd 아래(디즈니식 스택) */
+.detail__facts--stack {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.detail__facts--stack .fact {
+  display: block;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+.detail__facts--stack dt {
+  display: block;
+  font-size: 13px;
+  opacity: 0.75;
+  margin-bottom: 6px;
+  white-space: normal;
+}
+
+.detail__facts--stack dd {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.95;
+  word-break: keep-all;
+}
+
+/* 아래 영역(임시) */
+.detail__below {
+  padding: 40px 0;
+}
+
+/* ✅ 태블릿: heroInner 1열, 상세정보 2열 */
+@media (max-width: 1024px) {
+  .detail__heroInner {
+    grid-template-columns: 1fr;
+    padding: 56px 22px 40px;
+  }
+
+  .detail__infoGrid3--clean {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  .detail__infoCol--main {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ✅ 모바일: 1열 스택 */
+@media (max-width: 640px) {
+  .detail__heroInner {
+    padding: 44px 16px 32px;
+  }
+
+  .detail__title {
+    font-size: 40px;
+  }
+
+  .detail__infoGrid3--clean {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .detail__infoTitle {
+    font-size: 22px;
+  }
 }

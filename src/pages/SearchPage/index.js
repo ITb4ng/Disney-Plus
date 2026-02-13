@@ -1,59 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from '../../api/axios';
-import { useDebounce } from '../../hooks/useDebounce';
-import './SearchPage.css';
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import tmdbAxios from "../../api/tmdbaxios"; // ✅ 프록시 규격 axios로 통일
+import { useDebounce } from "../../hooks/useDebounce";
+import "./SearchPage.css";
 
 const SearchPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
+  const { search } = useLocation();
 
-  const useQuery = () => new URLSearchParams(useLocation().search);
-  const query = useQuery();
-  const searchTerm = query.get('q');
+  const searchTerm = useMemo(() => {
+    return new URLSearchParams(search).get("q") ?? "";
+  }, [search]);
+
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
   useEffect(() => {
-    if (debouncedSearchTerm) {
-      fetchSearchMovie(debouncedSearchTerm);
+    const term = (debouncedSearchTerm ?? "").trim();
+    if (!term) {
+      setSearchResults([]);
+      return;
     }
+    fetchSearchMovie(term);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm]);
 
   const fetchSearchMovie = async (term) => {
     try {
-      const response = await axios.get(
-        `/search/multi?include_adult=false&query=${term}`
-      );
-      setSearchResults(response.data.results);
+      // ✅ 프록시 규격: path + query params
+      const response = await tmdbAxios.get("", {
+        params: {
+          path: "search/multi",
+          include_adult: false,
+          query: term,
+          language: "ko-KR",
+        },
+      });
+
+      setSearchResults(Array.isArray(response.data?.results) ? response.data.results : []);
     } catch (error) {
-      console.log(error);
+      console.log("search error:", error);
+      setSearchResults([]);
     }
   };
 
-  // ✅ 렌더링 전에 걸러서 map에서 return 누락 문제 제거
   const filteredResults = searchResults.filter(
-    (movie) => movie.backdrop_path !== null && movie.media_type !== 'person'
+    (movie) => movie.backdrop_path !== null && movie.media_type !== "person"
   );
 
   if (filteredResults.length > 0) {
     return (
       <section className="search-container">
         {filteredResults.map((movie) => {
-          const movieImageUrl =
-            'https://image.tmdb.org/t/p/w500' + movie.backdrop_path;
+          const movieImageUrl = "https://image.tmdb.org/t/p/w500" + movie.backdrop_path;
 
           return (
             <div className="movie" key={movie.id}>
               <div
                 className="movie__column-poster"
-                onClick={() => navigate(`/${movie.id}`)}
+                onClick={() => {
+                  console.log("CLICK", movie.media_type, movie.id);
+                  navigate(`/detail/${movie.media_type}/${movie.id}`);
+                }}
               >
-                <img
-                  src={movieImageUrl}
-                  alt="movie"
-                  className="movie__poster"
-                />
+                <img src={movieImageUrl} alt={movie.title || movie.name || "movie"} className="movie__poster" />
               </div>
             </div>
           );

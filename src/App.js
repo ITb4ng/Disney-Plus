@@ -47,8 +47,8 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<LoginPage />} />
         <Route path="main" element={<MainPage />} />
-        <Route path=":movieId" element={<DetailPage />} />
         <Route path="search" element={<SearchPage />} />
+        <Route path="/detail/:type/:movieId" element={<DetailPage />} />
       </Route>
     </Routes>
 

@@ -1,151 +1,205 @@
 .banner {
-    color: white;
-    object-fit: contain;
-    height: 448px;
+  position: relative;
+  color: white;
+  min-height: 60vh;        /* 화면 기준으로 자연스럽게 */
+  height: 448px;           /* 너 기존 기본값은 유지(안정성) */
+  max-height: 700px;       /* 과하게 커지는 것 방지 */
+  display: flex;
+  align-items: center;     /* 컨텐츠 수직 정렬 기준 */
 }
-.closePopup {
-    position: absolute;
-    top: 0;
-    right: 15px;
-    border: none;
-    outline: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    background: #F2F23E;
-}
-
-@media (min-width: 1500px) {
-    .banner {
-        position: relative;
-        height: 600px;
-    }
-
-    .banner--fadeBottom {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 40rem;
-    }
-}
-
-  
-
-@media (max-width: 768px) {
-    .banner__contents {
-        width: min-content !important;
-        padding-left: 2.3rem;
-        margin-left: 0px !important;
-    }
-
-    .banner__description {
-        font-size: 0.8rem !important;
-        width: auto !important;
-    }
-
-    .info {
-        text-align: left;
-        padding-right: 1.2rem;
-    }
-
-    .space {
-        margin-left: 6px;
-    }
-
-    .banner_button {
-        font-size: 0.8rem !important;
-        border-radius: 4px !important;
-    }
-}
-
-@media (min-width:300px) and (max-width:767px) {
-    .banner__contents {
-        width: 100% !important;
-        padding-left: 2.3rem;
-        margin-left: 0px !important;
-    }
-    .banner__title {
-        font-size: 1.5rem !important;
-        transform: translateY(50%);
-        padding-bottom: 1.5rem !important;
-    }
-
-    .banner__description {
-        font-size: 0.8rem !important;
-        width: auto !important;
-        max-width: 300px !important;
-        margin: 0;
-    }
-}
-
 .banner__contents {
-    margin-left: 40px;
-    padding-top: 140px;
-    height: 190px;
+  margin-left: 40px;
+  padding-top: 0;               /* 기존 140px은 화면에 따라 어색해짐 */
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;      /* 수평 좌측 */
+  justify-content: center;      /* 수직 중앙 */
+  text-align: left;
+  max-width: 520px;
+  gap: 12px;            /* 컨텐츠 영역 제한 */
 }
 
 .banner__title {
-    font-size: 3rem;
-    font-weight: 800;
-    padding-bottom: 0.5rem;
+  font-size: 3rem;
+  font-weight: 600;
+  padding-bottom: 0;
+  margin: 0;
 }
 
 .banner__description {
-    width: 45rem;
-    line-height: 1.3;
-    padding-top: 1rem;
-    font-weight: 500;
-    font-size: 1rem;
-    max-width: 400px;
-    height: 80px;
-}
-
-.banner--fadeBottom {
-    height: 7.4rem;
-    background-image: linear-gradient(180deg,
-            transparent,
-            rgba(37, 37, 37, 0.61),
-            #111);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.3;
+  width: 100%;                  /* 고정 width(45rem) 제거 */
+  max-width: 520px;
+  height: auto;                 /* 고정 높이 제거 */
+  margin: 0;
 }
 
 .banner__buttons {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
 }
 
 .banner__button {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    cursor: pointer;
-    outline: none;
-    border: none;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 0.4rem 1rem;
-    margin-right: 1rem;
-}
-
-.banner__button:hover {
-    color: #000;
-    background-color: rgba(170, 170, 170, 0.9);
-    transition: all 0.2s;
-}
-
-.play {
-    background-color: white;
-    color: black;
+  display: inline-flex;
+  text-transform: uppercase;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  margin-right: 0;             
 }
 
 
+.banner {
+  transition: opacity 1s ease, filter 500ms ease;
+}
 
-.element {
-    inset: 1em 2em 3em 0;
-    /* top right bottom left */
-    inset: 10% 5% -10%;
-    /* top left/right bottom */
-    inset: 0 10px;
-    /* top/bottom left/right */
-    inset: 20px;
-    /* all edges = 20px */
+.banner.is-dimmed {
+  opacity: 0.65;
+  filter: blur(0.3px);
+}
+
+
+/* =========================
+   Tablet & Mobile (<=1024)
+   - 좌측 정렬 유지
+   - 이상한 width/min-content/translate 제거
+   ========================= */
+@media (max-width: 1024px) {
+  .banner {
+    min-height: 50vh;
+  }
+  .banner__contents {
+    margin-left: 0 !important;
+    padding: 0 24px;
+    max-width: 520px;
+  }
+
+  .banner__title {
+    font-size: 2rem !important;
+    transform: none !important;  
+    padding-bottom: 0 !important;
+  }
+
+  .banner__description {
+    font-size: 0.9rem !important;
+    max-width: 420px !important;
+  }
+
+  .banner__button {
+    font-size: 0.9rem !important;
+    border-radius: 6px !important;
+  }
+}
+
+/* =========================
+   Small Mobile (<=767)
+   - 더 타이트하게
+   ========================= */
+@media (max-width: 767px) {
+  .banner {
+    min-height: 40vh;
+  }
+  .banner__contents {
+    padding: 0 18px;
+    max-width: 100%;
+  }
+
+  .banner__title {
+    font-size: 1.9rem !important;
+  }
+
+  .banner__description {
+    font-size: 0.9rem !important;
+    max-width: 320px !important;
+  }
+}
+
+.video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+}
+
+.video-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(3px);
+}
+
+.video-shell {
+  position: relative;
+  z-index: 10000;
+  width: 70%;
+  max-width: 960px;
+}
+
+/* 영상 */
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* iframe */
+.video-container iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* 유튜브 영상 닫기 버른,ㅌ */
+.video-close {
+  position: fixed;     
+  bottom: 50px;         
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.55);
+  background: rgba(0,0,0,1);
+  color: #fff;
+  font-size: 22px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 10001;
+  transition: background 250ms ease;
+}
+
+.video-close:hover {
+  background: rgba(255,255,255, .25);
+}
+
+
+@media (max-width: 768px) {
+  .video-shell {
+    width: 95%;
+  }
+
+  .video-close {
+    bottom: 100px;
+    width: 44px;
+    height: 44px;
+  }
 }

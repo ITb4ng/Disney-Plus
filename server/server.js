@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 
 const TMDB_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE = process.env.TMDB_BASE || "https://api.themoviedb.org/3";
@@ -16,7 +16,6 @@ if (!TMDB_KEY) {
   process.exit(1);
 }
 
-// 공통 프록시: /api/tmdb?path=discover/movie&region=KR&...
 app.get("/api/tmdb", async (req, res) => {
   try {
     const { path, ...rest } = req.query;
@@ -28,31 +27,25 @@ app.get("/api/tmdb", async (req, res) => {
     const cleanPath = path.replace(/^\//, "");
     const url = new URL(`${TMDB_BASE}/${cleanPath}`);
 
-    // 키는 서버에서만
     url.searchParams.set("api_key", TMDB_KEY);
 
-    // 나머지 params 전달
     for (const [k, v] of Object.entries(rest)) {
       if (v === undefined || v === null) continue;
-      url.searchParams.set(k, String(v));
+      const val = Array.isArray(v) ? v[v.length - 1] : v;
+      url.searchParams.set(k, String(val));
     }
 
     const tmdbRes = await fetch(url, { method: "GET" });
     const text = await tmdbRes.text();
 
     res.status(tmdbRes.status);
-
-    // TMDB 응답을 그대로 전달 (json일 수도, 아닐 수도)
-    try {
-      res.json(JSON.parse(text));
-    } catch {
-      res.send(text);
-    }
+    res.setHeader("Content-Type", tmdbRes.headers.get("content-type") || "application/json");
+    return res.send(text);
   } catch (e) {
-    res.status(500).json({ message: "Proxy error", error: String(e) });
+    return res.status(500).json({ message: "Proxy error", error: String(e) });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ TMDB proxy running: http://localhost:${PORT}/api/tmdb`);
+  console.log(`TMDB proxy running: http://localhost:${PORT}/api/tmdb`);
 });

@@ -1,5 +1,5 @@
 import React from 'react'
-import Nav from '../../components/Nav'
+// import Nav from '../../components/Nav'
 import Banner from '../../components/banner'
 import Row from '../../components/Row'
 import Category from '../../components/category'
@@ -9,7 +9,6 @@ import requests from '../../api/request'
 const MainPage = () => {
   return (
     <Container>
-      <Nav />
       <Banner />
       <Category />
       <Row title="Trending Now" id="TN" fetchUrl={requests.fetchTrending} />

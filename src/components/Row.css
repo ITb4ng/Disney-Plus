@@ -1,7 +1,60 @@
+*{
+    box-sizing: border-box;
+}
+.rowShell {
+  --arrow-zone: 72px;
+}
+.rowShell .swiperArea {
+  padding-right: var(--arrow-zone); /* ✅ 우측은 항상 확보 */
+  padding-left: 0;                  /* ✅ 초기엔 0 */
+  box-sizing: border-box;
+  overflow: hidden;
+}
+/* .swiperArea {
+  padding-left: var(--arrow-zone) !important;
+  padding-right: var(--arrow-zone) !important;
+} */
+@media (max-width: 1024px) {
+  .rowShell {
+    --arrow-zone: 52px;
+  }
+}
+
+.rowShell[data-left="1"] .swiperArea {
+  padding-left: var(--arrow-zone);
+}
+@media (max-width: 1024px) {
+  section h2 {
+    font-size: 18px;
+    margin: 0 0 10px;
+  }
+}
+
+
+
+
 .slider {
     position: relative;
 }
+.swiper-slide{
+    width: 300px;
+}
+.swiper-wrapper {
+  will-change: transform;
+}
+/* 네비게이션 버튼이 슬라이드/이미지 위에 확실히 오도록 */
+.swiper-button-prev,
+.swiper-button-next {
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+}
 
+/* 혹시 Swiper container에 pointer-events 꼬였을 때 대비 */
+.swiper {
+  pointer-events: auto;
+   overflow: hidden;
+  /* padding-right: 40px; */
+}
 .slider__arrow-left {
     background-clip: content-box;
     padding: 20px 0;
@@ -133,4 +186,27 @@
 .swiper-button-next::after, .swiper-button-prev::after {
     font-size: 1.3rem !important;
     font-weight: 600 !important;
+}
+
+
+@media (max-width: 1024px) {
+  .swiper-slide {
+    width: 180px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .arrowZone {
+    width: 56px !important;
+  }
+}
+@media (max-width: 1024px) {
+  section {
+    padding-bottom: 18px !important;
+  }
+}
+@media (max-width: 1024px) {
+  .app-nav {
+    padding: 0 40px !important;
+  }
 }
