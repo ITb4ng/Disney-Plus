@@ -2,18 +2,16 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Scrollbar, A11y } from "swiper/modules";
+import { A11y } from "swiper/modules";
 
 import MovieModal from "./MovieModal";
 import tmdbAxios from "../api/tmdbaxios";
 import "./Row.css";
 
 import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/scrollbar";
 
 const ARROW_ZONE = 72;
+const PHONE_MAX = 960;
 
 const Row = ({ title, id, fetchUrl }) => {
   const [movies, setMovies] = useState([]);
@@ -21,13 +19,43 @@ const Row = ({ title, id, fetchUrl }) => {
   const [movieSelected, setMovieSelection] = useState({});
   const swiperRef = useRef(null);
 
-  // ✅ nav 상태: 처음/끝 체크
-  const [navState, setNavState] = useState({ isBeginning: true, isEnd: false });
+  const [navState, setNavState] = useState({
+    isBeginning: true,
+    isEnd: false,
+  });
 
-  // ✅ 초기 1회 정렬용
   const didInitRef = useRef(false);
 
-  // ✅ fetchUrl 규격 통일
+  /* -----------------------------
+     📱 폰 레이아웃 감지
+     - 960px 이하
+     - 터치 기반 디바이스
+  ----------------------------- */
+  const [isPhoneLayout, setIsPhoneLayout] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mqWidth = window.matchMedia(`(max-width: ${PHONE_MAX}px)`);
+    const mqTouch = window.matchMedia("(hover: none) and (pointer: coarse)");
+
+    const sync = () =>
+      setIsPhoneLayout(mqWidth.matches && mqTouch.matches);
+
+    sync();
+
+    mqWidth.addEventListener?.("change", sync);
+    mqTouch.addEventListener?.("change", sync);
+
+    return () => {
+      mqWidth.removeEventListener?.("change", sync);
+      mqTouch.removeEventListener?.("change", sync);
+    };
+  }, []);
+
+  /* -----------------------------
+     fetchUrl 규격 통일
+  ----------------------------- */
   const query = useMemo(() => {
     if (!fetchUrl) return null;
 
@@ -44,7 +72,9 @@ const Row = ({ title, id, fetchUrl }) => {
     return null;
   }, [fetchUrl]);
 
-  // ✅ 데이터 로드
+  /* -----------------------------
+     데이터 로드
+  ----------------------------- */
   useEffect(() => {
     if (!query) return;
 
@@ -59,7 +89,10 @@ const Row = ({ title, id, fetchUrl }) => {
           params: { path: cleanPath, ...params },
         });
 
-        const results = Array.isArray(res.data?.results) ? res.data.results : [];
+        const results = Array.isArray(res.data?.results)
+          ? res.data.results
+          : [];
+
         if (!ignore) setMovies(results);
       } catch (e) {
         console.error(`[Row:${id}] fetch failed`, e);
@@ -72,7 +105,9 @@ const Row = ({ title, id, fetchUrl }) => {
     };
   }, [query, id]);
 
-  // ✅ 이미지 없는 건 제외 (loop 안 쓰는 대신 최소한 안정)
+  /* -----------------------------
+     이미지 없는 데이터 제거
+  ----------------------------- */
   const validMovies = useMemo(
     () => movies.filter((m) => m?.backdrop_path || m?.poster_path),
     [movies]
@@ -83,112 +118,111 @@ const Row = ({ title, id, fetchUrl }) => {
     setMovieSelection(movie);
   };
 
-  // ✅ Swiper 상태 동기화(공용)
   const syncNav = (swiper) => {
-    setNavState({ isBeginning: swiper.isBeginning, isEnd: swiper.isEnd });
+    setNavState({
+      isBeginning: swiper.isBeginning,
+      isEnd: swiper.isEnd,
+    });
   };
 
-  // ✅ 데이터 로딩 완료 시: update + (초기 1회만) 0번 정렬
+  /* -----------------------------
+     Swiper 초기 동기화
+  ----------------------------- */
   useEffect(() => {
     const swiper = swiperRef.current;
     if (!swiper) return;
 
-    let rafId = requestAnimationFrame(() => {
+    const rafId = requestAnimationFrame(() => {
       if (!swiper || swiper.destroyed) return;
-      if (!swiper.el) return;
       if (!swiper.slides || swiper.slides.length === 0) return;
 
-      try {
-        swiper.update();
-        swiper.navigation?.update?.();
-        // ✅ loop=false라서 slideTo만 사용 (초기 1회만)
-        if (!didInitRef.current) {
-          didInitRef.current = true;
-          swiper.slideTo?.(0, 0);
-        }
-        syncNav(swiper);
-      } catch (e) {
-        console.debug(`[Row:${id}] swiper post-update skipped`, e);
+      swiper.update();
+
+      if (!didInitRef.current) {
+        didInitRef.current = true;
+        swiper.slideTo?.(0, 0);
       }
+
+      syncNav(swiper);
     });
 
     return () => cancelAnimationFrame(rafId);
   }, [validMovies.length, id]);
 
-  // ✅ 좌측 화살표는 "처음엔 숨김" (공홈 느낌)
-  const showLeft = !navState.isBeginning;
-  // ✅ 우측은 끝이면 비활성
-  const disableRight = navState.isEnd;
+  /* -----------------------------
+     화살표 사용 여부
+  ----------------------------- */
+  const useArrows = !isPhoneLayout;
+  const showLeft = useArrows && !navState.isBeginning;
+  const disableRight = useArrows && navState.isEnd;
+
+  /* -----------------------------
+     Swiper 옵션
+  ----------------------------- */
+  const slidesPerGroup = isPhoneLayout ? 1 : 5;
 
   return (
     <Container id={id}>
       <Title>{title}</Title>
 
-      <RowShell className="rowShell" data-left={showLeft ? "1" : "0"}>
-        {/* 좌 히트존 (처음엔 숨김: 공간 차지 X, overlay만) */}
-        <ArrowZone
-          className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
-          type="button"
-          aria-label="Previous"
-          aria-hidden={!showLeft}
-          onClick={() => {
-            if (!showLeft) return;
-            swiperRef.current?.slidePrev();
-          }}
-        >
-          <ArrowIcon className="icon">‹</ArrowIcon>
-        </ArrowZone>
+      <RowShell
+        className="rowShell"
+        data-left={showLeft ? "1" : "0"}
+        data-touch={isPhoneLayout ? "1" : "0"}
+      >
+        {useArrows && (
+          <ArrowZone
+            className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
+            type="button"
+            aria-label="Previous"
+            aria-hidden={!showLeft}
+            onClick={() => {
+              if (!showLeft) return;
+              swiperRef.current?.slidePrev();
+            }}
+          >
+            <ArrowIcon>‹</ArrowIcon>
+          </ArrowZone>
+        )}
 
-        {/* 우 히트존 */}
-        <ArrowZone
-          className="arrowZone right"
-          type="button"
-          aria-label="Next"
-          disabled={disableRight}
-          aria-disabled={disableRight}
-          onClick={() => {
-            if (disableRight) return;
-            swiperRef.current?.slideNext();
-          }}
-        >
-          <ArrowIcon className="icon">›</ArrowIcon>
-        </ArrowZone>
+        {useArrows && (
+          <ArrowZone
+            className="arrowZone right"
+            type="button"
+            aria-label="Next"
+            disabled={disableRight}
+            aria-disabled={disableRight}
+            onClick={() => {
+              if (disableRight) return;
+              swiperRef.current?.slideNext();
+            }}
+          >
+            <ArrowIcon>›</ArrowIcon>
+          </ArrowZone>
+        )}
 
-        {/* 스크롤/카드 영역
-            ✅ 왼쪽 화살표가 안 보일 때는 padding-left 0으로 "딱 붙게"
-            ✅ 오른쪽은 항상 화살표가 있으니 padding-right는 유지 (취향)
-        */}
-        <SwiperArea className="swiperArea"
-        
-        >
+        <SwiperArea className="swiperArea">
           <Swiper
-            modules={[Navigation, Pagination, Scrollbar, A11y]}
+            modules={[A11y]}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
-              // mount 시 nav 동기화
               syncNav(swiper);
             }}
             onSlideChange={syncNav}
             onResize={syncNav}
-            onReachBeginning={syncNav}
-            onReachEnd={syncNav}
-            navigation={false}
-            pagination={false}
             watchOverflow
             loop={false}
             speed={450}
-            spaceBetween={12}
+            spaceBetween={0}
             slidesPerView="auto"
-            slidesPerGroup={2}
-            slidesOffsetBefore={0}
-            slidesOffsetAfter={0}
+            slidesPerGroup={slidesPerGroup}
             threshold={8}
-            preventClicks
-            preventClicksPropagation
           >
             {validMovies.map((movie) => {
-              const imgPath = movie.backdrop_path || movie.poster_path;
-              const altText = movie.title || movie.name || "movie";
+              const imgPath =
+                movie.backdrop_path || movie.poster_path;
+              const altText =
+                movie.title || movie.name || "movie";
 
               return (
                 <SwiperSlide key={movie.id}>
@@ -208,7 +242,10 @@ const Row = ({ title, id, fetchUrl }) => {
       </RowShell>
 
       {modalOpen && (
-        <MovieModal {...movieSelected} setModalOpen={setModalOpen} />
+        <MovieModal
+          {...movieSelected}
+          setModalOpen={setModalOpen}
+        />
       )}
     </Container>
   );
@@ -224,6 +261,25 @@ const Container = styled.section`
 
 const Title = styled.h2`
   margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 600;
+
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 375px) {
+    font-size: 17px;
+  }
+
+  @media (max-width: 340px) {
+    font-size: 16px;
+  }
 `;
 
 const Wrap = styled.div`
@@ -240,15 +296,12 @@ const Wrap = styled.div`
   border: 3px solid rgba(249, 249, 249, 0.1);
 
   img {
-    inset: 0px;
+    inset: 0;
     display: block;
     height: 100%;
     object-fit: cover;
-    opacity: 1;
     position: absolute;
     width: 100%;
-    transition: opacity 500ms ease-in-out;
-    z-index: 1;
   }
 
   &:hover {
@@ -272,7 +325,6 @@ const SwiperArea = styled.div`
   overflow: hidden;
 `;
 
-/* 좌우 히트존 (overlay, 레이아웃 공간 차지 X) */
 const ArrowZone = styled.button`
   position: absolute;
   top: 0;
@@ -284,64 +336,34 @@ const ArrowZone = styled.button`
   align-items: center;
   justify-content: center;
 
-  padding: 0;
   border: none;
   cursor: pointer;
-
-  transition: background 160ms ease, opacity 160ms ease, transform 160ms ease;
+  background: transparent;
+  transition: opacity 160ms ease;
   opacity: 0.9;
 
   &.left {
     left: 0;
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.45),
-      rgba(0, 0, 0, 0)
-    );
   }
 
   &.right {
     right: 0;
-    background: linear-gradient(
-      to left,
-      rgba(0, 0, 0, 0.45),
-      rgba(0, 0, 0, 0)
-    );
   }
 
-  &:hover {
-    opacity: 1;
-  }
-
-  /* ✅ 처음엔 left 버튼 숨김: 공간 안 먹고, 클릭도 막음 */
   &.isHidden {
     opacity: 0;
     pointer-events: none;
-    transform: translateX(-6px);
   }
 
   &:disabled {
+    opacity: 0.25;
     cursor: default;
-    opacity: 0.25;
   }
-
-  &:disabled:hover {
-    opacity: 0.25;
-  }
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-  @media (max-width: 1024px) {
-    --arrow-zone: 52px;
-  } 
 `;
 
 const ArrowIcon = styled.span`
   font-size: 34px;
   line-height: 1;
   user-select: none;
-
   color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
 `;

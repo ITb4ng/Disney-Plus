@@ -11,6 +11,7 @@
     "firebase-tools": "^12.8.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
     "styled-components": "^6.0.7",
@@ -47,5 +48,4 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
-
 }

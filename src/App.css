@@ -1,12 +1,43 @@
-body {
-  background-color: #040714;
-  color: #f9f9f9;
-  font-family: Avenir-Roman, sans-serif;
-  margin: 0;
-  padding: 0;
+html, body, #root {
+  height: 100%;
 }
 
-a {
-  color: #f9f9f9;
-  text-decoration: none;
+body {
+  margin: 0;
+  background-color: #05060a;
+  overflow-y: auto;
+  color: #f9f9f9; 
+}
+
+button,
+input,
+textarea {
+  color: inherit;
+  font-family: inherit;
+}
+
+/* 콘텐츠 컨테이너 */
+.app {
+  min-height: 100%;
+  position: relative;
+}
+
+/* ✅ 배경 레이어 */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+
+  pointer-events: none; /* 스크롤/클릭 가로채지 마 */
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  transform: translateZ(0);
+}
+
+/* ✅ 실제 페이지/네비는 배경 위로 */
+.app > :not(.app-bg) {
+  position: relative;
+  z-index: 1;
 }

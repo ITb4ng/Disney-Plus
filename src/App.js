@@ -1,23 +1,21 @@
-import { Outlet, Route, Routes } from 'react-router-dom';
-import './App.css';
-import Nav from './components/Nav';
-import LoginPage from './pages/LoginPage';
-import MainPage from './pages/MainPage';
-import DetailPage from './pages/DetailPage';
-import SearchPage from './pages/SearchPage';
+import { Outlet, Route, Routes } from "react-router-dom";
+import "./App.css";
+import Nav from "./components/Nav";
+import LoginPage from "./pages/LoginPage";
+import MainPage from "./pages/MainPage";
+import DetailPage from "./pages/DetailPage";
+import SearchPage from "./pages/SearchPage";
+import Login from "./pages/Login"
 import { useEffect } from "react";
 
-
-
-const Layout =() => {
-  return(
-    <div>
+const Layout = () => {
+  return (
+    <div className="layout">
       <Nav />
       <Outlet />
     </div>
-  )
-}
-
+  );
+};
 
 function App() {
   useEffect(() => {
@@ -42,19 +40,27 @@ function App() {
   }, []);
 
   return (
-   <div className='app'>
-     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="main" element={<MainPage />} />
-        <Route path="search" element={<SearchPage />} />
-        <Route path="/detail/:type/:movieId" element={<DetailPage />} />
-      </Route>
-    </Routes>
+    <div className="app">
+      {/* ✅ 배경 레이어 (이벤트 절대 가로채지 않음) */}
+      <div
+        className="app-bg"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `url(${process.env.PUBLIC_URL}/images/home-background.png)`,
+        }}
+      />
 
-   </div>
-  )
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="main" element={<MainPage />} />
+          <Route path="search" element={<SearchPage />} />
+          <Route path="/detail/:type/:movieId" element={<DetailPage />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
+      </Routes>
+    </div>
+  );
 }
 
 export default App;
-
