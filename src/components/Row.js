@@ -13,11 +13,18 @@ import "swiper/css";
 const ARROW_ZONE = 72;
 const PHONE_MAX = 960;
 
-const Row = ({ title, id, fetchUrl }) => {
+// ✅ 스켈레톤 카드 개수 (취향)
+const SKELETON_COUNT = 10;
+
+const Row = ({ title, id, fetchUrl, showRank = false }) => {
   const [movies, setMovies] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [movieSelected, setMovieSelection] = useState({});
   const swiperRef = useRef(null);
+
+  // ✅ 스켈레톤용 상태
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   const [navState, setNavState] = useState({
     isBeginning: true,
@@ -39,8 +46,7 @@ const Row = ({ title, id, fetchUrl }) => {
     const mqWidth = window.matchMedia(`(max-width: ${PHONE_MAX}px)`);
     const mqTouch = window.matchMedia("(hover: none) and (pointer: coarse)");
 
-    const sync = () =>
-      setIsPhoneLayout(mqWidth.matches && mqTouch.matches);
+    const sync = () => setIsPhoneLayout(mqWidth.matches && mqTouch.matches);
 
     sync();
 
@@ -81,6 +87,9 @@ const Row = ({ title, id, fetchUrl }) => {
     let ignore = false;
 
     (async () => {
+      setIsLoading(true);
+      setHasError(false);
+
       try {
         const { path, ...params } = query;
         const cleanPath = String(path).replace(/^\/+/, "");
@@ -89,14 +98,16 @@ const Row = ({ title, id, fetchUrl }) => {
           params: { path: cleanPath, ...params },
         });
 
-        const results = Array.isArray(res.data?.results)
-          ? res.data.results
-          : [];
-
+        const results = Array.isArray(res.data?.results) ? res.data.results : [];
         if (!ignore) setMovies(results);
       } catch (e) {
         console.error(`[Row:${id}] fetch failed`, e);
-        if (!ignore) setMovies([]);
+        if (!ignore) {
+          setHasError(true);
+          setMovies([]);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
       }
     })();
 
@@ -134,7 +145,6 @@ const Row = ({ title, id, fetchUrl }) => {
 
     const rafId = requestAnimationFrame(() => {
       if (!swiper || swiper.destroyed) return;
-      if (!swiper.slides || swiper.slides.length === 0) return;
 
       swiper.update();
 
@@ -147,7 +157,7 @@ const Row = ({ title, id, fetchUrl }) => {
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [validMovies.length, id]);
+  }, [validMovies.length, id, isLoading]);
 
   /* -----------------------------
      화살표 사용 여부
@@ -157,9 +167,18 @@ const Row = ({ title, id, fetchUrl }) => {
   const disableRight = useArrows && navState.isEnd;
 
   /* -----------------------------
-     Swiper 옵션
+     스켈레톤 데이터
   ----------------------------- */
-  const slidesPerGroup = isPhoneLayout ? 1 : 5;
+  const skeletonSlides = useMemo(
+    () =>
+      Array.from({ length: SKELETON_COUNT }, (_, i) => ({
+        _sk: true,
+        id: `sk-${id}-${i}`,
+      })),
+    [id]
+  );
+
+  const renderList = isLoading ? skeletonSlides : validMovies;
 
   return (
     <Container id={id}>
@@ -212,21 +231,35 @@ const Row = ({ title, id, fetchUrl }) => {
             onResize={syncNav}
             watchOverflow
             loop={false}
-            speed={450}
-            spaceBetween={0}
+            speed={900}
+            spaceBetween={10}
             slidesPerView="auto"
-            slidesPerGroup={slidesPerGroup}
-            threshold={8}
+            slidesPerGroupAuto={true}
+            threshold={10}
           >
-            {validMovies.map((movie) => {
-              const imgPath =
-                movie.backdrop_path || movie.poster_path;
-              const altText =
-                movie.title || movie.name || "movie";
+            {renderList.map((movie, index) => {
+              // ✅ 스켈레톤 슬라이드
+              if (movie?._sk) {
+                return (
+                  <SwiperSlide key={movie.id}>
+                    <Wrap className="skWrap" aria-hidden="true">
+                      <div className="skCard" />
+                    </Wrap>
+                  </SwiperSlide>
+                );
+              }
+
+              // ✅ 정상 슬라이드
+              const imgPath = movie.backdrop_path || movie.poster_path;
+              const altText = movie.title || movie.name || "movie";
+              const rank = index + 1;
 
               return (
                 <SwiperSlide key={movie.id}>
                   <Wrap>
+                    {/* ✅ Top Rated 등에서만 랭킹 표시 */}
+                    {showRank && <RankBadge className="rank rank--tl">{rank}</RankBadge>}
+
                     <img
                       src={`https://image.tmdb.org/t/p/original${imgPath}`}
                       alt={altText}
@@ -238,22 +271,27 @@ const Row = ({ title, id, fetchUrl }) => {
               );
             })}
           </Swiper>
+
+          {/* ✅ 에러 메시지 */}
+          {!isLoading && hasError && <RowHint role="status">Failed to load</RowHint>}
+
+          {/* ✅ 데이터는 로딩 끝났는데 비어있으면 */}
+          {!isLoading && !hasError && validMovies.length === 0 && (
+            <RowHint role="status">No items</RowHint>
+          )}
         </SwiperArea>
       </RowShell>
 
-      {modalOpen && (
-        <MovieModal
-          {...movieSelected}
-          setModalOpen={setModalOpen}
-        />
-      )}
+      {modalOpen && <MovieModal {...movieSelected} setModalOpen={setModalOpen} />}
     </Container>
   );
 };
 
 export default Row;
 
-/* ---------------- styled-components ---------------- */
+/* ===========================
+   styled-components (기존 유지)
+=========================== */
 
 const Container = styled.section`
   padding: 0 0 26px;
@@ -286,11 +324,11 @@ const Wrap = styled.div`
   width: 95%;
   height: 95%;
   padding-top: 56.25%;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: rgb(0 0 0/69%) 0px 26px 30px -10px,
     rgb(0 0 0/73%) 0px 16px 10px -10px;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s;
   border: 3px solid rgba(249, 249, 249, 0.1);
@@ -310,6 +348,18 @@ const Wrap = styled.div`
     transform: scale(0.98);
     border-color: rgba(249, 249, 249, 0.8);
   }
+
+  /* ✅ 스켈레톤일 땐 hover 의미없게 */
+  &.skWrap {
+    cursor: default;
+    border-color: rgba(249, 249, 249, 0.08);
+    &:hover {
+      transform: none;
+      box-shadow: rgb(0 0 0/69%) 0px 26px 30px -10px,
+        rgb(0 0 0/73%) 0px 16px 10px -10px;
+      border-color: rgba(249, 249, 249, 0.08);
+    }
+  }
 `;
 
 const RowShell = styled.div`
@@ -323,6 +373,7 @@ const SwiperArea = styled.div`
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 `;
 
 const ArrowZone = styled.button`
@@ -367,3 +418,41 @@ const ArrowIcon = styled.span`
   user-select: none;
   color: rgba(255, 255, 255, 0.9);
 `;
+
+// ✅ 에러/빈상태 힌트 (아주 작게)
+const RowHint = styled.div`
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  font-size: 12px;
+  opacity: 0.75;
+  pointer-events: none;
+`;
+
+/* ===========================
+   ✅ 랭킹 배지 추가 (기존 스타일 방해 X)
+=========================== */
+const RankBadge = styled.div`
+  position: absolute;
+  left: 3px;   /* 살짝 안쪽 */
+  bottom: 3px;
+  z-index: 6;
+
+  font-size: 84px;          /* 96 → 84 */
+  font-weight: 900;
+  line-height: 0.9;
+
+  color: rgba(255, 255, 255, 0.12);
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.9);  /* 3 → 2 */
+
+  text-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.6);
+
+  pointer-events: none;
+  user-select: none;
+
+  @media (max-width: 1024px) { font-size: 72px; }
+  @media (max-width: 768px) { font-size: 60px; }
+  @media (max-width: 480px) { font-size: 48px; }
+`;
+

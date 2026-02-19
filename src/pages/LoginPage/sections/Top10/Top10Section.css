@@ -1,8 +1,10 @@
+/* =========================
+   Base
+========================= */
 .top10Section,
 .top10RailWrap {
   overflow-x: hidden;
 }
-
 
 .top10Section {
   position: relative;
@@ -11,18 +13,126 @@
   overflow-x: hidden;
 }
 
+/* 타이틀 */
 .top10TitleWrap {
-  max-width: 1520px;
-  margin: 0 auto 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
   padding: 0 24px;
 }
 
 .top10TitleWrap h2 {
   text-align: center;
-  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: clamp(22px, 5vw, 44px);
+  line-height: 1.15;
+  margin: 0;
 }
+
+/* =========================
+   Shell (ArrowZone + Swiper)
+========================= */
+.top10Shell {
+  display: grid;
+  grid-template-columns: 72px 1fr 72px;
+  align-items: stretch;
+  position: relative;
+  padding: 24px;
+}
+
+.top10SwiperArea {
+  overflow: hidden; /* 카드가 화살표 영역 뒤로 새는 거 방지 */
+  position: relative;
+}
+
+/* =========================
+   Optional: Right Fade Mask
+   (카드 위로 덮는 느낌 줄이려고 약하게)
+========================= */
+.top10SwiperArea::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0; /* SwiperArea 기준 */
+  width: 90px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+}
+
+/* =========================
+   Arrow Zone
+========================= */
+.top10ArrowZone {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  line-height: 1;
+
+  cursor: pointer;
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+
+  /* 데스크탑: hover 시만 보이게 */
+  opacity: 0;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+/* 섹션 hover 시 등장 (Row처럼) */
+.top10Shell:hover .top10ArrowZone {
+  opacity: 1;
+}
+
+.top10ArrowZone:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 아이콘: 원 제거 + 정중앙 */
+.top10ArrowIcon {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+
+  display: grid;
+  place-items: center;
+
+  font-size: 34px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+
+  /* 폰트 글리프 시각 보정 */
+  transform: translateY(-0.5px);
+}
+
+/* ✅ 요구사항: 처음/끝 도달시 아예 안 보이게 (JSX에서 is-hidden 붙임) */
+.top10ArrowZone.is-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* (혹시 남아있으면) disabled 스타일은 약하게 */
+.top10ArrowZone.is-disabled {
+  opacity: 0.25 !important;
+  cursor: default;
+}
+.top10ArrowZone.is-disabled:hover {
+  background: transparent;
+}
+
+/* =========================
+   Cards (Top10Row에서 Card class 쓴다면)
+   - 너가 올린 .top10Card 기반 유지
+========================= */
 .top10Card {
-  width: clamp(240px, 18vw, 340px); /* 데스크탑에서 확 커짐 */
+  width: clamp(240px, 18vw, 340px);
   aspect-ratio: 16 / 9;
   border-radius: 10px;
   overflow: hidden;
@@ -38,54 +148,108 @@
   object-fit: cover;
 }
 
-/* 레일레퍼 */
-.top10RailWrap {
-  position: relative;
-  width: 100%;
-  padding: 0 24px;
-}
-
-/* 오른쪽 페이드 마스크: 카드 위로 "덮지 않게" */
-.top10RailWrap::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 24px;            /* rail padding 고려 */
-  width: 90px;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;             /* ✅ 낮게: 컨트롤보다 아래 */
-  background: linear-gradient(to left, rgba(0,0,0,0.55), rgba(0,0,0,0));
-}
-
-
-.top10Controls {
-  position: absolute;
-  right: 24px;
-  bottom: 16px;
-  display: flex;
-  gap: 10px;
-  z-index: 30; /* 레일 위로 */
-}
-
-
-.navBtn {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-
-
+/* =========================
+   Legacy controls (우측하단 네비) 완전 비활성
+   - JSX에서 지웠어도 CSS에 남아있으면 깔끔하게 숨김
+========================= */
+.top10Controls,
+.navBtn,
 .navBtn--disabled {
-  cursor: default;
-  pointer-events: none;
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.35);
+  display: none !important;
+}
+
+/* =========================
+   Responsive (Mobile)
+========================= */
+@media (max-width: 625px) {
+  .top10Section {
+    margin: 24px 0 32px;
+    padding: 8px 0 44px; /* 모바일에서 좌우 padding은 shell로 통제 */
+  }
+
+  .top10TitleWrap {
+    padding: 0 14px;
+    margin-bottom: 10px;
+  }
+
+  /* ARROW_ZONE 축소 + 레일 패딩 축소 */
+  .top10Shell {
+    grid-template-columns: 44px 1fr 44px;
+    padding: 0 14px;
+  }
+
+  /* 모바일은 hover가 없으니, 보일 버튼은 항상 보여줘야 함 */
+  .top10ArrowZone {
+    opacity: 1;
+  }
+
+  /* 숨김은 계속 숨김 */
+  .top10ArrowZone.is-hidden {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
+  .top10ArrowIcon {
+    font-size: 26px;
+  }
+
+  /* 모바일 카드 크기 너무 커서 두 장만 보이면 답답하니 살짝 축소 */
+  .top10Card {
+    width: clamp(160px, 60vw, 220px);
+    border-radius: 10px;
+  }
+
+  /* 페이드도 모바일에서는 살짝 약하게 */
+  .top10SwiperArea::after {
+    width: 60px;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
+  }
+}
+
+/* =========================
+   Responsive (Tablet)
+========================= */
+@media (min-width: 626px) and (max-width: 998px) {
+  .top10Section {
+    margin: 28px 0 38px;
+    padding: 10px 16px 56px;
+  }
+
+  .top10TitleWrap {
+    padding: 0 16px;
+  }
+
+  .top10Shell {
+    grid-template-columns: 60px 1fr 60px;
+    padding: 0 16px;
+  }
+
+  .top10ArrowIcon {
+    font-size: 30px;
+  }
+
+  .top10Card {
+    width: clamp(200px, 22vw, 300px);
+  }
+}
+
+@media (max-width: 625px) {
+  .top10Section {
+    margin: 25px 0;
+    padding: 6px 0 34px;
+  }
+
+  .top10TitleWrap {
+    padding: 0 10px;
+    margin-bottom: 18px;
+  }
+
+  .top10Shell {
+    grid-template-columns: 36px 1fr 36px; /* 화살표존 더 슬림 */
+    padding: 0 6px; /* ✅ 레일 좌우 여백 최소화 */
+  }
+
+  .top10ArrowIcon {
+    font-size: 22px;
+  }
 }

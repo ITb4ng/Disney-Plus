@@ -5,27 +5,27 @@ import Row from '../../components/Row'
 import Category from '../../components/category'
 import styled  from 'styled-components'
 import requests from '../../api/request'
+import FooterSection from "../LoginPage/sections/Footer/FooterSection";
 
 const MainPage = () => {
   return (
-    <Container>
+    <><Container>
       <Banner />
       <Category />
+      <Row title="Top Rated" id="TR" fetchUrl={requests.fetchTopRated} showRank />
       <Row title="Trending Now" id="TN" fetchUrl={requests.fetchTrending} />
-      <Row title="Top Rated" id="TR" fetchUrl={requests.fetchTopRated} />
       <Row title="Action Movies" id="AM" fetchUrl={requests.fetchActionMovies} />
       <Row title="Comedy Movies" id="CM" fetchUrl={requests.fetchComedyMovies} />
-    </Container>
+    </Container><FooterSection /></>
   )
 }
 
 export default MainPage
 
 const Container = styled.main`
-   position : relative;
-   min-height : calc(100vh - 250px);
-   overflow-x : hidden;
-   display : block;
-   top : 72px;
-   padding : 0 calc( 3.5vw + 5px);
-`
+  position: relative;
+  min-height: calc(100vh - 250px);
+  overflow-x: hidden;
+  display: block;
+  padding: 72px calc(3.5vw + 5px) 0;
+`;

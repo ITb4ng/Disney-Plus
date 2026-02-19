@@ -61,39 +61,39 @@
 
 @media (max-width: 1024px) {
   .bundle-promo {
-    width: min(900px, 100%);
-    margin: 0 auto;
-    text-align: center;           
+    width: 100%;
+    margin: 0;
+    text-align: left; /* ✅ 모바일 공홈 느낌: 좌정렬 기본 */
   }
+
   .bundle-ctaGrid {
     width: 100%;
-    max-width: 760px;             
-    margin: 18px auto 18px;
+    max-width: none;        /* ✅ 패널 안에서 꽉 쓰기 */
+    margin: 14px 0 12px;
 
     display: grid;
-    grid-template-columns: 1fr 1fr;  
-    /* justify-items: center; 가로 중앙 */
-    align-items: end;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 
-    padding: 48px 24px 0;
-    box-sizing: border-box;      
+    padding: 0;             /* ✅ 48px 24px 제거 */
+    align-items: stretch;   /* ✅ 버튼 높이 균일 */
+    box-sizing: border-box;
   }
-    .hero-right {
-    display: none;
+
+  .hero-left {
+    width: 100%;            /* ✅ 760px 제한 제거 */
+    justify-self: stretch;
   }
-   .hero-left {
-    width: min(760px, 100%); 
-    justify-self: center;
-  }
-   .bundle-logoBox {
-    justify-content: center;
+
+  .bundle-logoBox {
+    /* justify-content: flex-start; ✅ 로고도 좌로 */
   }
 }
 
 @media (max-width: 768px) {
   .bundle-ctaGrid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    grid-template-columns: 1fr; /* ✅ 공홈식: 버튼 세로 */
+    gap: 10px;
   }
 
   .bundle-logoBox {
@@ -101,10 +101,11 @@
   }
 
   .bundle-btn {
-    width: 100%;
+    height: 52px;
+    border-radius: 10px; /* ✅ 공홈 느낌 조금 더 둥글게 */
+    font-weight: 700;
   }
 }
-
 @media (min-width: 768px) and (max-width: 1023px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);

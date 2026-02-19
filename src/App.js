@@ -1,33 +1,41 @@
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import Nav from "./components/Nav";
 import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
 import DetailPage from "./pages/DetailPage";
 import SearchPage from "./pages/SearchPage";
-import Login from "./pages/Login"
+import Login from "./pages/Login";
 import { useEffect } from "react";
 
 const Layout = () => {
+  const { pathname } = useLocation();
+  const hideNav = pathname === "/login"; 
+
   return (
     <div className="layout">
-      <Nav />
+      {!hideNav && <Nav />}
       <Outlet />
     </div>
   );
 };
 
+
 function App() {
   useEffect(() => {
     const nav = document.querySelector(".app-nav");
-    if (!nav) return;
 
     const apply = () => {
+      if (!nav) {
+        document.documentElement.style.setProperty("--nav-h", `0px`);
+        return;
+      }
       const h = nav.getBoundingClientRect().height;
       document.documentElement.style.setProperty("--nav-h", `${Math.ceil(h)}px`);
     };
 
     apply();
+    if (!nav) return;
 
     const ro = new ResizeObserver(apply);
     ro.observe(nav);
@@ -41,7 +49,6 @@ function App() {
 
   return (
     <div className="app">
-      {/* ✅ 배경 레이어 (이벤트 절대 가로채지 않음) */}
       <div
         className="app-bg"
         aria-hidden="true"

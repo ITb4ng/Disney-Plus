@@ -253,7 +253,7 @@ const Nav = () => {
   /* =========================================================
    * 11) 파생 값(렌더링 조건/아바타 텍스트 등)
    * ======================================================= */
-  const isLoginPage = pathname === "/login";
+  // const isLoginPage = pathname === "/login";
 
   // 아바타 이니셜(이미지 없을 때)
   const avatarText = (() => {
@@ -274,7 +274,8 @@ const Nav = () => {
         </Left>
 
         <Center>
-          {isLoginPage ? null : !isMobile ? (
+          {pathname === "/" ? null : (
+            !isMobile ? (
             <input
               className="nav__input"
               id="nav-search"
@@ -313,7 +314,8 @@ const Nav = () => {
                 />
               )}
             </SearchPill>
-          )}
+          )  
+        )}
         </Center>
 
         <Right>
@@ -384,7 +386,7 @@ const NavWrapper = styled.nav`
 
   height: 70px;
   background-color: ${(props) =>
-    props.$show ? "rgba(9, 11, 19, 0.95)" : "rgba(9, 11, 19, 0)"};
+    props.$show ? "rgba(9, 11, 19, 1)" : "rgba(9, 11, 19, 0)"};
       transition: background-color 280ms ease;
   z-index: 10;
 

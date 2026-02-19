@@ -207,3 +207,23 @@
     padding-right: 0 !important;
   }
 }
+
+/* Row skeleton card */
+.skCard {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.13) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: row-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes row-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import {
@@ -56,9 +57,14 @@ export default function Login() {
   return (
     <Wrap>
       <Card>
-        <Brand>
-          <img src="/images/logo.svg" alt="Disney+ Logo" />
-        </Brand>
+        <BrandLink to="/">
+          <Brand>
+            <img src="/images/logo.svg" alt="Disney+ Logo" />
+          </Brand>
+        </BrandLink>
+      
+      <Divider />
+
 
         <Title>로그인</Title>
 
@@ -111,12 +117,12 @@ export default function Login() {
 /* ===== styled-components ===== */
 
 const Wrap = styled.div`
-  min-height: 100vh;
+  height: 100dvh;     /* 모바일까지 깔끔 */
   display: grid;
   place-items: center;
-  padding: calc(var(--nav-h, 0px) + 24px) 16px 24px;
+  padding: 16px;
+  overflow: hidden;
 `;
-
 const Card = styled.div`
   width: min(420px, 100%);
   padding: 28px 22px;
@@ -131,20 +137,29 @@ const Card = styled.div`
   box-shadow: 0 20px 55px rgba(0, 0, 0, 0.6);
 `;
 
-const Brand = styled.div`
+const BrandLink = styled(Link)`
   display: flex;
   justify-content: center;
+  text-decoration: none;
+`;
+const Brand = styled.div`
   margin-bottom: 14px;
 
   img {
     width: 92px;
     height: auto;
     opacity: 0.95;
+
+    /* 🔒 전역 스타일 차단 */
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
   }
 `;
 
 const Title = styled.h1`
-  margin: 0 0 18px;
+  margin: 18px 0;
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.2px;

@@ -25,7 +25,7 @@ function CheckIcon() {
 }
 
 export default function PricingSection() {
-  const [tab, setTab] = useState("disney");
+  const [tab, setTab] = useState("bundle");
   const { sectionRef, activeId } = useSectionObserve("pricing");
 
   const isBundle = tab === "bundle";
@@ -120,14 +120,26 @@ export default function PricingSection() {
 
               <div className={cx("pricing-planCell", leftPlan.isReco && "is-reco")}>
                 <div className="pricing-planInner">
-                  <div className="pricing-logoText">{leftPlan.logoText}</div>
+                  <img
+                    className={cx("pricing-logo", leftPlan.logoVariant && `is-${leftPlan.logoVariant}`)}
+                    src={leftPlan.logoImg}
+                    alt={leftPlan.logoAlt || "Disney+"}
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="pricing-planName">{leftPlan.name}</div>
                 </div>
               </div>
 
               <div className={cx("pricing-planCell", rightPlan.isReco && "is-reco", rightPlan.isFlat && "is-flat")}>
                 <div className="pricing-planInner">
-                  <div className="pricing-logoText">{rightPlan.logoText}</div>
+                  <img
+                    className={cx("pricing-logo", rightPlan.logoVariant && `is-${rightPlan.logoVariant}`)}
+                    src={rightPlan.logoImg}
+                    alt={rightPlan.logoAlt || "Disney+"}
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="pricing-planName">{rightPlan.name}</div>
                 </div>
               </div>

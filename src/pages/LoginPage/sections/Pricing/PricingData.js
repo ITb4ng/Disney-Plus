@@ -1,3 +1,12 @@
+const DISNEY_LOGO =
+  "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/3600EEA25BEB4CAC2E8F0F82F03245FA7A8558F67A7EC9F49AEEFF2542EF3CD7/compose?format=webp&width=290";
+
+const BUNDLE_LEFT_LOGO =
+  "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/00328ED2854929F667624303D1CD48BA99B8FFA2F49999E2E3417A2C3BFE0F45/compose?format=webp&width=300";
+
+const BUNDLE_RIGHT_LOGO =
+  "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/B306005276BE4926367313F887E61BCFE08292636A605A62EB3189586A1BD8BD/compose?format=webp&width=180";
+
 export const TABS = [
   { key: "disney", label: "디즈니+" },
   { key: "bundle", label: "번들 할인" },
@@ -7,25 +16,28 @@ export const DISNEY_PLANS = [
   {
     key: "premium",
     badge: "추천",
-    logoText: "Disney+",
+    logoImg: DISNEY_LOGO,
+    logoAlt: "Disney+",
     name: "디즈니+ 프리미엄",
     monthlyLabel: "월 ₩13,900",
     annualLabel: "연 ₩139,000",
     annualSub: "최대 16% 할인된 가격^",
-    isReco: true, 
+    isReco: true,
   },
   {
     key: "standard",
     badge: null,
-    logoText: "Disney+",
+    logoImg: DISNEY_LOGO,
+    logoAlt: "Disney+",
     name: "디즈니+ 스탠다드",
     monthlyLabel: "월 ₩9,900",
     annualLabel: "연 ₩99,000",
     annualSub: "최대 16% 할인된 가격^",
     isReco: false,
-    isFlat: true, 
+    isFlat: true,
   },
 ];
+
 
 // 디즈니+ 탭 데이터(좌측 항목 + 각 플랜의 값)
 export const DISNEY_ROWS = [
@@ -67,21 +79,26 @@ export const BUNDLE_PLANS = [
   {
     key: "trio",
     badge: "추천",
-    logoText: "Disney+ · TVING · Wavve",
+    logoImg: BUNDLE_LEFT_LOGO,
+    logoAlt: "디즈니+ 티빙 웨이브 번들",
     name: "디즈니+ 티빙 웨이브 번들",
     monthlyLabel: "월 ₩21,500",
     isReco: true,
+    logoVariant: "bundleLeft",
   },
   {
     key: "duo",
     badge: null,
-    logoText: "Disney+ · TVING",
+    logoImg: BUNDLE_RIGHT_LOGO,
+    logoAlt: "디즈니+ 티빙 번들",
     name: "디즈니+ 티빙 번들",
     monthlyLabel: "월 ₩18,000",
     isReco: false,
     isFlat: true,
+    logoVariant: "bundleRight",
   },
 ];
+
 
 export const BUNDLE_ROWS = [
   {

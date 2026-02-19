@@ -1,134 +1,167 @@
 :root {
   --nav-h: 70px;
-}
-.pricing-surface {
-  --sticky-top: calc(var(--nav-h));
-  --col-tablet: 42% repeat(2, 1fr);
-  position: relative;
-  overflow: visible;   
-}
-.pricing-sticky{
-  position: sticky;
-  top: var(--sticky-top);
-  z-index: 9999; 
-  overflow: visible;
-  background: #040714; 
-  padding-top: 18px;
-  backdrop-filter: blur(6px);
-  border-bottom: solid 1px #b7b8bd;
-  /* border-bottom: 1px solid rgba(255,255,255,0.12); */
+
+  /* Typography scale + color system */
+  --text-strong: rgba(255, 255, 255, 0.92); /* titles / primary */
+  --text-body: rgba(255, 255, 255, 0.82);   /* table body */
+  --text-muted: rgba(255, 255, 255, 0.62);  /* descriptions / footnote */
+  --text-faint: rgba(255, 255, 255, 0.48);  /* marks / extra subtle */
+
+  --line: rgba(255, 255, 255, 0.10);
+  --panel: rgba(255, 255, 255, 0.06);
+  --tab-bg: rgba(255, 255, 255, 0.06);
+  --tab-border: rgba(255, 255, 255, 0.10);
+
+  --accent: rgba(2, 214, 232, 0.95);
+  --accent-text: rgba(2, 23, 42, 0.78);
 }
 
-.pricing-sticky::before{
-  content:"";
-  position:absolute;
-  left:0; 
-  right:0;
-  top:0;
+/* =========================
+   Surface / Sticky
+========================= */
+.pricing-surface {
+  --sticky-top: var(--nav-h);
+  --col-tablet: 42% repeat(2, 1fr);
+  position: relative;
+  overflow: visible;
+}
+
+.pricing-sticky {
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: 20; /* 9999는 과함. 필요한 만큼만 */
+  overflow: visible;
+  background: #040714;
+  padding-top: 18px;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+
+/* 위쪽 미세 그라데이션 (필요하면 살리고, 아니면 삭제 가능) */
+.pricing-sticky::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
   height: 17px;
   z-index: 2;
 }
 
-
-.pricing-surfaceClip{
-  overflow: hidden;    
-  position: relative;        
+/* body clip */
+.pricing-surfaceClip {
+  overflow: hidden;
+  position: relative;
   z-index: 1;
-  /* border: 1px solid rgba(255,255,255,0.10);
-     background: rgba(255,255,255,0.03); */
-  /* box-shadow: 0 18px 46px rgba(0,0,0,0.34); */
 }
 
-
-.pricing-section{
+/* =========================
+   Section / Layout
+========================= */
+.pricing-section {
   padding: 110px 0 90px;
   color: #e9edf5;
   position: relative;
-  isolation: isolate; 
+  isolation: isolate;
   z-index: 0;
+
+  /* 폰트 “깨져보임” 완화 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
 }
 
-.pricing-inner{
+.pricing-inner {
   width: min(1120px, calc(100% - 48px));
   margin: 0 auto;
 }
 
-.pricing-header{
+.pricing-header {
   text-align: center;
   margin-bottom: 26px;
 }
 
-.pricing-title{
+.pricing-title {
   margin: 0 0 14px;
-  font-size: 44px;
-  line-height: 1.12;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  line-height: 1.08;
+  font-size: clamp(28px, 4.6vw, 52px);
+  color: var(--text-strong);
 }
 
-.pricing-desc{
+.pricing-desc {
   margin: 0 0 18px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(233, 237, 245, 0.72);
+  font-size: clamp(13px, 1.6vw, 16px);
+  line-height: 1.65;
+  color: var(--text-muted);
 }
 
-/* tabs */
-.pricing-tabs{
+/* =========================
+   Tabs
+========================= */
+.pricing-tabs {
   display: inline-flex;
   gap: 6px;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: var(--tab-bg);
+  border: 1px solid var(--tab-border);
 }
 
-.pricing-tab{
+.pricing-tab {
   appearance: none;
   border: 0;
   cursor: pointer;
   border-radius: 999px;
   padding: 9px 14px;
   font-size: 13px;
-  color: rgba(233,237,245,0.78);
+  color: rgba(233, 237, 245, 0.78);
   background: transparent;
   transition: transform 140ms ease, background 140ms ease, color 140ms ease;
 }
-.pricing-tab:hover{ transform: translateY(-1px); }
-.pricing-tab.is-active{
-  background: rgba(2,214,232,0.95);
-  color: rgb(2,23,42);
+.pricing-tab:hover {
+  transform: translateY(-1px);
+}
+.pricing-tab.is-active {
+  background: var(--accent);
+  color: rgba(2, 23, 42, 0.86);
   font-weight: 800;
 }
 
-.pricing-row{
+/* =========================
+   Grid rows
+========================= */
+.pricing-row {
   display: grid;
   grid-template-columns: var(--col-tablet);
   align-items: stretch;
 }
 
-
-.pricing-featureEmpty{
+.pricing-featureEmpty {
   background: transparent;
 }
 
 /* badge row */
-.pricing-rowBadge .pricing-planCell{
-  padding: 26px 14px 0;         
+.pricing-rowBadge .pricing-planCell {
+  padding: 26px 14px 0;
   position: relative;
 }
 
 /* plan title row */
-.pricing-rowPlan .pricing-planCell{
+.pricing-rowPlan .pricing-planCell {
   padding: 10px 14px 10px;
 }
 
 /* cta row */
-.pricing-rowCta .pricing-planCell{
+.pricing-rowCta .pricing-planCell {
   padding: 0 14px 16px;
 }
 
-/* ===== plan cells ===== */
-.pricing-planCell{
+/* =========================
+   Plan cells
+========================= */
+.pricing-planCell {
   position: relative;
   display: flex;
   justify-content: center;
@@ -137,17 +170,16 @@
 }
 
 .pricing-planCell.is-reco,
-.pricing-dataCell.is-reco{
-  background: rgba(255,255,255,0.06);
+.pricing-dataCell.is-reco {
+  background: var(--panel);
 }
 
 .pricing-planCell.is-flat,
-.pricing-dataCell.is-flat{
+.pricing-dataCell.is-flat {
   border-radius: 0 !important;
 }
 
-/* 플랜 내부 */
-.pricing-planInner{
+.pricing-planInner {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -155,105 +187,136 @@
   gap: 10px;
 }
 
-.pricing-logoText{
-  margin-top: 8px;
-  font-size: 13px;
-  color: rgba(233,237,245,0.70);
-  letter-spacing: 0.02em;
+/* ❌ logoText는 JSX에서 제거했으니 CSS도 제거 (삭제됨) */
+
+/* logo image */
+.pricing-logo {
+  display: block;
+  width: clamp(160px, 18vw, 200px);
+  height: auto;
+  margin: 0 auto 14px;
+  opacity: 0.98;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.pricing-logo.is-bundleLeft {
+  width: clamp(180px, 20vw, 230px);
+}
+.pricing-logo.is-bundleRight {
+  width: clamp(150px, 17vw, 190px);
 }
 
-.pricing-planName{
-  font-size: 18px;
+/* plan name */
+.pricing-planName {
+  font-weight: 750;
+  font-size: clamp(16px, 2vw, 22px);
   letter-spacing: -0.01em;
-  color: rgba(249,249,249,0.98);
+  color: var(--text-strong);
+  line-height: 1.18;
 }
 
 /* 추천 floating badge */
-.pricing-badgeFloat{
+.pricing-badgeFloat {
   position: absolute;
-  top: 0;                   
+  top: 0;
   left: 50%;
   transform: translate(-50%, -60%);
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.95);
-  color: rgb(19,104,120);
+  background: rgba(255, 255, 255, 0.95);
+  color: rgb(19, 104, 120);
   font-size: 12px;
   font-weight: 800;
-  z-index: 2;            
+  z-index: 2;
   pointer-events: none;
 }
 
-/* CTA buttons */
-.pricing-ctaPrimary{
+/* =========================
+   CTA buttons
+========================= */
+.pricing-ctaPrimary {
   width: 100%;
   height: 48px;
   border: 0;
   cursor: pointer;
   border-radius: 12px;
-  background: rgba(2,214,232,0.95);
-  color: rgb(2,23,42);
-  font-weight: 900;
+  background: var(--accent);
+
+  /* ✅ “너무 진해서 안 보임” 해결: 완전 블랙 금지 */
+  color: var(--accent-text);
+  font-weight: 700;
   letter-spacing: -0.01em;
+  font-size: clamp(14px, 1.6vw, 16px);
+
   transition: filter 140ms ease, transform 140ms ease;
 }
-.pricing-ctaPrimary:hover{
+.pricing-ctaPrimary:hover {
   transform: translateY(-1px);
   filter: brightness(0.98);
 }
 
-.pricing-ctaSecondary{
+.pricing-ctaSecondary {
   width: 100%;
   height: 48px;
   border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.28);
+  border: 2px solid rgba(255, 255, 255, 0.28);
   background: transparent;
-  color: rgba(233,237,245,0.92);
+  color: var(--text-strong);
   cursor: pointer;
   font-weight: 800;
   transition: border-color 140ms ease, filter 140ms ease;
 }
-.pricing-ctaSecondary:hover{
-  border-color: rgba(2,214,232,0.55);
+.pricing-ctaSecondary:hover {
+  border-color: rgba(2, 214, 232, 0.55);
   filter: brightness(1.03);
 }
 
-/* ===== body rows ===== */
-.pricing-body{ background: transparent; }
-
-.pricing-rowBody{
-  border-bottom: 1px solid rgba(255,255,255,0.10);
+/* =========================
+   Body rows
+========================= */
+.pricing-body {
+  background: transparent;
 }
-.pricing-rowBody:last-child{
+
+.pricing-rowBody {
+  border-bottom: 1px solid var(--line);
+}
+.pricing-rowBody:last-child {
   border-bottom: 0;
 }
 
-/* 좌측 feature */
-.pricing-featureCell{
+/* 좌측 feature (한 단계 낮게) */
+.pricing-featureCell {
   padding: 18px 16px;
-  color: rgba(233,237,245,0.78);
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: clamp(13px, 1.4vw, 14px);
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  letter-spacing: -0.01em;
+  line-height: 1.55;
 }
 
-/* 데이터 셀 */
-.pricing-dataCell{
+/* 데이터 셀 (메인 바디) */
+.pricing-dataCell {
   padding: 14px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  color: var(--text-body);
 }
 
-.pricing-cellText{
+.pricing-cellText {
   font-size: 13px;
-  color: rgba(233,237,245,0.92);
-  line-height: 1.4;
+  color: var(--text-body);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  font-weight: 500;
 }
 
-.pricing-cellStack{
+.pricing-cellStack {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -261,43 +324,96 @@
   align-items: center;
 }
 
-.pricing-subNote{
+.pricing-subNote {
   font-size: 12px;
-  color: rgba(233,237,245,0.70);
+  color: var(--text-muted);
+  line-height: 1.55;
 }
 
-.pricing-check{
-  color: rgba(233,237,245,0.92);
+.pricing-check {
+  color: var(--text-body);
+  opacity: 0.95;
 }
 
-/* ===== Responsive 안전장치 ===== */
-@media (max-width: 1024px){
-  .pricing-title{ font-size: 38px; }
-  .pricing-surface{ border-radius: 12px; }
-}
-
-@media (max-width: 820px){
-  .pricing-inner{ width: min(1120px, calc(100% - 28px)); }
-  .pricing-row{ grid-template-columns: 1fr 1fr; }
-  .pricing-featureCell{ grid-column: 1 / -1; justify-content: center; text-align: center; }
-  .pricing-featureEmpty{ display: none; }
-}
-
-
-.App, main, .layout, .container {
-  overflow: visible !important;
-}
-
-
+/* =========================
+   Footnote (참고 UI로 확실히 분리)
+========================= */
 .pricing-footnote {
   margin-top: 30px;
   position: relative;
   z-index: 0;
+  color: var(--text-muted);
 }
 
-.pricing-surface,
-.pricing-inner,
-.pricing-section{
-  position: relative;
-  z-index: 0;
+.pricing-footnote .fn-text {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.pricing-footnote .fn-item {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.pricing-footnote .fn-link {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pricing-footnote .fn-mark {
+  color: var(--text-faint);
+}
+
+/* =========================
+   Responsive 안전장치
+========================= */
+@media (max-width: 1024px) {
+  .pricing-inner {
+    width: min(1120px, calc(100% - 32px));
+  }
+}
+
+@media (max-width: 820px) {
+  .pricing-inner {
+    width: min(1120px, calc(100% - 28px));
+  }
+
+  /* 너 원래 로직 유지: 모바일에서는 feature가 위로 올라오는 구조 */
+  .pricing-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pricing-featureCell {
+    grid-column: 1 / -1;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pricing-featureEmpty {
+    display: none;
+  }
+}
+
+@media (max-width: 625px) {
+  .pricing-section {
+    padding: 80px 0 70px;
+  }
+
+  .pricing-logo {
+    width: 140px;
+    margin-bottom: 10px;
+  }
+  .pricing-logo.is-bundleLeft {
+    width: 155px;
+  }
+  .pricing-logo.is-bundleRight {
+    width: 125px;
+  }
+
+  .pricing-footnote .fn-text,
+  .pricing-footnote .fn-item {
+    font-size: 11px;
+    line-height: 1.8;
+  }
 }

@@ -1,10 +1,13 @@
+/* HeroSection.css */
+
 /* background layer */
-.hero-bg{
+.hero-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
 }
-.login-hero{
+
+.login-hero {
   position: relative;
   width: 100%;
   min-height: 80vh; /* 100vh 고정 X */
@@ -15,7 +18,8 @@
   --content-w-tablet: 50vw;
   --left-max: 560px;
 }
-.hero-bg-slide{
+
+.hero-bg-slide {
   position: absolute;
   inset: 0;
   background-size: cover;
@@ -24,28 +28,25 @@
   transition: opacity 700ms ease;
 }
 
-.hero-bg-slide.is-active{
+.hero-bg-slide.is-active {
   opacity: 1;
 }
 
-.hero-overlay{
+.hero-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    linear-gradient(to right,
-      rgba(0,0,0,0.85) 0%,
-      rgba(0,0,0,0.45) 45%,
-      rgba(0,0,0,0) 70%
+  background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.45) 45%,
+      rgba(0, 0, 0, 0) 70%
     ),
-    linear-gradient(to top,
-      rgba(0,0,0,0.75) 0%,
-      rgba(0,0,0,0) 45%
-    );
+    linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 45%);
 }
 
 /* content layer */
-.hero-layout{
+.hero-layout {
   position: absolute;
   z-index: 2;
   top: 10%;
@@ -56,15 +57,19 @@
   align-items: center;
   gap: 40px;
   width: min(var(--content-w-desktop), 1200px);
-  margin: 0 0 0 5em; 
+  margin: 0 0 0 5em;
   padding: clamp(24px, 5vw, 80px);
 }
 
-.hero-left{ min-width: 0; }
-.hero-right{ min-width: 0; }
+.hero-left {
+  min-width: 0;
+}
+.hero-right {
+  min-width: 0;
+}
 
 /* bottom caption */
-.hero-caption-wrap{
+.hero-caption-wrap {
   position: absolute;
   left: 50%;
   bottom: 30px;
@@ -76,57 +81,126 @@
   min-width: 260px;
 }
 
-.hero-caption{
+.hero-caption {
   position: absolute;
   inset: 0;
   opacity: 0;
   transition: opacity 500ms ease;
   display: flex;
   flex-direction: column;
-  /* gap: 8px; */
   justify-content: center;
   font-size: 12px;
-  color: rgba(255,255,255,0.75);
-  /* white-space: normal;    
-  line-height: 1.4;  */
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.hero-caption.is-active{ opacity: 1; }
+.hero-caption.is-active {
+  opacity: 1;
+}
 
 .cap-title,
-.cap-status{
-  word-break: keep-all;         
+.cap-status {
+  word-break: keep-all;
 }
 
-/* thin bar nav */
-.hero-nav{
+/* =========================
+   ✅ thin bar nav (wrap) + play/pause
+========================= */
+.hero-navWrap {
   position: absolute;
   left: 50%;
   bottom: 50px;
   transform: translateX(-50%);
   z-index: 3;
+
   width: min(60vw, 860px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* thin bar nav */
+.hero-nav {
+  flex: 1;
   display: flex;
   gap: 5px;
 }
 
-.hero-nav-bar{
+/* bar */
+.hero-nav-bar {
+  position: relative;
   flex: 1;
   height: 3px;
   border: 0;
-  background: rgba(255,255,255, .25);
+  background: rgba(255, 255, 255, 0.25);
   padding: 0;
   cursor: pointer;
+  border-radius: 999px;
+  transition: background 180ms ease;
 }
 
-.hero-nav-bar.is-active{
-  background: rgba(255,255,255,0.75);
+/* ✅ 클릭범위 확장 (after) */
+.hero-nav-bar::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  top: -14px;
+  bottom: -14px;
+  background: transparent;
 }
 
+.hero-nav-bar:hover {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.hero-nav-bar:focus-visible {
+  outline: 2px solid rgba(2, 214, 232, 0.65);
+  outline-offset: 6px;
+}
+
+.hero-nav-bar.is-active {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* ✅ Play / Pause button (react-icons) */
+.hero-mediaToggle {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+
+  transition: background 160ms ease, transform 160ms ease, color 160ms ease;
+}
+
+.hero-mediaToggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-mediaToggle:active {
+  transform: translateY(1px);
+}
+
+.hero-mediaToggle svg {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* =========================
+   Responsive
+========================= */
 @media (max-width: 1024px) {
   .hero-bg {
     position: absolute;
-    inset: 0;           
+    inset: 0;
     z-index: 0;
   }
   .hero-bg-slide {
@@ -148,12 +222,9 @@
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.35),
-      rgba(0,0,0,0.7)
-    );
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.7));
   }
+
   .login-hero {
     position: relative;
     width: 100%;
@@ -168,17 +239,16 @@
     box-sizing: border-box;
   }
 
-
   .hero-layout {
     position: relative;
     z-index: 2;
 
-    width: min(980px, 100%);    
+    width: min(980px, 100%);
     margin: 0 auto;
 
     display: grid;
-    grid-template-columns: 1fr;  
-    justify-items: center;     
+    grid-template-columns: 1fr;
+    justify-items: center;
 
     padding: 48px 24px 0;
     box-sizing: border-box;
@@ -201,28 +271,20 @@
     z-index: 3;
   }
 
-  .hero-nav {
-    position: absolute;
-    left: 50%;
+  /* ✅ thinbar + 버튼도 같이 이동 */
+  .hero-navWrap {
     bottom: 20px;
-    transform: translateX(-50%);
-    z-index: 3;
-
-    display: flex;
-    justify-content: center;
+    width: min(60vw, 860px);
     gap: 10px;
-    padding: 0;
-    margin: 0;
+  }
+
+  .hero-nav {
+    gap: 10px;
   }
 }
 
-
-
-
-
-
-@media (max-width: 767px){
-  .hero-layout{
+@media (max-width: 767px) {
+  .hero-layout {
     grid-template-columns: 1fr;
     width: min(92vw, 520px);
     top: 16px;
@@ -230,7 +292,158 @@
   }
 
   .hero-caption-wrap,
-  .hero-nav{
+  .hero-navWrap {
     width: min(86vw, 520px);
+  }
+
+  .hero-mediaToggle {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+
+@media (max-width: 767px) {
+  /* ✅ 모바일에서는 hero 전체를 '센터 정렬'하지 말고 자연스럽게 */
+  .login-hero {
+    align-items: stretch; /* 기존 flex-end로 하단 몰림 방지 */
+    padding-bottom: 0;    /* 너무 큰 하단 여백 제거 */
+  }
+
+  /* ✅ BundlePromo 영역(CTA/텍스트)은 아래쪽으로 내려서 안정화 */
+  @media (max-width: 767px) {
+  /* hero-layout을 화면 하단에 패널처럼 붙임 */
+  .hero-layout {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    top: auto;
+
+    width: 100%;
+    margin: 0;
+    padding: 0 14px;
+    z-index: 4;
+
+    display: block;
+  }
+
+  /* hero-left 패널화 */
+  .hero-left {
+    width: 100%;
+    justify-self: stretch;
+
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    padding: 14px 14px 16px;
+    box-sizing: border-box;
+  }
+
+  .hero-right { display: none !important; }
+}
+
+  /* =========================
+     ✅ 우측 세로 thinbar 확실히
+  ========================= */
+  .hero-navWrap {
+    position: absolute;
+    right: 10px;
+    top: 22%;
+    left: auto;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: auto;
+    z-index: 6;
+
+    display: flex;
+    flex-direction: column; /* ✅ nav + 버튼 세로 */
+    gap: 10px;
+  }
+
+  .hero-nav {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: auto;
+  }
+
+  .hero-nav-bar {
+    width: 3px;
+    height: 34px;
+    flex: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .hero-nav-bar.is-active {
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  /* ✅ 클릭영역(터치) 더 확장 */
+  .hero-nav-bar::after {
+    left: -16px;
+    right: -16px;
+    top: -12px;
+    bottom: -12px;
+  }
+
+  /* ✅ play/pause는 thinbar 아래에 작게 */
+  .hero-mediaToggle {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .hero-mediaToggle svg {
+    font-size: 14px;
+  }
+
+  /* =========================
+     ✅ "우측에 보이는 길쭉한 막대" 같은 현상 방지
+     - 특정 요소가 overflow/스크롤바처럼 보이는 경우 컷
+  ========================= */
+  .hero-right {
+    display: none !important;
+  }
+
+  .hero-navWrap,
+  .hero-bg,
+  .hero-layout {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-caption-wrap.hero-caption--mobileTopLeft {
+    top: -700px;
+    left: 35%;
+    width: min(72vw, 320px);
+    z-index: 6;
+    text-align: left;
+  }
+
+  .hero-caption {
+    font-size: 11px;
+    color: rgba(255,255,255,0.72);
+    gap: 4px;
+  }
+
+  .cap-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .cap-status {
+    font-size: 10px;
+    color: rgba(255,255,255,0.55);
   }
 }
