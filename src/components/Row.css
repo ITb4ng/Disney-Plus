@@ -1,6 +1,3 @@
-/* Row.css (FINAL) */
-/* Row.jsx에서 실제로 쓰는 클래스: .rowShell, .swiperArea, .arrowZone */
-
 /* RowShell: Swiper가 삐져나와도 화면 안 찢어지게 */
 .rowShell {
   --arrow-zone: 72px;

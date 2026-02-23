@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "./PricingSection.css";
+
 import {
   TABS,
   DISNEY_PLANS,
   DISNEY_ROWS,
   BUNDLE_PLANS,
   BUNDLE_ROWS,
+  FOOTNOTES,
 } from "./PricingData";
+
 import { useSectionObserve } from "./useSectionObserve";
 
 function cx(...names) {
@@ -24,25 +28,121 @@ function CheckIcon() {
   );
 }
 
+/**
+ * 각주 마크 (서비스 느낌 버전)
+ * - 클릭 가능 (button)
+ * - 접근성: aria-label
+ */
+function SupMarks({ ids, onClick }) {
+  if (!Array.isArray(ids) || ids.length === 0) return null;
+
+  return (
+    <>
+      {ids.map((id) => (
+        <sup key={id} className="fn-markWrap" aria-label={`각주 ${id}`}>
+          <button type="button" className="fn-markBtn" onClick={() => onClick?.(id)}>
+            {id}
+          </button>
+        </sup>
+      ))}
+    </>
+  );
+}
+
 export default function PricingSection() {
   const [tab, setTab] = useState("bundle");
+  const [openNotes, setOpenNotes] = useState(false);
+  const [activeNoteId, setActiveNoteId] = useState(null);
+
+  // 토글 패널로 스크롤용
+  const footnotePanelRef = useRef(null);
+  // 하이라이트 자동 해제 타이머
+  const clearTimerRef = useRef(null);
+
   const { sectionRef, activeId } = useSectionObserve("pricing");
 
   const isBundle = tab === "bundle";
   const plans = isBundle ? BUNDLE_PLANS : DISNEY_PLANS;
-  const rows  = isBundle ? BUNDLE_ROWS  : DISNEY_ROWS;
+  const rows = isBundle ? BUNDLE_ROWS : DISNEY_ROWS;
 
+  // 훅 순서 고정용: 안전한 기본값
+  const leftPlan = plans?.[0];
+  const rightPlan = plans?.[1];
+  const leftKey = leftPlan?.key ?? "";
+  const rightKey = rightPlan?.key ?? "";
+
+  /**
+   * ✅ "진짜 서비스 느낌" 핵심
+   * - 각주 클릭하면 토글 자동 오픈
+   * - 패널로 스크롤 + 해당 항목으로 스크롤
+   * - 하이라이트 표시
+   * - 2.5초 후 하이라이트 자동 해제
+   */
+  const handleFootnoteClick = (id) => {
+    setActiveNoteId(id);
+    setOpenNotes(true);
+
+    // 이전 타이머 제거
+    if (clearTimerRef.current) {
+      window.clearTimeout(clearTimerRef.current);
+      clearTimerRef.current = null;
+    }
+
+    // 토글이 열려 DOM이 그려진 다음 스크롤
+    requestAnimationFrame(() => {
+      footnotePanelRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      const el = document.querySelector(`[data-footnote-id="${id}"]`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // 키보드 유저도 "지금 이거야"를 알 수 있게 포커스(선택)
+      el?.focus?.();
+    });
+
+    // 하이라이트 자동 해제
+    clearTimerRef.current = window.setTimeout(() => {
+      setActiveNoteId(null);
+      clearTimerRef.current = null;
+    }, 2500);
+  };
+
+  // 사용된 footnote id만 모으기 (토글에 표시)
+  const usedFootnoteIds = useMemo(() => {
+    if (!Array.isArray(rows) || !leftKey || !rightKey) return [];
+
+    const set = new Set();
+
+    rows.forEach((r) => {
+      if (r?.featureFootnotes?.length) {
+        r.featureFootnotes.forEach((id) => set.add(id));
+      }
+
+      const left = r?.[leftKey];
+      const right = r?.[rightKey];
+
+      [left, right].forEach((cell) => {
+        if (cell?.footnotes?.length) {
+          cell.footnotes.forEach((id) => set.add(id));
+        }
+      });
+    });
+
+    [leftPlan, rightPlan].forEach((p) => {
+      if (p?.annualFootnotes?.length) {
+        p.annualFootnotes.forEach((id) => set.add(id));
+      }
+    });
+
+    return Array.from(set).sort((a, b) => a - b);
+  }, [rows, leftKey, rightKey, leftPlan, rightPlan]);
+
+  // 훅 호출 이후에만 조기 return
   if (!Array.isArray(plans) || plans.length < 2) return null;
   if (!Array.isArray(rows)) return null;
-
-  const leftKey = plans[0].key;
-  const rightKey = plans[1].key;
-
-  const leftPlan = plans[0];
-  const rightPlan = plans[1];
   if (!leftKey || !rightKey) return null;
-
-  const colTemplate = "42% repeat(2, 1fr)";
 
   const renderCell = (cell, plan) => {
     if (!cell) return null;
@@ -53,7 +153,14 @@ export default function PricingSection() {
           <button type="button" className="pricing-ctaSecondary">
             {plan.annualLabel}
           </button>
-          <div className="pricing-subNote">{plan.annualSub}</div>
+
+          {plan.annualSub && (
+            <div className="pricing-subNote">
+              {plan.annualSub}
+              {/* ✅ 연간 서브 문구 각주도 클릭 가능 */}
+              <SupMarks ids={plan.annualFootnotes} onClick={handleFootnoteClick} />
+            </div>
+          )}
         </div>
       );
     }
@@ -62,21 +169,27 @@ export default function PricingSection() {
       return (
         <div className="pricing-check" role="img" aria-label="포함된 기능">
           <CheckIcon />
+          {/* ✅ 체크 항목 각주 */}
+          <SupMarks ids={cell.footnotes} onClick={handleFootnoteClick} />
         </div>
       );
     }
 
-    return <div className="pricing-cellText">{cell.text}</div>;
+    return (
+      <div className="pricing-cellText">
+        {cell.text}
+        {/* ✅ 텍스트 항목 각주 */}
+        <SupMarks ids={cell.footnotes} onClick={handleFootnoteClick} />
+      </div>
+    );
   };
-
-  
 
   return (
     <section ref={sectionRef} className="pricing-section" id="pricing">
       <div className="pricing-inner">
         <header className="pricing-header">
           <h2 className="pricing-title">원하는 멤버십을 선택하세요.</h2>
-          <p className="pricing-desc">멤버십은 언제든지 변경* 또는 취소** 할 수 있습니다.</p>
+          <p className="pricing-desc">멤버십은 언제든지 변경 또는 취소할 수 있습니다.</p>
 
           <div className="pricing-tabs" role="tablist" aria-label="요금제 탭">
             {TABS.map((t) => (
@@ -94,7 +207,7 @@ export default function PricingSection() {
           </div>
         </header>
 
-        <div className="pricing-surface" style={{ "--col-tablet": colTemplate }}>
+        <div className="pricing-surface">
           {/* sticky */}
           <div className={cx("pricing-sticky", activeId === "pricing" && "is-active")}>
             {/* badge row */}
@@ -120,26 +233,30 @@ export default function PricingSection() {
 
               <div className={cx("pricing-planCell", leftPlan.isReco && "is-reco")}>
                 <div className="pricing-planInner">
-                  <img
-                    className={cx("pricing-logo", leftPlan.logoVariant && `is-${leftPlan.logoVariant}`)}
-                    src={leftPlan.logoImg}
-                    alt={leftPlan.logoAlt || "Disney+"}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div className="pricing-logoSlot">
+                    <img
+                      className={cx("pricing-logo", leftPlan.logoVariant && `is-${leftPlan.logoVariant}`)}
+                      src={leftPlan.logoImg}
+                      alt={leftPlan.logoAlt || "Disney+"}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                   <div className="pricing-planName">{leftPlan.name}</div>
                 </div>
               </div>
 
               <div className={cx("pricing-planCell", rightPlan.isReco && "is-reco", rightPlan.isFlat && "is-flat")}>
                 <div className="pricing-planInner">
-                  <img
-                    className={cx("pricing-logo", rightPlan.logoVariant && `is-${rightPlan.logoVariant}`)}
-                    src={rightPlan.logoImg}
-                    alt={rightPlan.logoAlt || "Disney+"}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div className="pricing-logoSlot">
+                    <img
+                      className={cx("pricing-logo", rightPlan.logoVariant && `is-${rightPlan.logoVariant}`)}
+                      src={rightPlan.logoImg}
+                      alt={rightPlan.logoAlt || "Disney+"}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                   <div className="pricing-planName">{rightPlan.name}</div>
                 </div>
               </div>
@@ -176,7 +293,11 @@ export default function PricingSection() {
 
                 return (
                   <div className="pricing-row pricing-rowBody" key={r.feature}>
-                    <div className="pricing-featureCell">{r.feature}</div>
+                    <div className="pricing-featureCell">
+                      {r.feature}
+                      {/* ✅ 왼쪽 feature에도 각주 클릭 적용 */}
+                      <SupMarks ids={r.featureFootnotes} onClick={handleFootnoteClick} />
+                    </div>
 
                     <div className={cx("pricing-dataCell", leftPlan.isReco && "is-reco")}>
                       {renderCell(left, leftPlan)}
@@ -191,62 +312,69 @@ export default function PricingSection() {
             </div>
           </div>
 
-          {/* footnote는 기존 그대로 두면 됨 */}
+          {/* footnote guide + toggle */}
           <div className="pricing-footnote">
-					<p className="fn-text">
-						멤버십 구독이 필요합니다. 19세 이상 구독 가능.
-						<u className="fn-underline">
-							해당 멤버십은 회원님의 가구에 연동된 기기에서만 이용할 수 있습니다.
-						</u>
-    			</p>
-					<ul className="fn-list" aria-label="주요 유의사항 목록">
-						<li className="fn-item">
-							<span className="fn-mark">*</span>
-						멤버십 유형에 따라 멤버십 변경의 적용 시점 및 (해당 시) 즉시 청구되는 금액이 다를 수 있습니다.
-						</li>
+            <p className="fn-guide">
+              멤버십 구독이 필요합니다. 디즈니+에서 직접 결제로 구독 가능한 본 번들 멤버십은{" "}
+              <u className="fn-underline">만 19세 이상만</u> 구독 가능하며,{" "}
+              <u className="fn-underline">디즈니+ 멤버십은 회원님의 가구에 연동된 기기에서만 이용할 수 있습니다.</u>
+            </p>
 
-						<li className="fn-item">
-							<span className="fn-mark">**</span>
-						결제 주기 종료 시 자동 갱신이 취소 처리됩니다. 즉시 취소를 포함한 취소 및 환불에 관한 자세한 사항은
-							<a className="fn-link" href="/legal/cancellation-and-refund-policy" rel="noreferrer">
-									<u>관련 정책</u>
-							</a>
-						을 확인하거나
-							<a className="fn-link" href="https://help.disneyplus.com/ko/contact-us" rel="noreferrer">
-									<u>고객 서비스팀</u>
-							</a>
-						으로 문의하시기 바랍니다.
-						</li>
+            <button
+              type="button"
+              className={cx("fn-toggle", openNotes && "is-open")}
+              aria-expanded={openNotes}
+              onClick={() => setOpenNotes((v) => !v)}
+            >
+              자세히 보기
+              <span className="fn-toggleIcon" aria-hidden="true">
+                {openNotes ? "▲" : "▼"}
+              </span>
+            </button>
 
-						<li className="fn-item">
-						<span className="fn-mark">***</span>
-							영상 화질/오디오 및 저장 기능은 인터넷 서비스, 기기 성능, 멤버십 유형 및 각 콘텐츠에 따라 달라질 수 있습니다.
-							각 콘텐츠별 다양한 기능 표시가 있을 수 있으나, 해당 멤버십 유형에서 사용 가능한 최대 사양까지만 이용할 수 있습니다.
-						<a className="fn-link" href="https://help.disneyplus.com/article/disneyplus-ko-kr-price" rel="noreferrer">
-								<u>더 알아보기</u>
-						</a>
-						</li>
+            {openNotes && (
+              <div
+                className="fn-panel"
+                ref={footnotePanelRef}
+                role="region"
+                aria-label="멤버십 조건 상세"
+              >
+                <ul className="fn-list">
+                  {usedFootnoteIds.map((id) => {
+                    const note = FOOTNOTES?.[id];
+                    if (!note) return null;
 
-						<li className="fn-item">
-							<span className="fn-mark">^</span>
-								월간 멤버십 12개월 구독료 대비 할인된 가격입니다.
-							<a className="fn-link" href="/legal/%EB%94%94%EC%A6%88%EB%8B%88+-%EC%9D%B4%EC%9A%A9%EC%95%BD%EA%B4%80" rel="noreferrer">
-									<u>추가 약관 적용</u>
-							</a>
-						.
-						</li>
+                    const isActive = activeNoteId === id;
 
-						<li className="fn-item">
-							<span className="fn-mark">†</span>
-							라이브 채널 스트리밍 및 생방송 프로그램에는 광고가 포함될 수 있으며, 모든 멤버십 유형에서 특정 홍보 및 협찬 콘텐츠를 경험하게 될 수 있습니다.
-							자세한 내용은
-								<a className="fn-link" href="https://help.disneyplus.com/ko/article/disneyplus-ko-kr-ads" rel="noopener nofollow">
-										<u>고객센터</u>
-								</a>
-							에서 알아보세요.
-						</li>
-					</ul>
-        </div>
+                    return (
+                      <li
+                        key={id}
+                        className={cx("fn-item", isActive && "is-active")}
+                        data-footnote-id={id}
+                        tabIndex={-1} // focus 가능하게
+                      >
+                        <div className="fn-head">
+                          <sup className="fn-mark">{id}</sup>
+                          <span className="fn-title">{note.title}</span>
+
+                          {/* 선택됨을 아주 작게 표시(서비스 느낌) */}
+                          {isActive && <span className="fn-pill">클릭한</span>}
+                        </div>
+
+                        <div className="fn-text">{note.summary}</div>
+
+                        {note.linkTo && (
+                          <Link className="fn-link" to={note.linkTo}>
+                            자세히 보기
+                          </Link>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

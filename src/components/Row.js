@@ -258,7 +258,9 @@ const Row = ({ title, id, fetchUrl, showRank = false }) => {
                 <SwiperSlide key={movie.id}>
                   <Wrap>
                     {/* ✅ Top Rated 등에서만 랭킹 표시 */}
-                    {showRank && <RankBadge className="rank rank--tl">{rank}</RankBadge>}
+                   {showRank && (
+                      <span className="rank--outline rank--tl rank--main">{rank}</span>
+                    )}
 
                     <img
                       src={`https://image.tmdb.org/t/p/original${imgPath}`}
@@ -322,16 +324,21 @@ const Title = styled.h2`
 
 const Wrap = styled.div`
   width: 95%;
-  height: 95%;
   padding-top: 56.25%;
+
   border-radius: 8px;
   box-shadow: rgb(0 0 0/69%) 0px 26px 30px -10px,
     rgb(0 0 0/73%) 0px 16px 10px -10px;
+
   cursor: pointer;
-  overflow: visible;
+
+  overflow: hidden;
+
   position: relative;
   transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s;
+
   border: 3px solid rgba(249, 249, 249, 0.1);
+  box-sizing: border-box;
 
   img {
     inset: 0;
@@ -349,7 +356,6 @@ const Wrap = styled.div`
     border-color: rgba(249, 249, 249, 0.8);
   }
 
-  /* ✅ 스켈레톤일 땐 hover 의미없게 */
   &.skWrap {
     cursor: default;
     border-color: rgba(249, 249, 249, 0.08);
@@ -428,31 +434,3 @@ const RowHint = styled.div`
   opacity: 0.75;
   pointer-events: none;
 `;
-
-/* ===========================
-   ✅ 랭킹 배지 추가 (기존 스타일 방해 X)
-=========================== */
-const RankBadge = styled.div`
-  position: absolute;
-  left: 3px;   /* 살짝 안쪽 */
-  bottom: 3px;
-  z-index: 6;
-
-  font-size: 84px;          /* 96 → 84 */
-  font-weight: 900;
-  line-height: 0.9;
-
-  color: rgba(255, 255, 255, 0.12);
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.9);  /* 3 → 2 */
-
-  text-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.6);
-
-  pointer-events: none;
-  user-select: none;
-
-  @media (max-width: 1024px) { font-size: 72px; }
-  @media (max-width: 768px) { font-size: 60px; }
-  @media (max-width: 480px) { font-size: 48px; }
-`;
-

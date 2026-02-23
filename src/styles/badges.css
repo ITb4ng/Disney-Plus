@@ -1,0 +1,126 @@
+/* src/styles/badges.css */
+
+/* 위치 프리셋 */
+.rank--tl { top: 10px; left: 10px; }
+.rank--tr { top: 10px; right: 10px; }
+.rank--bl { bottom: 10px; left: 10px; }
+.rank--br { bottom: 10px; right: 10px; }
+
+/* A) Outline (메인용) */
+.rank--outline {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+
+  display: inline-block;
+  width: auto;
+  height: auto;
+
+  padding: 0;
+  background: transparent;
+  border: 0;
+
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+
+  /* 기본(Top10 같은 큰 곳) */
+  font-size: clamp(48px, 3.2vw, 64px);
+
+  color: rgba(255, 255, 255, 0.06);
+  -webkit-text-stroke: 3px rgba(255, 255, 255, 0.85);
+  /* text-stroke: 3px rgba(255, 255, 255, 0.85); */
+
+  text-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.55),
+    0 0 26px rgba(110, 170, 255, 0.16);
+}
+
+/* 메인 Row 전용 튜닝 */
+.rank--outline.rank--main {
+  font-size: clamp(40px, 3.2vw, 64px);
+  -webkit-text-stroke: 2.5px rgba(255, 255, 255, 0.82);
+  /* text-stroke: 2.5px rgba(255, 255, 255, 0.82); */
+  transform: translateY(1px);
+}
+
+/* 메인 TL 위치 보정 */
+.rank--outline.rank--main.rank--tl {
+  top: auto;
+  bottom: 12px;
+  left: 12px;
+}
+
+/* B) Pill (Top10용) */
+.rank--pill {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 34px;
+  min-width: 34px;
+  padding: 0 11px;
+
+  border-radius: 999px;
+  box-sizing: border-box;
+
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-size: 18px;
+
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.65),
+    0 10px 26px rgba(0, 0, 0, 0.55);
+
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(18, 22, 40, 0.78), rgba(10, 12, 18, 0.62));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.25) inset,
+    0 0 26px rgba(110, 170, 255, 0.18);
+
+  transform: translateY(-0.5px);
+}
+
+.rank--pill::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 44%);
+  opacity: 0.9;
+}
+
+/* 모바일 */
+@media (max-width: 625px) {
+  .rank--outline {
+    font-size: clamp(38px, 9vw, 62px);
+    -webkit-text-stroke: 2.5px rgba(255, 255, 255, 0.85);
+    /* text-stroke: 2.5px rgba(255, 255, 255, 0.85); */
+  }
+
+  .rank--pill {
+    height: 30px;
+    min-width: 30px;
+    padding: 0 9px;
+    font-size: 16px;
+  }
+
+  .rank--tl { top: 8px; left: 8px; }
+  .rank--tr { top: 8px; right: 8px; }
+  .rank--bl { bottom: 8px; left: 8px; }
+  .rank--br { bottom: 8px; right: 8px; }
+}

@@ -88,9 +88,9 @@ const Top10Row = ({
             return (
               <SwiperSlide key={movie.id}>
                 <Card>
-                  {/* ✅ 랭킹 숫자 */}
-                  <Rank aria-hidden="true">{index + 1}</Rank>
-
+                <span className="rank--outline rank--bl" aria-hidden="true">
+                  {index + 1}
+                </span>
                   <img
                     src={`${IMG_BASE}${path}`}
                     alt={title}
@@ -113,11 +113,13 @@ export default Top10Row;
 
 const Container = styled.div`
   position: relative;
+  height: 100%;
 `;
 
 const Card = styled.div`
   width: 100%;
-  padding-top: 56.25%;
+  height: 100%;
+  box-sizing: border-box; 
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -130,23 +132,4 @@ const Card = styled.div`
     height: 100%;
     object-fit: cover;
   }
-`;
-
-const Rank = styled.span`
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  z-index: 2;
-
-  font-weight: 900;
-  line-height: 1;
-
-  font-size: clamp(18px, 4.2vw, 34px);
-
-  color: rgba(255, 255, 255, 0.92);
-  text-shadow: 0 8px 22px rgba(0, 0, 0, 0.6);
-  pointer-events: none;
-
-  /* 살짝만 올려서 시각중앙 보정 */
-  transform: translateY(-0.5px);
 `;

@@ -6,6 +6,7 @@ import MainPage from "./pages/MainPage";
 import DetailPage from "./pages/DetailPage";
 import SearchPage from "./pages/SearchPage";
 import Login from "./pages/Login";
+import "./styles/badges.css";
 import { useEffect } from "react";
 
 const Layout = () => {

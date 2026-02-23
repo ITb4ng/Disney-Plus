@@ -4,7 +4,8 @@ export default function BundlePromo() {
   return (
     <div className="bundle-promo">
       <div className="bundle">
-        <h1 className="bundle-title">디즈니+ 티빙 웨이브 번들 출시!</h1>
+        <h1 className="bundle-title">이 모든 이야기가 여기에 
+지금 스트리밍 중</h1>
         <div className="bundle-ctaGrid" aria-label="플랜 선택">
           <div className="bundle-card">
             <div className="bundle-logoBox">

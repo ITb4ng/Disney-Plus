@@ -4,7 +4,7 @@ import { slides } from "./slides";
 import BundlePromo from "./Bundle";
 
 
-import { FaPlay, FaPause } from "react-icons/fa";
+import { IoMdPause, IoMdPlay } from "react-icons/io";
 
 export default function HeroSection() {
   const [active, setActive] = useState(0);
@@ -41,8 +41,6 @@ export default function HeroSection() {
   return (
     <section
       className="login-hero"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
     >
       {/* background */}
       <div className="hero-bg">
@@ -99,7 +97,7 @@ export default function HeroSection() {
           aria-label={paused ? "재생" : "일시정지"}
           title={paused ? "재생" : "일시정지"}
         >
-          {paused ? <FaPlay /> : <FaPause />}
+          {paused ? <IoMdPlay /> : <IoMdPause />}
         </button>
       </div>
     </section>

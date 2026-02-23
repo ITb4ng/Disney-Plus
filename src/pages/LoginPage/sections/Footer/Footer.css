@@ -132,24 +132,23 @@
 }
 
 .footer-sns-link {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
-  color: rgba(255,255,255,.88);
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 13px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+  font-size: 18px;
+  transition: background 160ms ease, transform 160ms ease;
 }
 
 .footer-sns-link:hover {
-  background: rgba(255,255,255,.10);
+  background: rgba(255,255,255,0.14);
+  transform: translateY(-2px);
 }
+
 
 /* 4) logo */
 .footer-logo {
@@ -157,26 +156,96 @@
   font-weight: 900;
   color: #fff;
   letter-spacing: .2px;
+  cursor: pointer;
 }
 
-/* 5) legal */
 .footer-row-legal {
   margin-top: 26px;
 }
 
-.footer-legal {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-width: 920px;
-  text-align: center;
-  font-size: 11px;
-  line-height: 1.7;
-  color: rgba(255,255,255,.60);
+.footer-legal.footer-legal-icons {
+  max-width: none;
+  text-align: initial;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; 
 }
 
-.footer-legal li + li {
-  margin-top: 8px;
+.footer-legal.footer-legal-icons li + li {
+  margin-top: 0;
+}
+
+/* 아이콘 그룹(li) */
+.footer-legal-icon-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap; /* 좁으면 다음 줄로 */
+  padding-top: 6px;
+}
+
+/* 아이콘 버튼 */
+.footer-legal-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.footer-legal-icon-link:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-2px);
+}
+
+.footer-legal-icon-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+.footer-legal-icon-link.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.04);
+  transform: none;
+}
+
+/* ===== Responsive: legal icons ===== */
+@media (max-width: 768px) {
+  .footer-legal.footer-legal-icons {
+    gap: 12px;
+  }
+  .footer-legal-icon-group {
+    gap: 12px;
+  }
+  .footer-legal-icon-link {
+    width: 32px;
+    height: 32px;
+  }
+  .footer-legal-icon-link svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 420px) {
+  .footer-legal-icon-group {
+    gap: 10px;
+  }
+  .footer-legal-icon-link {
+    width: 30px;
+    height: 30px;
+  }
+  .footer-legal-icon-link svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 /* responsive */
@@ -288,7 +357,7 @@
   .footer-col-list {
     padding: 6px 2px 14px;
   }
-  .footer-row .footer-row-sns {
+  .footer-row-sns {
     justify-content: center;
   }
 

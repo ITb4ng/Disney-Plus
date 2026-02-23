@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html, body, #root {
   height: 100%;
   padding: 0;
@@ -28,7 +34,7 @@ a {
   text-decoration: none;
   text-underline-offset: 3px;
   display: inline-block;
-  margin: 0 3px;
+  /* margin: 0 3px; */
 }
 a:hover {
   text-decoration: underline;
@@ -41,10 +47,13 @@ p {
 ul, ol {
   list-style: none;
   margin: 0;
-  padding-left: 18px;
+  padding: 0;
 }
 li {
   margin: 6px 0;
+}
+span {
+  margin-right: 2px;
 }
 /* 콘텐츠 컨테이너 */
 .app {

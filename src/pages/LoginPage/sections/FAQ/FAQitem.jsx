@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import { HiOutlinePlus } from "react-icons/hi2";
 
 function renderAnswer(answer) {
   // "\n- " 패턴이 있으면: 첫 문장 + bullet 리스트로 렌더링
@@ -63,9 +64,9 @@ export default function FAQItem({ item }) {
       >
         <span className="faq-q">{question}</span>
 
-        {/* 공홈 느낌: +가 열리면 -처럼 보이게 회전 */}
+        {/* 리스트가 열리면 -처럼 보이게 회전 */}
         <span className="faq-icon" aria-hidden="true">
-          +
+          <HiOutlinePlus />
         </span>
       </summary>
 
