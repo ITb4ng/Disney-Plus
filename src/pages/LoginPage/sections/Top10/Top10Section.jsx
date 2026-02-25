@@ -3,12 +3,12 @@ import Top10Row from "./Top10Row";
 import requests from "../../../../api/request";
 import "./Top10Section.css";
 
-export default function Top10Section() {
+export default function Top10Section({ id }) {
   const [swiper, setSwiper] = useState(null);
   const [nav, setNav] = useState({ isBeginning: true, isEnd: false });
 
   return (
-    <section className="top10Section">
+    <section id={id} className="top10Section">
       <div className="top10TitleWrap">
         <h2>오늘 한국의 TOP 10</h2>
       </div>

@@ -8,7 +8,7 @@
   --bundle-max: 760px;
 
   --padX: clamp(14px, 3vw, 28px);
-  --padY: clamp(18px, 4vw, 64px);
+  --padY: clamp(18px, 4vw, 80px);
 
   /* 모바일 패널 */
   --panel-gutter: 14px;
@@ -21,18 +21,22 @@
   --hero-min: clamp(560px, 80vh, 860px);
 }
 
+
+
+
 /* =========================
    Root
 ========================= */
 .hero {
   position: relative;
   width: 100%;
-  min-height: 100svh;
+  min-height: 90svh;
   overflow: hidden;
   background: #000;
   color: #fff;
   isolation: isolate;
-
+  display: flex;
+  align-items: center; /* 세로 중앙 */
   /* iOS safe area (상단만) */
   padding-top: env(safe-area-inset-top);
 }
@@ -78,15 +82,53 @@
     );
 }
 
+/* 스크롤 인디케이터 */
+.hero-scrollCue--inline{
+  margin-top: 18px;          /* 번들 설명 아래 간격 */
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.22);
+  color: rgba(255,255,255,0.9);
+
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.hero-scrollCue--inline svg{ display:block; font-size:18px; }
+
+/* 부드러운 바운스 */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-scrollCue {
+    animation: heroBounce 1.6s ease-in-out infinite;
+  }
+
+  @keyframes heroBounce {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50%     { transform: translateX(-50%) translateY(6px); }
+  }
+}
+.hero-scrollCue {
+  position: absolute;
+  left: 44px;
+  bottom: -15%;
+  z-index: 999;
+}
+@media (max-width: 1024px){
+  .hero-scrollCue { left: 50% ; bottom: 0;}
+}
+
 /* =========================
    Content layout (Desktop base)
 ========================= */
 .hero-layout {
   position: relative;
   z-index: 2;
-
   width: min(var(--hero-max), calc(100% - 40px));
-  margin: 80px 0 0 80px;
+  margin: 0 0 0 100px;
 
   padding: var(--padY) var(--padX);
   box-sizing: border-box;
@@ -265,7 +307,7 @@
     width: 100%;
     max-width: 100%;
 
-    margin: 80px 0 0 0;
+    margin: 0px 0 0 0;
     padding: 0 var(--padX) 56px;
 
     min-height: 80vh;
@@ -276,10 +318,8 @@
     width: 100%;
     max-width: var(--bundle-max);
     justify-self: center;
-
-    height: 100%;
+    height: 95%;
     align-self: stretch;
-
     display: flex;
     flex-direction: column;
   }
@@ -295,6 +335,7 @@
 
   .hero-navWrap {
     bottom: 14px;
+    width: min(80vw, 860px);
   }
 }
 
@@ -307,10 +348,9 @@
 ========================= */
 @media (max-width: 767px) {
    .hero {
-    min-height: 0;
+    min-height: 95svh;
     padding-top: env(safe-area-inset-top);
   }
-
   .hero-layout {
     margin: 0;
     padding: 0 var(--padX) calc(16px + env(safe-area-inset-bottom));
@@ -325,7 +365,7 @@
     max-width: var(--bundle-max);
 
     /* ✅ hero-layout 높이를 다 먹고 */
-    height: 100%;
+    height: 90%;
     align-self: stretch;
 
     /* ✅ 내부 컨텐츠(번들)를 바닥으로 밀어 */
@@ -409,10 +449,13 @@
     height: 100svh;
     padding: 0 var(--padX) calc(10px + env(safe-area-inset-bottom));
   }
-
+  .hero-scrollCue {
+    bottom: 20px;
+    z-index: 1;
+  }
   .hero-navWrap {
-    transform: translateY(-50%) scale(0.85);
+    transform: translateY(-50%) scale(0.82);
     top: 26%;
-    right: 8px;
+    right: 3px;
   }
 }

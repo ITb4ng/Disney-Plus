@@ -5,7 +5,9 @@
 .top10RailWrap {
   overflow-x: hidden;
 }
-
+#home-content {
+  scroll-margin-top: 90px; /* 헤더 높이에 맞춰 조절 */
+}
 .top10Section {
   position: relative;
   margin: 36px 0 44px;
@@ -178,7 +180,7 @@
 ========================= */
 @media (max-width: 625px) {
   .top10Section {
-    margin: 25px 0;
+    margin-top: 40px 0;
     padding: 6px 0 34px; /* 모바일에서 좌우 padding은 shell로 통제 */
   }
 
@@ -186,35 +188,58 @@
     padding: 0 10px;
     margin-bottom: 18px;
   }
-
+  .top10TitleWrap h2 {
+    font-size: 28px;
+  }
   /* ✅ ARROW_ZONE + 레일 패딩 최소화 (중복 제거 후 최종값만 유지) */
   .top10Shell {
-    grid-template-columns: 36px 1fr 36px;
-    padding: 0 6px;
+    position: relative;
+    display: block;          /* ✅ grid 해제 */
+    padding: 0 16px;         /* ✅ 좌우 패딩은 이걸로 통일 */
+    height: var(--top10-row-h);
 
-    /* ✅ 모바일 카드 폭 기준으로 row height도 자동 재계산 */
-    --top10-card-w: clamp(160px, 60vw, 220px);
+    /* 카드 폭도 iPhone 기준으로 좀 더 현실적인 값 */
+    --top10-card-w: clamp(160px, 52vw, 210px);
+    --top10-row-h: calc(var(--top10-card-w) * 9 / 16);
   }
 
-  /* 모바일은 hover가 없으니, 버튼은 항상 보이게 */
   .top10ArrowZone {
-    opacity: 1;
+    display: none !important;
   }
-
+  /* .top10ArrowZone {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    opacity: 1;
+    z-index: 5;
+    background: rgba(0,0,0, .18);
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  } */
+  .top10SwiperArea {
+    position: relative;
+    overflow: hidden;
+    height: var(--top10-row-h);
+  }
   /* 숨김은 계속 숨김 */
   .top10ArrowZone.is-hidden {
     opacity: 0 !important;
     pointer-events: none;
   }
+/* 왼쪽/오른쪽 각각 위치 */
 
-  .top10ArrowIcon {
-    font-size: 22px;
-  }
+  .top10ArrowIcon { font-size: 22px; }
 
-  /* 페이드도 모바일에서는 살짝 약하게 */
+  .top10ArrowZone--left { left: 6px; }
+  .top10ArrowZone--right { right: 6px; }
+
+  /* 페이드 마스크는 유지하되 폭만 과하지 않게 */
   .top10SwiperArea::after {
-    width: 60px;
-    background: linear-gradient(to left, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
+    width: 52px;
+    background: linear-gradient(to left, rgba(0,0,0,0.30), rgba(0,0,0,0));
   }
 }
 

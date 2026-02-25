@@ -3,6 +3,8 @@ import "./HeroSection.css";
 import { slides } from "./slides";
 import BundlePromo from "./Bundle";
 import { IoMdPause, IoMdPlay } from "react-icons/io";
+import { FaAngleDown } from "react-icons/fa6";
+
 
 export default function HeroSection() {
   const total = slides.length;
@@ -69,8 +71,20 @@ export default function HeroSection() {
       {/* content */}
       <div className="hero-layout">
         <div className="hero-left">
-          <BundlePromo />
-        </div>
+         <BundlePromo />
+         <button
+            type="button"
+            className="hero-scrollCue hero-scrollCue--inline"
+            aria-label="아래 콘텐츠로 이동"
+            onClick={() => {
+              document
+                .getElementById("home-content")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+          <FaAngleDown />
+         </button>
+        </div>    
         <div className="hero-right" />
       </div>
 

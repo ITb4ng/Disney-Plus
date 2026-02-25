@@ -55,32 +55,33 @@
   line-height: 1.5;
   cursor: pointer;
 }
+.footer-lang-select
 .footer-lang-select:focus {
   outline: none;
   color: #fff;
-  /* border-color: rgba(120, 160, 255, 0.9); */
-  /* box-shadow: 0 0 0 2px rgba(120, 160, 255, 0.35); */
 }
 .footer-lang-select option {
   background: #fff;
   color: #000;
 }
+.footer-lang-icon svg,
+.footer-lang-caret svg {
+  display: block;
+}
 .footer-lang-icon,
 .footer-lang-caret {
   pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .footer-lang-icon {
-  position: absolute;
   left: 14px;
   opacity: .9;
-  pointer-events: none;
 }
-
 .footer-lang-caret {
-  position: absolute;
   right: 14px;
   opacity: .8;
-  pointer-events: none;
 }
 
 /* 2) menu 4 columns */
@@ -168,7 +169,7 @@
   text-align: initial;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  text-align: center;
   gap: 10px; 
 }
 
@@ -236,6 +237,9 @@
 }
 
 @media (max-width: 420px) {
+  .footer-legal.footer-legal-icons {
+    font-size: 13px;
+  }
   .footer-legal-icon-group {
     gap: 10px;
   }
@@ -281,7 +285,7 @@
 
   .footer-lang-select {
     width: 100%;
-    min-width: 150px;
+    min-width: 140px;
   }
 }
 
@@ -300,7 +304,7 @@
 @media (max-width: 768px) {
   .footer-lang-select {
     width: 100%;
-    min-width: 180px;
+    min-width: 140px;
   }
   .footer-row.footer-row-lang {
     justify-content: flex-start;
@@ -345,16 +349,18 @@
   .footer-col-summary::-webkit-details-marker { display: none; }
 
   .footer-col-caret {
-    transition: transform .25s ease-in-out;
-    transform: rotate(-90deg);
-    font-size: 8px;
-    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;   /* 아이폰 기준 적당 */
+    line-height: 1;
+    transition: transform 0.25s ease;
+    transform: rotate(270deg);
   }
 
-  details[open] .footer-col-caret {
-    transform: rotate(0deg);
+  .footer-col-mobile[open] .footer-col-caret {
+    transform: rotate(360deg);
   }
-
   .footer-col-list {
     padding: 6px 2px 14px;
   }

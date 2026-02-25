@@ -59,12 +59,14 @@ const Top10Row = ({
       <Swiper
         modules={[A11y]}
         loop={false}
-        spaceBetween={18}
+        spaceBetween={12}
         breakpoints={{
           1378: { slidesPerView: 5.4, slidesPerGroup: 5 },
-          998: { slidesPerView: 4.4, slidesPerGroup: 4 },
-          625: { slidesPerView: 3.4, slidesPerGroup: 3 },
-          0: { slidesPerView: 2.2, slidesPerGroup: 2 },
+          998:  { slidesPerView: 4.4, slidesPerGroup: 4 },
+          625:  { slidesPerView: 3.4, slidesPerGroup: 3 },
+
+          390:  { slidesPerView: 2.05, slidesPerGroup: 2, spaceBetween: 14 },
+          0:    { slidesPerView: 1.85, slidesPerGroup: 1, spaceBetween: 12 },
         }}
         onSwiper={(s) => {
           swiperRef.current = s;

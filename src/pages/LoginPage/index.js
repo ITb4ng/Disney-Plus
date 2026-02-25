@@ -10,7 +10,7 @@ export default function LoginPage() {
     <>
     <main>
       <HeroSection />
-      <Top10Section />
+      <Top10Section id="home-content" />
       <PricingSection />
       <FAQSection />
     </main>

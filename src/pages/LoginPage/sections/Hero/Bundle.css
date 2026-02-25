@@ -45,7 +45,7 @@
 }
 
 .bundle-logoBox {
-  height: 38px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +152,11 @@
     height: 28px;
   }
 }
-
+@media (max-width: 390px) {
+  .bundle-logoImg{
+    max-width: 160px;
+  }
+}
 /* 매우 좁으면 그때 1열 */
 @media (max-width: 360px) {
   .bundle-ctaGrid {
