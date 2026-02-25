@@ -1,36 +1,61 @@
-.bundle-ctaGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); 
-  gap: 16px;
-  align-items: stretch; 
-  margin: 18px 0 18px;
-  max-width: 760px;
+/* Bundle.css */
+
+.bundle-promo {
+  width: 100%;
+  text-align: left;
 }
 
+.bundle {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 0;
+  box-sizing: border-box;
+}
+
+.bundle-title {
+  margin: 0 0 14px;
+  font-size: clamp(26px, 5.2vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.bundle-ctaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+
+  margin: 18px 0 18px;
+
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
 .bundle-card {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 12px;
-  height: 100%;            
+  height: 100%;
   box-sizing: border-box;
+
+  min-width: 0; /* ✅ 중요: grid item overflow 방지 */
 }
 
 .bundle-logoBox {
-  height: 56px;           
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-
   box-sizing: border-box;
 }
 
 .bundle-logoImg {
   height: 100%;
   width: auto;
-  max-width: 260px; 
-
+  max-width: 260px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 6px 18px rgba(0,0,0,0.35));
@@ -38,15 +63,20 @@
 
 .bundle-btn {
   width: 100%;
+  min-width: 0;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 54px;           
-  border-radius: 6px;
+
+  height: 54px;
+  border-radius: 10px;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 700;
+
   background: #2ad3ff;
   color: #00111a;
+
   transition: transform 0.15s ease, filter 0.15s ease;
   margin-top: auto;
   box-sizing: border-box;
@@ -57,58 +87,109 @@
   transform: translateY(-1px);
 }
 
+.bundle-desc {
+  margin: 14px auto 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.85);
+  max-width: 620px;
+}
 
+.bundle-desc--small {
+  font-size: 12px;
+  color: rgba(255,255,255,0.78);
+}
 
+.bundle-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.70);
+}
+
+/* ===== Tablet ===== */
 @media (max-width: 1024px) {
+  .bundle {
+    max-width: 900px;
+  }
   .bundle-promo {
-    width: 100%;
-    margin: 0;
-    text-align: left; /* ✅ 모바일 공홈 느낌: 좌정렬 기본 */
+    text-align: center;
   }
-
   .bundle-ctaGrid {
-    width: 100%;
-    max-width: none;        /* ✅ 패널 안에서 꽉 쓰기 */
-    margin: 14px 0 12px;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 12px;
-
-    padding: 0;             /* ✅ 48px 24px 제거 */
-    align-items: stretch;   /* ✅ 버튼 높이 균일 */
-    box-sizing: border-box;
+    margin: 14px 0 12px;
   }
-
-  .hero-left {
-    width: 100%;            /* ✅ 760px 제한 제거 */
-    justify-self: stretch;
-  }
-
-  .bundle-logoBox {
-    /* justify-content: flex-start; ✅ 로고도 좌로 */
+  .bundle-desc,
+  .bundle-note {
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
+/* ===== Mobile ===== */
 @media (max-width: 768px) {
-  .bundle-ctaGrid {
-    grid-template-columns: 1fr; /* ✅ 공홈식: 버튼 세로 */
-    gap: 10px;
+  .bundle-title {
+    font-size: 26px;
+    line-height: 1.12;
   }
 
-  .bundle-logoBox {
-    height: 40px;
+  .bundle-desc {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .bundle-desc--small,
+  .bundle-note {
+    font-size: 12px;
+    line-height: 1.5;
   }
 
   .bundle-btn {
-    height: 52px;
-    border-radius: 10px; /* ✅ 공홈 느낌 조금 더 둥글게 */
-    font-weight: 700;
+    height: 46px;
+    font-size: 14px;
+  }
+
+  .bundle-logoBox {
+    height: 28px;
   }
 }
-@media (min-width: 768px) and (max-width: 1023px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+
+/* 매우 좁으면 그때 1열 */
+@media (max-width: 360px) {
+  .bundle-ctaGrid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 360px) {
+  .bundle-title {
+    font-size: 24px;
+    line-height: 1.12;
+  }
+
+  .bundle-btn {
+    height: 44px;
+    font-size: 13px;
+  }
+
+  .bundle-desc {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .bundle-desc--small,
+  .bundle-note {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .bundle-logoBox { height: 28px; }
+  .bundle-logoImg { max-width: 140px; }
+}
+@media (max-width: 390px) {
+   .bundle-promo{
+    transform: scale(0.95);
   }
 }
+ 

@@ -220,6 +220,7 @@
 @media (max-width: 768px) {
   .footer-legal.footer-legal-icons {
     gap: 12px;
+    font-size: 14px;
   }
   .footer-legal-icon-group {
     gap: 12px;
