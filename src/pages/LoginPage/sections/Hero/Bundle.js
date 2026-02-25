@@ -4,8 +4,12 @@ export default function BundlePromo() {
   return (
     <div className="bundle-promo">
       <div className="bundle">
-        <h1 className="bundle-title">이 모든 이야기가 여기에 
-지금 스트리밍 중</h1>
+        <h1 className="bundle-title">
+          이 모든 이야기가 여기에
+          <br />
+          지금 스트리밍 중
+        </h1>
+
         <div className="bundle-ctaGrid" aria-label="플랜 선택">
           <div className="bundle-card">
             <div className="bundle-logoBox">
@@ -20,6 +24,7 @@ export default function BundlePromo() {
               번들로 할인 받기
             </a>
           </div>
+
           <div className="bundle-card">
             <div className="bundle-logoBox">
               <img
@@ -34,6 +39,7 @@ export default function BundlePromo() {
             </a>
           </div>
         </div>
+
         <p className="bundle-desc">
           디즈니+ 멤버십은 결제 화면에서 월간 또는 연간 결제 주기를 선택할 수 있습니다.
           <br />
@@ -41,10 +47,13 @@ export default function BundlePromo() {
           <br />
           <strong>더 자세한 사항은 모든 멤버십 유형 보기에서 확인해 보세요.</strong>
         </p>
-        <p className="bundle-desc" style={{ fontSize: "12px" }}>
-         디즈니+ 스탠다드는 월 9,900원부터, 디즈니+ 프리미엄은 월 13,900원부터 구독 가능합니다.
-디즈니+ 티빙 번들은 월 18,000원에, 디즈니+ 티빙 웨이브 번들은 월 21,500원에 구독 가능합니다. 스탠다드 멤버십 개별 구독 대비 번들로 할인 효과를 누려보세요. 자세한 사항은 여기서 확인하세요.
+
+        <p className="bundle-desc bundle-desc--small">
+          디즈니+ 스탠다드는 월 9,900원부터, 디즈니+ 프리미엄은 월 13,900원부터 구독 가능합니다.
+          디즈니+ 티빙 번들은 월 18,000원에, 디즈니+ 티빙 웨이브 번들은 월 21,500원에 구독 가능합니다.
+          스탠다드 멤버십 개별 구독 대비 번들로 할인 효과를 누려보세요. 자세한 사항은 여기서 확인하세요.
         </p>
+
         <p className="bundle-note">*모든 가격은 부가세를 포함합니다. 추가 약관 적용.</p>
       </div>
     </div>

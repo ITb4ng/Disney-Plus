@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./PricingSection.css";
+import { FaAngleDown } from "react-icons/fa6";
 
 import {
   TABS,
@@ -72,7 +73,6 @@ export default function PricingSection() {
   const rightKey = rightPlan?.key ?? "";
 
   /**
-   * ✅ "진짜 서비스 느낌" 핵심
    * - 각주 클릭하면 토글 자동 오픈
    * - 패널로 스크롤 + 해당 항목으로 스크롤
    * - 하이라이트 표시
@@ -207,60 +207,61 @@ export default function PricingSection() {
           </div>
         </header>
 
-        <div className="pricing-surface">
-          {/* sticky */}
-          <div className={cx("pricing-sticky", activeId === "pricing" && "is-active")}>
-            {/* badge row */}
-            <div className="pricing-row pricing-rowBadge">
-              <div className="pricing-featureEmpty" />
+<div className="pricing-surface">
+  {/* sticky */}
+  <div className={cx("pricing-sticky", activeId === "pricing" && "is-active")}>
+    {/* ✅ badge row 제거: 배지를 plan row 내부로 합침 */}
 
-              <div className={cx("pricing-planCell", leftPlan.isReco && "is-reco")}>
-                <div className="pricing-planInner">
-                  {leftPlan.badge && <div className="pricing-badgeFloat">{leftPlan.badge}</div>}
-                </div>
-              </div>
+    {/* plan row */}
+    <div className="pricing-row pricing-rowPlan">
+      <div className="pricing-featureEmpty" />
 
-              <div className={cx("pricing-planCell", rightPlan.isReco && "is-reco", rightPlan.isFlat && "is-flat")}>
-                <div className="pricing-planInner">
-                  {rightPlan.badge && <div className="pricing-badgeFloat">{rightPlan.badge}</div>}
-                </div>
-              </div>
+      <div className={cx("pricing-planCell", leftPlan.isReco && "is-reco")}>
+        <div className="pricing-planInner">
+          {/* ✅ 추천 배지: 카드 내부에 포함(같이 움직임) */}
+          {leftPlan.badge && (
+            <div className="pricing-badgeFloat" aria-label="추천">
+              {leftPlan.badge}
             </div>
+          )}
 
-            {/* plan row */}
-            <div className="pricing-row pricing-rowPlan">
-              <div className="pricing-featureEmpty" />
+          <div className="pricing-logoSlot">
+            <img
+              className={cx("pricing-logo", leftPlan.logoVariant && `is-${leftPlan.logoVariant}`)}
+              src={leftPlan.logoImg}
+              alt={leftPlan.logoAlt || "Disney+"}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
 
-              <div className={cx("pricing-planCell", leftPlan.isReco && "is-reco")}>
-                <div className="pricing-planInner">
-                  <div className="pricing-logoSlot">
-                    <img
-                      className={cx("pricing-logo", leftPlan.logoVariant && `is-${leftPlan.logoVariant}`)}
-                      src={leftPlan.logoImg}
-                      alt={leftPlan.logoAlt || "Disney+"}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div className="pricing-planName">{leftPlan.name}</div>
-                </div>
-              </div>
+          <div className="pricing-planName">{leftPlan.name}</div>
+        </div>
+      </div>
 
-              <div className={cx("pricing-planCell", rightPlan.isReco && "is-reco", rightPlan.isFlat && "is-flat")}>
-                <div className="pricing-planInner">
-                  <div className="pricing-logoSlot">
-                    <img
-                      className={cx("pricing-logo", rightPlan.logoVariant && `is-${rightPlan.logoVariant}`)}
-                      src={rightPlan.logoImg}
-                      alt={rightPlan.logoAlt || "Disney+"}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div className="pricing-planName">{rightPlan.name}</div>
-                </div>
-              </div>
+      <div className={cx("pricing-planCell", rightPlan.isReco && "is-reco", rightPlan.isFlat && "is-flat")}>
+        <div className="pricing-planInner">
+          {/* ✅ 추천 배지: 카드 내부에 포함(같이 움직임) */}
+          {rightPlan.badge && (
+            <div className="pricing-badgeFloat" aria-label="추천">
+              {rightPlan.badge}
             </div>
+          )}
+
+          <div className="pricing-logoSlot">
+            <img
+              className={cx("pricing-logo", rightPlan.logoVariant && `is-${rightPlan.logoVariant}`)}
+              src={rightPlan.logoImg}
+              alt={rightPlan.logoAlt || "Disney+"}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+
+          <div className="pricing-planName">{rightPlan.name}</div>
+        </div>
+      </div>
+    </div>
 
             {/* cta row */}
             <div className="pricing-row pricing-rowCta">
@@ -327,8 +328,11 @@ export default function PricingSection() {
               onClick={() => setOpenNotes((v) => !v)}
             >
               자세히 보기
-              <span className="fn-toggleIcon" aria-hidden="true">
-                {openNotes ? "▲" : "▼"}
+              <span
+                className={`fn-toggleIcon ${openNotes ? "is-open" : ""}`}
+                aria-hidden="true"
+              >
+                <FaAngleDown />
               </span>
             </button>
 

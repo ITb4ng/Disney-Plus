@@ -1,6 +1,8 @@
 import "./Footer.css";
 import { footerColumns, footerSns, footerLegal, languages } from "./FooterData";
 import { Link } from "react-router-dom";
+import { TfiAngleDown } from "react-icons/tfi";
+import { AiOutlineGlobal } from "react-icons/ai";
 import {
   FaXTwitter,
   FaInstagram,
@@ -56,7 +58,9 @@ function FooterCol({ title, links, isFirst }) {
         <details className="footer-col-mobile footer-col-mobile-accordion">
           <summary className="footer-col-summary">
             <span>{title}</span>
-            <span className="footer-col-caret">▼</span>
+            <span className="footer-col-caret">
+              <TfiAngleDown />
+            </span>
           </summary>
 
           <ul className="footer-col-list">{renderLinks(links)}</ul>
@@ -100,10 +104,10 @@ export default function FooterSection() {
               </select>
 
               <span className="footer-lang-icon" aria-hidden="true">
-                🌐
+                <AiOutlineGlobal />
               </span>
               <span className="footer-lang-caret" aria-hidden="true">
-                ▾
+                <TfiAngleDown />
               </span>
             </div>
           </div>

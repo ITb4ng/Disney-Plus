@@ -117,11 +117,15 @@ export default function Login() {
 /* ===== styled-components ===== */
 
 const Wrap = styled.div`
-  height: 100dvh;     /* 모바일까지 깔끔 */
+  height: 100dvh;
   display: grid;
   place-items: center;
   padding: 16px;
   overflow: hidden;
+
+  input, textarea, select {
+    font-size: 16px;
+  }
 `;
 const Card = styled.div`
   width: min(420px, 100%);
@@ -187,6 +191,9 @@ const Input = styled.input`
   border-radius: 12px;
   padding: 0 12px;
 
+  font-size: 16px; /* ✅ iOS 포커스 줌 방지 핵심 */
+  line-height: 1.2;
+
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.95);
@@ -196,6 +203,7 @@ const Input = styled.input`
 
   &::placeholder {
     color: rgba(255, 255, 255, 0.45);
+    font-size: 12px;
   }
 
   &:focus {
@@ -208,7 +216,6 @@ const Input = styled.input`
     cursor: not-allowed;
   }
 `;
-
 const PrimaryBtn = styled.button`
   height: 46px;
   border-radius: 12px;
