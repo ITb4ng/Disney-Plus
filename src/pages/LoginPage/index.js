@@ -8,12 +8,10 @@ import "./index.css";
 export default function LoginPage() {
   return (
     <>
-    <main>
-      <HeroSection />
-      <Top10Section id="home-content" />
-      <PricingSection />
-      <FAQSection />
-    </main>
+        <HeroSection />
+        <Top10Section id="home-content" />
+        <PricingSection />
+        <FAQSection />
       <FooterSection />
     </>
   );
