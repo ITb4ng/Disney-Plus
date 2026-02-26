@@ -1,3 +1,5 @@
+*, *::before, *::after { box-sizing: border-box; }
+
 :root {
   --nav-h: 70px;
 
@@ -17,6 +19,8 @@
   --hover-text: #17171c;
 }
 
+.pricingSection { overflow-x: clip; }
+
 /* 클릭 가능한 각주 마크 */
 .fn-markWrap {
   font-size: 0.7em;
@@ -30,8 +34,13 @@
   padding: 0;
   color: var(--text-faint);
   cursor: pointer;
-  font: 12px;
+  font-size: 12px;
   line-height: 1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .fn-markBtn:hover {
@@ -39,7 +48,25 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.fn-markBtn:active {
+  color: rgba(255, 255, 255, 0.92);
+}
 
+.fn-markBtn:active::after {
+  background: rgba(255, 255, 255, 0.08);
+}
+.fn-markBtn::after {
+  content: "";
+  position: absolute;
+  inset: -10px;          /* 상하좌우 10px 확장 */
+  border-radius: 999px;  /* 둥글게 */
+}
+
+@media (max-width: 820px) {
+  .fn-markBtn::after {
+    inset: -14px; /* 손가락 버프 */
+  }
+}
 /* 하이라이트 (방금 클릭한 항목) */
 .fn-item.is-active {
   background: rgba(2, 214, 232, 0.08);
@@ -103,7 +130,7 @@
 
 /* body clip */
 .pricing-surfaceClip {
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   z-index: 1;
 }
@@ -200,10 +227,82 @@
   padding: 26px 14px 0;
   position: relative;
 }
+@media (max-width: 360px) {
+  /* 1) 2열 강제 유지가 빡빡하니 1열로 */
+  .pricing-row {
+    grid-template-columns: 1fr;
+  }
 
+  /* featureEmpty는 이미 820px 이하에서 숨김 처리지만, 혹시 모르니 안전 */
+  .pricing-featureEmpty {
+    display: none;
+  }
+
+  /* 2) 추천 뱃지: "위로 띄우기" 대신 카드 안으로 정착 */
+  .pricing-badgeFloat {
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+  }
+
+  /* 뱃지 공간 확보 (badge row 패딩만 살짝 늘림) */
+  .pricing-rowBadge .pricing-planCell {
+    padding-top: 34px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* plan title row: 좌우 패딩 살짝 줄여서 overflow 방지 */
+  .pricing-rowPlan .pricing-planCell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* cta row도 동일하게 */
+  .pricing-rowCta .pricing-planCell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* 3) 카드 내부가 flex 때문에 안 줄어드는 경우 방지 */
+  .pricing-planCell,
+  .pricing-planInner,
+  .pricing-logoSlot {
+    min-width: 0;
+  }
+
+  /* 4) 로고가 너무 커서 밀면 작게 */
+  .pricing-logo {
+    max-width: 140px;
+    margin-top: 10px;
+  }
+
+  .pricing-logo.is-bundleLeft {
+    max-width: 150px;
+    transform: scale(1);
+  }
+
+  .pricing-logo.is-bundleRight {
+    max-width: 130px;
+  }
+
+  /* 5) 플랜명 줄바꿈 안전장치 */
+  .pricing-planName {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
 /* plan title row */
 .pricing-rowPlan .pricing-planCell {
   padding: 10px 14px 10px;
+}
+
+
+@media (max-width: 480px) {
+  .pricing-rowPlan .pricing-planCell {
+    padding: 10px /* 14 → 10 */
+  }
 }
 
 /* cta row */
