@@ -3,6 +3,23 @@
    ============================= */
 
 /* ✅ Nav.jsx에서 className="nav__input"인 데스크탑 input만 타겟 */
+.nav-mobile-search {
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+}
+.nav-mobile-search:active {
+  transform: scale(0.96);
+}
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
 .app-nav .nav__input {
   flex: 1;
   min-width: 0;
@@ -58,6 +75,35 @@
 
   transform: translateY(-1px);
 }
+
+/* ✅ [ADD] 데스크탑 커스텀 X */
+.nav-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav__input {
+  padding-right: 34px; /* X 버튼 자리 */
+}
+
+.nav-search__clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.nav-search__clear:hover {
+  color: rgba(255,255,255,0.95);
+}
+
 
 /* =============================
    Large Desktop (>=1600)

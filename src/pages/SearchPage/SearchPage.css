@@ -2,12 +2,27 @@
     height: 100vh;
     background-color: black;
 }
+.search-page {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  padding-top: calc(var(--nav-h, 70px) + 12px);
+}
 
-.search-container {
-    background-color: black;
-    width: 100%;
-    text-align: center;
-    padding: 5rem 0;
+.search-header {
+  margin-bottom: 18px;
+}
+
+.search-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.search-header p {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
 }
 
 .paging__close{
@@ -47,4 +62,155 @@
 .movie__poster {
     width: 89%;
     border-radius: 5px;
+}
+
+
+
+.search-container {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background-color: transparent;
+  text-align: left;
+}
+
+
+@media (max-width: 1024px) {
+  .search-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .search-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 12px;
+  }
+}
+
+.card {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.card__media {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  aspect-ratio: 16 / 9;          /* ✅ 카드 크기 통일 */
+  transform: translateZ(0);
+}
+
+.card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.001);
+  transition: transform 240ms ease, filter 240ms ease;
+}
+
+.card__fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.65);
+  font-size: 12px;
+}
+
+.card__overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 12px 12px 10px;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.72),
+    rgba(0,0,0,0.05)
+  );
+}
+
+.card__title {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: rgba(255,255,255,0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card__meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.70);
+}
+
+.card:hover .card__media img {
+  transform: scale(1.04);
+  filter: saturate(1.05);
+}
+
+.card:focus-visible .card__media {
+  outline: 2px solid rgba(2, 231, 245, 0.55);
+  outline-offset: 2px;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.search-header__close {
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.search-top-input {
+  position: relative;
+  margin: 12px 0 18px;
+}
+
+.search-top-input input {
+  width: 100%;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.95);
+  padding: 0 42px 0 14px;
+  font-size: 16px; /* iOS zoom 방지 */
+}
+
+.search-top-input__clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ✅ 데스크탑에선 SearchPage 상단 인풋을 숨기고 nav 인풋 사용 */
+@media (min-width: 768px) {
+  .search-top-input {
+    display: none;
+  }
 }
