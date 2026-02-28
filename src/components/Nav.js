@@ -12,30 +12,45 @@ import { auth } from "../firebase";
 import { FiSearch } from "react-icons/fi";
 
 const Nav = () => {
-  /* =========================================================
-   * 1) Router / UI 기본 상태
-   * ======================================================= */
+  /* 1) Router / UI 기본 상태 */
   const [show, setShow] = useState(false);           // 스크롤 시 Nav 배경 처리(show)
-  const { pathname } = useLocation();                // 현재 라우트 경로
+  const {pathname, search } = useLocation();                // 현재 라우트 경로
   const navigate = useNavigate();                    // 라우팅 이동
   const isAuthPage = pathname === "/" || pathname === "/login";
-  /* =========================================================
-   * 2) 검색 관련 상태 (Desktop + Mobile 공용)
-   * ======================================================= */
+  /* 2) 검색 관련 상태 (Desktop + Mobile 공용) */
   const [searchValue, setSearchValue] = useState(""); // 검색어 입력 값
   const [isSearchOpen, setIsSearchOpen] = useState(false); // 모바일 검색 Pill 열림/닫힘
-  const searchRef = useRef(null);                     // 모바일 검색 input focus 제어용 ref
   const searchWrapRef = useRef(null);                 // 모바일 검색 영역(아이콘+input) 바깥 클릭 감지용 ref
 
   // 모바일 검색 닫기(공통으로 재사용)
   const closeSearch = () => setIsSearchOpen(false);
 
-  /* =========================================================
-   * 3) 반응형 상태 (Mobile 여부)
-   * ======================================================= */
+  /* 3) 반응형 상태 (Mobile 여부) */
   const [isMobile, setIsMobile] = useState(() =>
     typeof window === "undefined" ? false : window.innerWidth <= 767
   );
+
+  useEffect(() => {
+  const nav = document.querySelector(".app-nav");
+  if (!nav) return;
+
+  const set = () => {
+    const h = nav.getBoundingClientRect().height;
+    document.documentElement.style.setProperty("--nav-h", `${h}px`);
+  };
+
+  set();
+
+  const ro = new ResizeObserver(set);
+  ro.observe(nav);
+
+  window.addEventListener("resize", set);
+
+  return () => {
+    ro.disconnect();
+    window.removeEventListener("resize", set);
+  };
+}, []);
 
   // 화면 리사이즈 감지: Mobile 여부 업데이트
   useEffect(() => {
@@ -43,6 +58,20 @@ const Nav = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+  const q = new URLSearchParams(search).get("q") ?? "";
+
+  // ✅ /search에서는 URL q를 input에 반영
+  if (pathname.startsWith("/search")) {
+    setSearchValue(q);
+    return;
+  }
+
+  // ✅ /search가 아닌 곳으로 나가면 검색값 초기화
+  setSearchValue("");
+  setIsSearchOpen(false);
+}, [pathname, search]);
 
   /* =========================================================
    * 4) 프로필 메뉴(드롭다운) 토글 상태
@@ -211,10 +240,21 @@ const Nav = () => {
   const handleChange = (e) => {
     const v = e.target.value;
     setSearchValue(v);
+    const trimmed = v.trim();
 
-    if (isMobile) setIsSearchOpen(true); // 모바일이면 입력 시작 시 열림 유지
+    if (isMobile) setIsSearchOpen(true);
 
-    navigate(`/search?q=${encodeURIComponent(v)}`);
+    // ✅ [FIX] backspace로 빈 값이 되어도 /main으로 보내지 말기
+    if (!trimmed) {
+      // ✅ [FIX] search 라우트에 있을 때만 q 제거해서 /search로 정리
+      if (pathname.startsWith("/search")) {
+        navigate("/search", { replace: true });
+      }
+      // ✅ [FIX] main에서는 그냥 입력값만 비우고 끝 (리다이렉트 X)
+      return;
+    }
+    // ✅ [FIX] 입력 중에는 history 쌓지 말고 replace
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true });
   };
 
   // Google 로그인
@@ -241,14 +281,6 @@ const Nav = () => {
     }
   };
 
-  // 모바일 검색 아이콘 토글 + 열릴 때 input focus
-  const toggleSearch = () => {
-    setIsSearchOpen((prev) => {
-      const next = !prev;
-      if (!prev) setTimeout(() => searchRef.current?.focus(), 0);
-      return next;
-    });
-  };
 
   /* =========================================================
    * 11) 파생 값(렌더링 조건/아바타 텍스트 등)
@@ -264,114 +296,134 @@ const Nav = () => {
   })();
 
 
-  return (
-    <NavWrapper className="app-nav" $show={show}>
-      <NavInner>
-        <Left>
-          <Logo to={userData ? "/main" : "/"}>
-            <img alt="Disney Plus Logo" src="/images/logo.svg" />
-          </Logo>
-        </Left>
+return (
+  <NavWrapper className="app-nav" $show={show}>
+    <NavInner>
+      <Left>
+        <Logo
+          to={userData ? "/main" : "/"}
+          onClick={() => {
+            setSearchValue("");
+            setIsSearchOpen(false); // (남아있어도 무방)
+          }}
+        >
+          <img alt="Disney Plus Logo" src="/images/logo.svg" />
+        </Logo>
+      </Left>
 
-        <Center>
-          {pathname === "/" ? null : (
-            !isMobile ? (
-            <input
-              className="nav__input"
-              id="nav-search"
-              name="search"
-              value={searchValue}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              type="search"
-              aria-label="영화 검색"
-              placeholder="영화를 검색해주세요"
-            />
-          ) : (
-           <SearchPill
-              ref={searchWrapRef}
-              type="button"
-              onClick={toggleSearch}
-              aria-label={isSearchOpen ? "검색 닫기" : "검색 열기"}
-              $open={isSearchOpen}
-            >
-              <IconSlot aria-hidden="true">
-                <FiSearch size={18} />
-              </IconSlot>
+      <Center>
+        {/* ✅ 데스크탑에서만 중앙 인풋 */}
+        {pathname === "/" ? null : (
+          !isMobile ? (
+            <div className="nav-search">
+              <input
+                className="nav__input"
+                id="nav-search"
+                name="search"
+                value={searchValue}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                type="search"
+                aria-label="영화 검색"
+                placeholder="영화를 검색해주세요"
+                style={{ fontSize: 16 }} // ✅ iOS zoom 방지
+              />
 
-              {isSearchOpen && (
-                <PillInput
-                  ref={searchRef}
-                  value={searchValue}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  type="search"
-                  aria-label="영화 검색"
-                  placeholder="검색"
-                  $open
-                  onClick={(e) => e.stopPropagation()}
-                  onBlur={() => closeSearch()}   // ✅ 포커스 벗어나면 닫기
-                />
-              )}
-            </SearchPill>
-          )  
-        )}
-        </Center>
-
-        <Right>
-         {isAuthPage ? (
-            <Login as="button" type="button" onClick={() => navigate("/login")}>
-              로그인
-            </Login>
-          ) : (
-            <SignOut ref={profileRef}>
-              <UserButton
-                type="button"
-                onClick={() => setIsProfileOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={isProfileOpen}
-                aria-label="사용자 메뉴 열기"
-              >
-                {userData?.photoURL ? (
-                  <UserImg
-                    src={userData.photoURL}
-                    alt={userData?.displayName || "user"}
-                  />
-                ) : (
-                  <UserInitial aria-hidden="true">{avatarText}</UserInitial>
-                )}
-              </UserButton>
-
-              <DropDown
-                role="menu"
-                $open={isProfileOpen}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MenuItem type="button" role="menuitem" onClick={closeProfile}>
-                  찜
-                </MenuItem>
-                <MenuItem type="button" role="menuitem" onClick={closeProfile}>
-                  마이페이지
-                </MenuItem>
-
-                <Divider />
-
-                <MenuItem
+              {/* ✅ 커스텀 X (기본 캔슬 버튼 숨겨도 OK) */}
+              {searchValue && (
+                <button
                   type="button"
-                  role="menuitem"
-                  $danger
-                  onClick={handleSignOut}
+                  className="nav-search__clear"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSearchValue("");
+
+                    // ✅ search 라우트면 q만 제거 (메인 강제 이동 X)
+                    if (pathname.startsWith("/search")) {
+                      navigate("/search", { replace: true });
+                    }
+                  }}
+                  aria-label="검색어 지우기"
                 >
-                  로그아웃
-                </MenuItem>
-              </DropDown>
-            </SignOut>
-          )}
-        </Right>
-      </NavInner>
-    </NavWrapper>
-  );
-};
+                  ✕
+                </button>
+              )}
+            </div>
+          ) : null
+        )}
+      </Center>
+
+      <Right>
+        {/* ✅ 모바일에서만: 프로필 왼쪽에 검색 아이콘 */}
+        {pathname !== "/" && isMobile && (
+          <button
+            type="button"
+            className="nav-mobile-search"
+            aria-label="검색 열기"
+            onClick={() => {
+              // ✅ 모바일은 아이콘 누르면 SearchPage로 진입(모달처럼)
+              navigate("/search", { replace: false });
+            }}
+          >
+            <FiSearch size={18} aria-hidden="true" />
+          </button>
+        )}
+
+        {/* ---- 기존 Right 영역 (로그인/프로필) 그대로 ---- */}
+        {isAuthPage ? (
+          <Login as="button" type="button" onClick={() => navigate("/login")}>
+            로그인
+          </Login>
+        ) : (
+          <SignOut ref={profileRef}>
+            <UserButton
+              type="button"
+              onClick={() => setIsProfileOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={isProfileOpen}
+              aria-label="사용자 메뉴 열기"
+            >
+              {userData?.photoURL ? (
+                <UserImg
+                  src={userData.photoURL}
+                  alt={userData?.displayName || "user"}
+                />
+              ) : (
+                <UserInitial aria-hidden="true">{avatarText}</UserInitial>
+              )}
+            </UserButton>
+
+            <DropDown
+              role="menu"
+              $open={isProfileOpen}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MenuItem type="button" role="menuitem" onClick={closeProfile}>
+                찜
+              </MenuItem>
+              <MenuItem type="button" role="menuitem" onClick={closeProfile}>
+                마이페이지
+              </MenuItem>
+
+              <Divider />
+
+              <MenuItem
+                type="button"
+                role="menuitem"
+                $danger
+                onClick={handleSignOut}
+              >
+                로그아웃
+              </MenuItem>
+            </DropDown>
+          </SignOut>
+        )}
+      </Right>
+    </NavInner>
+  </NavWrapper>
+);
+}
 
 
 export default Nav;
@@ -611,79 +663,4 @@ const Divider = styled.div`
   margin: 4px 2px;
   background: rgba(255, 255, 255, 0.08); /* ✅ 더 은은하게 */
 `;
-/* ====== mobile search pill ====== */
 
-const SearchPill = styled.button`
-  appearance: none;
-  -webkit-appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.45);
-  color: rgba(255, 255, 255, 0.92);
-  border-radius: 999px;
-  cursor: pointer;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-  transition: width 320ms cubic-bezier(0.22, 0.86, 0.3, 1);
-  width: ${(p) => (p.$open ? "min(58vw, 200px)" : "36px")};
-  height: 36px;
-
-  display: grid;
-  place-items: center;
-
-  ${(p) =>
-    p.$open &&
-    `
-    grid-auto-flow: column;
-    grid-template-columns: 18px 1fr;
-    column-gap: 8px;
-    padding: 0 10px;
-    place-items: center start;
-  `}
-
-  line-height: 0;
-  -webkit-tap-highlight-color: transparent;
-  transform: translateZ(0);
-
-  svg {
-    display: block;
-  }
-`;
-
-const IconSlot = styled.span`
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  line-height: 0;
-  flex: 0 0 18px;
-
-  svg {
-    display: block;
-    transform: none;
-  }
-`;
-
-const PillInput = styled.input`
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.95);
-
-  font-size: 12px;
-
-  width: ${(p) => (p.$open ? "100%" : "0px")};
-  opacity: ${(p) => (p.$open ? 1 : 0)};
-  pointer-events: ${(p) => (p.$open ? "auto" : "none")};
-
-  transition:
-    width 320ms cubic-bezier(0.22, 0.86, 0.3, 1),
-    opacity 180ms ease;
-
-  will-change: width, opacity;
-
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 11px;
-  }
-`;

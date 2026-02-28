@@ -1,15 +1,16 @@
-import tmdbAxios from "../api/tmdbaxios";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchBannerNowPlaying } from "../api/bannerQueries";
 import { useNavigate } from "react-router-dom";
-import requests from "../api/request";
 import "./Banner.css";
 
 const Banner = () => {
-  const [movie, setMovie] = useState(null);
-
-  // ✅ Skeleton / error state
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const { data: movie, isLoading, isError } = useQuery({
+    queryKey: ["banner", "nowPlaying"],
+    queryFn: fetchBannerNowPlaying,
+    staleTime: Infinity,     // ✅ 새로고침 전까지 재사용
+    refetchOnMount: false,   // ✅ 라우트 이동으로 재마운트돼도 재호출 X
+  });
 
   const [isClicked, setIsClicked] = useState(false);
   const bannerRef = useRef(null);
@@ -18,18 +19,10 @@ const Banner = () => {
   const navigate = useNavigate();
   const hasOverview = Boolean(movie?.overview && movie.overview.trim().length > 0);
 
-  const nowPlayingQuery = useMemo(() => {
-    const spec = requests.fetchNowplaying;
-    if (!spec || typeof spec !== "object" || !spec.path) return null;
-
-    const { path, ...params } = spec;
-    return { path, ...params };
-  }, []);
-
   const goDetail = () => {
-  if (!movie?.id) return;
-  const type = movie?.media_type || "movie";
-  navigate(`/detail/${type}/${movie.id}`);
+    if (!movie?.id) return;
+    const type = movie?.media_type || "movie";
+    navigate(`/detail/${type}/${movie.id}`);
   };
 
   // ESC로 모달 닫기
@@ -37,9 +30,7 @@ const Banner = () => {
     if (!isClicked) return;
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        setIsClicked(false);
-      }
+      if (e.key === "Escape") setIsClicked(false);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -63,59 +54,8 @@ const Banner = () => {
 
     onScroll();
     window.addEventListener("scroll", onScroll);
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, [movie?.id]);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
-
-    try {
-      if (!nowPlayingQuery) {
-        setMovie(null);
-        return;
-      }
-
-      // 1) 현재 상영작 리스트 (프록시 규격)
-      const response = await tmdbAxios.get("", { params: nowPlayingQuery });
-      const results = Array.isArray(response.data?.results) ? response.data.results : [];
-
-      if (results.length === 0) {
-        setMovie(null);
-        return;
-      }
-
-      const picked = results[Math.floor(Math.random() * results.length)];
-      const movieId = picked?.id;
-
-      if (!movieId) {
-        setMovie(null);
-        return;
-      }
-
-      // 2) 영화 상세 + 영상 (프록시 규격)
-      const { data: movieDetail } = await tmdbAxios.get("", {
-        params: { path: `movie/${movieId}`, append_to_response: "videos", language: "ko-KR" },
-      });
-
-      // picked에 media_type가 있으면 섞어두면 라우팅에도 도움됨
-      setMovie({ ...movieDetail, media_type: picked?.media_type ?? movieDetail?.media_type });
-    } catch (err) {
-      console.error("Banner fetch error:", err);
-      setHasError(true);
-      setMovie(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [nowPlayingQuery]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
 
   // 모달 열리면 스크롤 락
   useEffect(() => {
@@ -149,11 +89,11 @@ const Banner = () => {
   }
 
   // ✅ 2) Error / Empty fallback
-  if (!movie) {
+  if (isError || !movie) {
     return (
       <header ref={bannerRef} className="banner banner--loading">
         <div className="banner__contents">
-          <h1 className="banner__title">{hasError ? "Failed to load" : "No data"}</h1>
+          <h1 className="banner__title">{isError ? "Failed to load" : "No data"}</h1>
         </div>
         <div className="banner--fadeBottom" />
       </header>
@@ -165,10 +105,7 @@ const Banner = () => {
     <>
       <header
         ref={bannerRef}
-        className={`banner ${isDimmed ? "is-dimmed" : ""} 
-        ${
-          !hasOverview ? "no-overview" : ""
-        }`}
+        className={`banner ${isDimmed ? "is-dimmed" : ""} ${!hasOverview ? "no-overview" : ""}`}
         style={{
           backgroundImage: movie?.backdrop_path
             ? `url("https://image.tmdb.org/t/p/original/${movie.backdrop_path}")`
@@ -188,39 +125,39 @@ const Banner = () => {
             )}
           </div>
 
-        {hasOverview ? (
-          <h2 className="banner__description">
-            <span className="banner__descText">{movie.overview}</span>
+          {hasOverview ? (
+            <h2 className="banner__description">
+              <span className="banner__descText">{movie.overview}</span>
 
-            <span
-              className="banner__more"
-              role="button"
-              tabIndex={0}
-              onClick={goDetail}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") goDetail();
-              }}
-              aria-label="더보기: 상세 페이지로 이동"
-            >
-              더보기
-            </span>
-          </h2>
-        ) : (
-          <div className="banner__descriptionFallback">
-            <span
-              className="banner__detailLink"
-              role="button"
-              tabIndex={0}
-              onClick={goDetail}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") goDetail();
-              }}
-              aria-label="자세히 보기: 상세 페이지로 이동"
-            >
-              자세히 보기
-            </span>
-          </div>
-        )}
+              <span
+                className="banner__more"
+                role="button"
+                tabIndex={0}
+                onClick={goDetail}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") goDetail();
+                }}
+                aria-label="더보기: 상세 페이지로 이동"
+              >
+                더보기
+              </span>
+            </h2>
+          ) : (
+            <div className="banner__descriptionFallback">
+              <span
+                className="banner__detailLink"
+                role="button"
+                tabIndex={0}
+                onClick={goDetail}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") goDetail();
+                }}
+                aria-label="자세히 보기: 상세 페이지로 이동"
+              >
+                자세히 보기
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="banner--fadeBottom" />
