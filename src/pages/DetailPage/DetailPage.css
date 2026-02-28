@@ -1,101 +1,230 @@
+/* =========================
+   DetailPage Base
+========================= */
 .detail {
-  min-height: 130vh; /* 아래도 있음 느낌 */
+  min-height: 100%;
   background: #090b13;
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* HERO: 거의 1스크린 */
+/* =========================
+   HERO (Background Section)
+   - JS에서 background-image로 주입
+   - 이미지 사이즈는 JS에서 w780~w1920로 컨트롤
+========================= */
 .detail__hero {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   padding-top: var(--nav-h, 70px);
-  background-size: cover;
-  background-position: center right;
-  background-repeat: no-repeat;
   overflow: hidden;
+
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+
+  /* 반응형 영역 */
+  --safeTop: env(safe-area-inset-top);
+  --heroTop: clamp(12px, 3.2vh, 34px); 
+  --heroPadTop: calc(var(--nav-h, 70px) + var(--safeTop) + var(--heroTop));
+
+
+  --scrim: 0.24;   
+  --vig: 0;
+  --edge: 0.64;    /* 좌우 비네트 약하게 */
+  --top: 0.34;     /* 상단 비네트 약하게 */
+  --bottom: 0.18;  /* 하단 비네트 약하게 */
 }
 
-/* 공홈 느낌: 가장자리 어둡게 + 스크롤 비네팅 */
+@media (min-width: 1280px) {
+  .detail__hero {
+    background-position: center right;
+    --scrim: 0.22;
+    --bottom: 0.18;
+  }
+}
+
+@media (max-width: 640px) {
+  .detail__hero {
+    --scrim: 0.20;
+    --edge: 0.58;
+    --top: 0.28;
+    --bottom: 0.12;
+  }
+}
+@media (max-width: 640px) {
+  .detail__hero {
+    --heroTop: clamp(16px, 4vh, 46px);
+  }
+}
+
+@media (max-width: 360px) {
+  .detail__hero {
+    --heroTop: clamp(18px, 4.5vh, 54px);
+  }
+}
+/* ✅ 전체 톤 다운 scrim (밝은 이미지 대응) */
+.detail__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background: rgba(9, 11, 19, var(--scrim));
+}
+
+/* ✅ 하단 섹션 연결용 아주 약한 그라데이션 (너무 과하게 어둡지 않게) */
+.detail__hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(120px, 18vh, 220px);
+  z-index: 1;
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(9, 11, 19, 0) 0%,
+    rgba(9, 11, 19, 0.55) 65%,
+    rgba(9, 11, 19, 1) 100%
+  );
+}
+
+/* =========================
+   Hero Skeleton Overlay (이미지 로딩 끊김 완화)
+========================= */
+.detail__heroSk {
+  position: absolute;
+  inset: 0;
+  z-index: 0; /* before/scrim과 같은 레벨 느낌 */
+  background: rgba(9, 11, 19, 0.45);
+  pointer-events: none;
+}
+
+.detail__heroSkShimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  background-size: 200% 100%;
+  animation: hero-shimmer 1.1s ease-in-out infinite;
+}
+
+@keyframes hero-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* =========================
+   Vignette (스크롤 시 상단/좌우 강화)
+========================= */
 .detail__vignette {
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
 
+  /* ✅ 하단은 약하게,
+     ✅ 스크롤할수록(=--vig 증가) 상단/좌우가 더 진해짐 */
   background:
-    /* 좌측 어둡게 */
-    linear-gradient(to right,
-      rgba(0,0,0,0.85) 0%,
-      rgba(0,0,0,0.55) 20%,
-      rgba(0,0,0,0.25) 40%,
-      rgba(0,0,0,0.15) 55%,
-      rgba(0,0,0,0.05) 65%,
-      rgba(0,0,0,0.15) 75%,
-      rgba(0,0,0,0.45) 90%,
-      rgba(0,0,0,0.75) 100%
-    ),
+    /* 좌우(가독성 핵심) */
+   linear-gradient(to right,
+    rgba(0,0,0, calc(var(--edge) + var(--vig) * 0.22)) 0%,
+    rgba(0,0,0, calc(0.45 + var(--vig) * 0.18)) 20%,
+    rgba(0,0,0, calc(0.15 + var(--vig) * 0.10)) 40%,
+    rgba(0,0,0, 0) 50%,
+    rgba(0,0,0, calc(0.15 + var(--vig) * 0.10)) 60%,
+    rgba(0,0,0, calc(0.45 + var(--vig) * 0.18)) 80%,
+    rgba(0,0,0, calc(var(--edge) + var(--vig) * 0.22)) 100%
+  ),
 
-    /* 상단/하단 암전 */
+    /* 상단(스크롤하면 진해지게) */
     linear-gradient(to bottom,
-      rgba(0,0,0,0.35) 0%,
-      rgba(0,0,0,0.05) 25%,
-      rgba(0,0,0,0.05) 65%,
-      rgba(0,0,0,0.65) 100%
+      rgba(0,0,0, calc(var(--top) + var(--vig) * 0.38)) 0%,
+      rgba(0,0,0, calc(0.14 + var(--vig) * 0.18)) 22%,
+      rgba(0,0,0, 0) 48%,
+      /* ✅ 하단은 “기본 약하게” */
+      rgba(0,0,0, var(--bottom)) 100%
     );
 
-  transition: opacity 180ms ease;
+  transition: background 180ms ease;
 }
-/* ✅ 중앙 컨테이너 + 2컬럼 레이아웃 */
+
+/* =========================
+   HERO Inner Layout
+========================= */
 .detail__heroInner {
   position: relative;
-  z-index: 1;
+  z-index: 2; /* vignette 위 */
   width: 100%;
-  /* max-width: 1600px; */
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 72px clamp(16px, 4vw, 56px) 48px;
+
+  padding: var(--heroPadTop) clamp(16px, 4vw, 56px) 32px;
+
   display: grid;
-  grid-template-columns: minmax(520px, 1fr) minmax(0, 1.1fr);
-  gap: clamp(22px, 4vw, 48px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(18px, 4vw, 48px);
 }
 
+/* 태블릿 이하: 1열 */
+@media (max-width: 1024px) {
+  .detail__heroInner {
+    grid-template-columns: 1fr;
+    padding: 52px 22px 22px;
+  }
+}
+
+/* 모바일: 패딩 줄이기 */
+@media (max-width: 640px) {
+  .detail__heroInner {
+    padding: 60px 16px 18px;
+  }
+}
+@media (max-width: 360px) {
+  .detail__heroInner {
+    padding: 60px 20px 12px;
+  }
+}
 /* LEFT COLUMN */
-.detail__left {
-  max-width: none;
-  width: 100%;
-}
+.detail__left { width: 100%; }
 
+/* micro */
 .detail__micro {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.9;
 }
+.detail__microStrong { font-weight: 700; }
+.detail__microDot { opacity: 0.7; }
 
-.detail__microStrong {
-  font-weight: 700;
-}
-
-.detail__microDot {
-  opacity: 0.7;
-}
-
+/* title: clamp로 초소형까지 대응 */
 .detail__title {
   margin: 14px 0 10px;
-  font-size: 56px;
+  font-size: clamp(30px, 4.6vw, 56px);
   line-height: 1.05;
   letter-spacing: -0.5px;
 }
 
+/* meta row */
 .detail__metaRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 18px;
+  margin: 10px 0 14px;
 }
 
+/* pills */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -108,66 +237,54 @@
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(0,0,0,0.25);
 }
-
 .pill--age {
   background: rgba(255, 215, 0, 0.18);
   border-color: rgba(255, 215, 0, 0.32);
 }
+.pill--muted { opacity: 0.65; }
 
-.pill--muted {
-  opacity: 0.65;
-}
-
-.metaText {
-  font-size: 13px;
-  opacity: 0.85;
-}
-
+.metaText { font-size: 13px; opacity: 0.85; }
 .dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 999px;
+  width: 3px; height: 3px; border-radius: 999px;
   background: rgba(255,255,255,0.55);
   display: inline-block;
 }
 
-/* 버튼 */
-.detail__actions {
-  margin: 16px 0 18px;
-}
-
+/* actions */
+.detail__actions { margin: 32px 0 18px; }
+  
+/* 공통버튼 */
 .btn {
   border: 0;
   outline: 0;
   cursor: pointer;
   border-radius: 4px;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 14px;
   padding: 12px 18px;
 }
+.btn--primary { background: #2be0ff; color: #001018; }
 
-.btn--primary {
-  background: #2be0ff;
-  color: #001018;
-}
-
+/* ✅ 요약 overview는 “위쪽엔 요약만”이라면 여기서만 유지
+   아래 상세정보 섹션과 중복되면 아예 제거해도 됨 */
 .detail__overview {
-  max-width: 520px;
+  max-width: 62ch;
   font-size: 14px;
-  line-height: 1.55;
-  opacity: 0.9;
+  line-height: 1.65;
+  opacity: 0.92;
 }
 
-/* ✅ wide section: heroInner 전체폭 행 */
+/* =========================
+   Wide Section (divider 아래 상세)
+========================= */
 .detail__wideSection {
   grid-column: 1 / -1;
   width: 100%;
-  margin-top: 22px;
+  margin-top: 18px;
 }
 
-/* divider */
 .detail__divider {
-  margin: 18px 0 18px;
+  margin: 16px 0 16px;
   height: 1px;
   background: rgba(255,255,255,0.18);
   width: 100%;
@@ -177,33 +294,43 @@
   font-size: 14px;
   font-weight: 800;
   opacity: 0.9;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
-/* ✅ 3분할(레퍼런스처럼 “텍스트 3컬럼”) */
+/* 3col -> tablet 2col -> mobile 1col */
 .detail__infoGrid3--clean {
   width: 100%;
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
-  gap: clamp(28px, 5vw, 72px);
+  grid-template-columns: 1.55fr 1fr 1fr;
+  gap: clamp(18px, 4vw, 64px);
   align-items: start;
 
-  /* 패널 느낌 제거 */
   background: transparent;
   border: 0;
-  border-radius: 0;
   padding: 0;
-  backdrop-filter: none;
+}
+
+@media (max-width: 1024px) {
+  .detail__infoGrid3--clean {
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+  }
+  .detail__infoCol--main { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .detail__infoGrid3--clean {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 /* 좌측 타이틀/설명 */
 .detail__infoTitle {
-  margin: 0 0 12px;
-  font-size: 28px;
+  margin: 0 0 10px;
+  font-size: clamp(18px, 2.6vw, 28px);
   line-height: 1.15;
   letter-spacing: -0.2px;
 }
-
 .detail__infoBody {
   margin: 0;
   max-width: 60ch;
@@ -211,34 +338,18 @@
   line-height: 1.7;
   opacity: 0.92;
 }
+.detail__infoCol--main { min-width: 0; }
 
-.detail__infoCol--main {
-  min-width: 0;
-}
-
-/* ✅ 중/우: dt 위 dd 아래(디즈니식 스택) */
-.detail__facts--stack {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.detail__facts--stack .fact {
-  display: block;
-  margin: 0 0 18px;
-  padding: 0;
-}
-
+/* facts */
+.detail__facts--stack { margin: 0; padding: 0; border: 0; }
+.detail__facts--stack .fact { margin: 0 0 16px; padding: 0; }
 .detail__facts--stack dt {
-  display: block;
   font-size: 13px;
   opacity: 0.75;
   margin-bottom: 6px;
   white-space: normal;
 }
-
 .detail__facts--stack dd {
-  display: block;
   margin: 0;
   font-size: 14px;
   font-weight: 700;
@@ -246,44 +357,29 @@
   word-break: keep-all;
 }
 
-/* 아래 영역(임시) */
+/* =========================
+   Below (Row 영역)
+========================= */
 .detail__below {
-  padding: 40px 0;
+  padding-top: 34px;
 }
 
-/* ✅ 태블릿: heroInner 1열, 상세정보 2열 */
-@media (max-width: 1024px) {
-  .detail__heroInner {
-    grid-template-columns: 1fr;
-    padding: 56px 22px 40px;
-  }
-
-  .detail__infoGrid3--clean {
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-  }
-
-  .detail__infoCol--main {
-    grid-column: 1 / -1;
-  }
+.detailRowScope {
+  padding: 0 clamp(16px, 4vw, 56px);
 }
 
-/* ✅ 모바일: 1열 스택 */
 @media (max-width: 640px) {
-  .detail__heroInner {
-    padding: 44px 16px 32px;
-  }
+  .detailRowScope { padding: 0 16px; }
+}
 
-  .detail__title {
-    font-size: 40px;
-  }
 
-  .detail__infoGrid3--clean {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
 
-  .detail__infoTitle {
-    font-size: 22px;
-  }
+/* =========================
+   Back Button Wrap
+========================= */
+.detail__backWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 26px;
 }
