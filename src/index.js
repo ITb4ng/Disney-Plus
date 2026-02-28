@@ -11,7 +11,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      refetchOnWindowFocus: false, // 포커스 복귀 시 재호출 방지
+      refetchOnWindowFocus: false,
     },
   },
 });

@@ -6,17 +6,22 @@ import MainPage from "./pages/MainPage";
 import DetailPage from "./pages/DetailPage";
 import SearchPage from "./pages/SearchPage";
 import Login from "./pages/Login";
+import Footer from "./pages/LoginPage/sections/Footer/FooterSection";
 import "./styles/badges.css";
 import { useEffect } from "react";
 
 const Layout = () => {
   const { pathname } = useLocation();
   const hideNav = pathname === "/login"; 
+  const hideFooter =
+    pathname === "/login" ||
+    pathname.startsWith("/search");
 
   return (
     <div className="layout">
       {!hideNav && <Nav />}
       <Outlet />
+      {!hideFooter && <Footer />}
     </div>
   );
 };

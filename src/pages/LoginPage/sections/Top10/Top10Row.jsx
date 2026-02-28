@@ -82,7 +82,7 @@ const Top10Row = ({
         onResize={disableNav ? undefined : reportNavState}
       >
         {movies
-          .filter((m) => !!getImg(m)) // ✅ 이미지 없는 놈은 제외
+          .filter((m) => !!getImg(m))
           .map((movie, index) => {
             const path = getImg(movie);
             const title = getTitle(movie);

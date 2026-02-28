@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
@@ -123,7 +124,7 @@ const Nav = () => {
    * 6) 스크롤 UI: Nav 배경 show 처리
    * ======================================================= */
   useEffect(() => {
-    const handleScroll = () => setShow(window.scrollY > 400);
+    const handleScroll = () => setShow(window.scrollY > 150);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);

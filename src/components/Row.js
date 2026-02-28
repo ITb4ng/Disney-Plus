@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y } from "swiper/modules";
-
+import { useNavigate } from "react-router-dom";
 import MovieModal from "./MovieModal";
 import tmdbAxios from "../api/tmdbaxios";
 import "./Row.css";
@@ -16,10 +16,16 @@ const PHONE_MAX = 960;
 // ✅ 스켈레톤 카드 개수 (취향)
 const SKELETON_COUNT = 10;
 
-const Row = ({ title, id, fetchUrl, showRank = false }) => {
+const Row = ({ 
+  title, id, fetchUrl, showRank = false,
+  mode = "modal",          
+  navType, 
+  onNavigate,              
+  }) => {
   const [movies, setMovies] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [movieSelected, setMovieSelection] = useState({});
+  const navigate = useNavigate();
   const swiperRef = useRef(null);
 
   // ✅ 스켈레톤용 상태
@@ -125,6 +131,16 @@ const Row = ({ title, id, fetchUrl, showRank = false }) => {
   );
 
   const handleClick = (movie) => {
+    if (mode === "navigate") {
+      if (typeof onNavigate === "function") {
+        onNavigate(movie);
+        return;
+      }
+      const type = navType || movie?.media_type || "movie";
+      navigate(`/detail/${type}/${movie.id}`, { replace: true });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     setModalOpen(true);
     setMovieSelection(movie);
   };

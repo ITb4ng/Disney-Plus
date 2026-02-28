@@ -10,7 +10,7 @@ const SearchPage = () => {
 
   const navigate = useNavigate();
   const { search } = useLocation();
-
+  const location = useLocation(); // ✅ 통째로 받기 (구조분해 X)
   const urlQ = useMemo(() => new URLSearchParams(search).get("q") ?? "", [search]);
   const [inputValue, setInputValue] = useState(urlQ);
 
@@ -20,7 +20,11 @@ const SearchPage = () => {
   }, [urlQ]);
 
   const debounced = useDebounce(urlQ, 450);
-
+  const goDetail = (type, id) => {
+    navigate(`/detail/${type}/${id}`, {
+      state: { from: location.pathname + location.search },
+    });
+  };
   useEffect(() => {
     const term = (debounced ?? "").trim();
 
@@ -83,6 +87,8 @@ const SearchPage = () => {
 
     navigate(`/search?q=${encodeURIComponent(t)}`, { replace: true }); // ✅ history 폭증 방지
   };
+
+  
 
   return (
     <div className="search-page page">
@@ -158,7 +164,7 @@ const SearchPage = () => {
                 className="card"
                 key={`${item.media_type}-${item.id}`}
                 type="button"
-                onClick={() => navigate(`/detail/${item.media_type}/${item.id}`)}
+                onClick={() => goDetail(item.media_type, item.id)} 
                 aria-label={`${title} 상세로 이동`}
               >
                 <div className="card__media">
