@@ -1,9 +1,58 @@
+# Disney+ Renewal
+
+디즈니 플러스 UI/UX 리뉴얼을 목표로 한 React 기반 SPA 프로젝트입니다.  
+TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니다.
+
+---
+
+## 📦 Stable Release
+
+현재 안정화 버전: **v0.1.0**
+
+- 👉 GitHub - [v0.1.0 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.1.0)에서 v0.1.0 스냅샷(zip) 다운로드 가능  
+- 🌐 Live Demo (current dev deployment): https://b4ng-disney-plus.vercel.app/
+- 👉 또는 git clone 후 해당 태그로 체크아웃:
+
+
+
+```bash
+git clone https://github.com/ITb4ng/Disney-Plus.git
+cd Disney-Plus
+git checkout v0.1.0
+```
+## 🧪 Local 개발 실행 방법 
+```bash
+npm install
+npm run dev
+```
+### 실행 환경
+
+- Client: http://localhost:3000
+- TMDB Proxy(Server): http://localhost:4000/api/tmdb
+
+## 🚀 Tech Stack
+- React
+- React Router
+- Styled-components
+- Swiper
+- Express (TMDB Proxy Server)
+- Vercel Deployment
+- TanStack Query (React Query)
+
+## 🌐 Deployment Strategy
+- GitHub Releases 기준으로 Stable 버전 관리
+- feature/* → Vercel Preview 검증
+- dev → 통합 개발 검증 브랜치
+- release/<major>.<minor>.<patch> → 안정화 기준 브랜치
+- main → Production 브랜치 (v1.0.0 이후 예정)
+ 
+
+---
+
 ## 🚧 Renewal (dev) 진행 상황
 
 현재 `dev` 브랜치는 Disney+ 리뉴얼 작업의 **메인 브랜치**입니다.  
 UI/UX 개선과 구조 정리를 중심으로 지속적으로 업데이트 중입니다.
-
----
 
 ### ✅ 작업 내용 (2026-02-23)
 
@@ -79,7 +128,7 @@ UI/UX 개선과 구조 정리를 중심으로 지속적으로 업데이트 중�
 #### 6) 브랜치 전략 고도화
 - feature → dev PR → Vercel Preview 검증 프로세스 확립
 - dev → Production 환경에서
-- master 브랜치는 “비포 & 애프터 비교용 아카이브 브랜치”로 유지
+- master 브랜치는 초기 버전 아카이브 용도로 유지
 - 안정화 완료 시 `release/v1` 브랜치 생성 후 Production 기준 전환 예정
 
 ---
