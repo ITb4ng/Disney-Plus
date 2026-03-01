@@ -5,6 +5,7 @@ import tmdbAxios from "../../api/tmdbaxios";
 import Row from "../../components/Row";
 import requests from "../../api/request";
 import "./DetailPage.css";
+import { Helmet } from "react-helmet-async";
 
 const FALLBACK = "정보 없음";
 
@@ -19,6 +20,26 @@ const DetailPage = () => {
   const from = location.state?.from;
 
   const [data, setData] = useState(null);
+
+  const siteName = "Disney+ Renewal";
+  const baseUrl = "https://b4ng-disney-plus.vercel.app";
+
+  const titleText =
+  data?.title || data?.name || "콘텐츠 상세";
+
+  const overviewText =
+    data?.overview
+      ? data.overview.replace(/\s+/g, " ").trim().slice(0, 160)
+      : "Disney+ UI/UX Renewal 기반 클론 프로젝트 상세 페이지입니다.";
+
+  const canonicalUrl = `${baseUrl}/detail/${type}/${movieId}`;
+
+  const ogImagePath = data?.backdrop_path || data?.poster_path;
+  const ogImageUrl = ogImagePath
+    ? `https://image.tmdb.org/t/p/w780${ogImagePath}`
+    : `${baseUrl}/og-image.jpg`; // public에 기본 og 이미지 하나 넣어두면 베스트
+    
+  
 
   /* -------------------------
      Hero Image Size Control
@@ -245,6 +266,27 @@ const DetailPage = () => {
   ========================= */
 
   return (
+    <>
+    <Helmet>
+      {/* 기본 */}
+      <title>{titleText} | {siteName}</title>
+      <meta name="description" content={overviewText} />
+      <link rel="canonical" href={canonicalUrl} />
+
+      {/* Open Graph */}
+      <meta property="og:site_name" content={siteName} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${titleText} | ${siteName}`} />
+      <meta property="og:description" content={overviewText} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:image" content={ogImageUrl} />
+
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={`${titleText} | ${siteName}`} />
+      <meta name="twitter:description" content={overviewText} />
+      <meta name="twitter:image" content={ogImageUrl} />
+    </Helmet>
     <div className="detail">
       <section
         className="detail__hero"
@@ -332,6 +374,7 @@ const DetailPage = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 

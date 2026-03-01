@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from "react-helmet-async";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -22,7 +23,9 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <HelmetProvider>
+          <App />
+        </HelmetProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
