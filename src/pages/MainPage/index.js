@@ -5,7 +5,6 @@ import Row from '../../components/Row'
 import Category from '../../components/category'
 import styled  from 'styled-components'
 import requests from '../../api/request'
-import FooterSection from "../LoginPage/sections/Footer/FooterSection";
 
 const MainPage = () => {
   const [showDemoBanner, setShowDemoBanner] = useState(false);
@@ -23,14 +22,15 @@ const MainPage = () => {
     {showDemoBanner && (
         <DemoBanner onClose={() => setShowDemoBanner(false)} />
     )}
-    <Container>
-      <Banner />
-      <Category />
-      <Row title="Top Rated" id="TR" fetchUrl={requests.fetchTopRated} showRank />
-      <Row title="Trending Now" id="TN" fetchUrl={requests.fetchTrending} />
-      <Row title="Action Movies" id="AM" fetchUrl={requests.fetchActionMovies} />
-      <Row title="Comedy Movies" id="CM" fetchUrl={requests.fetchComedyMovies} />
-    </Container><FooterSection /></>
+      <Container>
+        <Banner />
+        <Category />
+        <Row title="Top Rated" id="TR" fetchUrl={requests.fetchTopRated} showRank />
+        <Row title="Trending Now" id="TN" fetchUrl={requests.fetchTrending} />
+        <Row title="Action Movies" id="AM" fetchUrl={requests.fetchActionMovies} />
+        <Row title="Comedy Movies" id="CM" fetchUrl={requests.fetchComedyMovies} />
+      </Container>
+    </>
   )
 }
 

@@ -12,10 +12,12 @@ import { useEffect } from "react";
 
 const Layout = () => {
   const { pathname } = useLocation();
-  const hideNav = pathname === "/login"; 
-  const hideFooter =
-    pathname === "/login" ||
-    pathname.startsWith("/search");
+
+  const isLoginRoute = pathname.startsWith("/login");
+  const isSearchRoute = pathname.startsWith("/search");
+
+  const hideNav = isLoginRoute;
+  const hideFooter = isLoginRoute || isSearchRoute;
 
   return (
     <div className="layout">
