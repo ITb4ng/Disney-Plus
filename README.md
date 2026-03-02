@@ -7,9 +7,9 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 
 ## 📦 Stable Release
 
-현재 안정화 버전: **v0.1.0**
+현재 안정화 버전: **v0.1.1**
 
-- 👉 GitHub - [v0.1.0 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.1.0)에서 v0.1.0 스냅샷(zip) 다운로드 가능  
+- 👉 GitHub - [v0.1.1 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.1.1)에서 v0.1.1 스냅샷(zip) 다운로드 가능  
 - 🌐 Live Demo (current dev deployment): https://b4ng-disney-plus.vercel.app/
 - 👉 또는 git clone 후 해당 태그로 체크아웃:
 
