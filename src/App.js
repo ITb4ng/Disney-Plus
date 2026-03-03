@@ -7,6 +7,10 @@ import DetailPage from "./pages/DetailPage";
 import SearchPage from "./pages/SearchPage";
 import Login from "./pages/Login";
 import Footer from "./pages/LoginPage/sections/Footer/FooterSection";
+import UpdatesPage from "./pages/DemoPage/UpdatePage";
+import FeedbackPage from "./pages/DemoPage/FeedbackPage";
+import FeedbackForm from "./pages/DemoPage/Form/FeedbackForm";
+import ScrollManager from "./components/ScrollManager";
 import "./styles/badges.css";
 import { useEffect } from "react";
 
@@ -15,22 +19,30 @@ const Layout = () => {
 
   const isLoginRoute = pathname.startsWith("/login");
   const isSearchRoute = pathname.startsWith("/search");
+  const isFeedbackRoute = pathname.startsWith("/feedback");
+  const isUpdatesRoute = pathname.startsWith("/updates");
 
   const hideNav = isLoginRoute;
-  const hideFooter = isLoginRoute || isSearchRoute;
+  const hideFooter = isLoginRoute || isSearchRoute || isFeedbackRoute || isUpdatesRoute;
 
   return (
     <div className="layout">
       {!hideNav && <Nav />}
+      <ScrollManager />
       <Outlet />
       {!hideFooter && <Footer />}
     </div>
   );
 };
 
-
 function App() {
   useEffect(() => {
+    // ✅ 브라우저 기본 스크롤 복구 끄기 (한 번만)
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    // ✅ nav 높이 계산
     const nav = document.querySelector(".app-nav");
 
     const apply = () => {
@@ -70,8 +82,12 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="main" element={<MainPage />} />
           <Route path="search" element={<SearchPage />} />
-          <Route path="/detail/:type/:movieId" element={<DetailPage />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="detail/:type/:movieId" element={<DetailPage />} />
+          <Route path="login" element={<Login />} />
+          <Route path="updates" element={<UpdatesPage />} />
+          <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="feedback/new" element={<FeedbackForm />} />
+          <Route path="feedback/:id/edit" element={<FeedbackForm mode="edit" />} />
         </Route>
       </Routes>
     </div>
