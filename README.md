@@ -13,7 +13,7 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 - 🌐 Live Demo (current dev deployment): https://b4ng-disney-plus.vercel.app/
 - 👉 또는 git clone 후 해당 태그로 체크아웃:
 
-
+- 0.1.2 ㅂ ㅔ 타 테스트 수정완료
 
 ```bash
 git clone https://github.com/ITb4ng/Disney-Plus.git
