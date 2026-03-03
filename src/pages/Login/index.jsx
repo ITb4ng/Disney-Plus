@@ -56,16 +56,22 @@ export default function Login() {
 
     try {
       setPending(true);
+      localStorage.removeItem("isGuest");
+      sessionStorage.removeItem("demo_banner");
+
       await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, eMail, password);
+
       setFadeOut(true);
       setTimeout(() => {
         navigate("/main", { replace: true });
       }, 250);
-    } catch (err) {
+    } 
+    catch (err) {
       console.log(err);
       setError("로그인에 실패했습니다. 계정 정보를 확인해주세요.");
-    } finally {
+    } 
+    finally {
       setPending(false);
     }
   };
@@ -74,12 +80,16 @@ export default function Login() {
     setError("");
     try {
       setPending(true);
+      localStorage.removeItem("isGuest");
+      sessionStorage.removeItem("demo_banner");
       await signInWithPopup(auth, provider);
       navigate("/main", { replace: true });
-    } catch (err) {
+    } 
+    catch (err) {
       console.log(err);
       setError("구글 로그인에 실패했습니다.");
-    } finally {
+    } 
+    finally {
       setPending(false);
     }
   };
@@ -88,21 +98,32 @@ export default function Login() {
     setError("");
     try {
       setPending(true);
-      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+      localStorage.setItem("isGuest", "1");
+      sessionStorage.setItem("demo_banner", "1");
+      
+      await setPersistence(
+      auth,
+      remember ? browserLocalPersistence : browserSessionPersistence
+      );
+
       await signInWithEmailAndPassword(auth, "demo@disney.dev", "12345678");
       setFadeOut(true);
       setTimeout(() => {
         navigate("/main", { replace: true });
       }, 250);
-      sessionStorage.setItem("demo_banner", "1"); 
-      navigate("/main", { replace: true });
-    } catch (err) {
+    } 
+      catch (err) {
       console.log(err);
+      // 실패하면 플래그 롤백
+      localStorage.removeItem("isGuest");
+      sessionStorage.removeItem("demo_banner");
       setError("체험 계정 로그인에 실패했습니다.");
-    } finally {
+    } 
+    finally {
       setPending(false);
     }
   };
+
   return (
     <Wrap $fade={fadeOut}>
       <Card>

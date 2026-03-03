@@ -1,0 +1,151 @@
+/* =========================
+   FeedbackPage Responsive
+   ========================= */
+
+/* 0) 공통: 페이지 좌우 패딩 토큰화 */
+.feedback-page {
+  --padX: clamp(14px, 3.4vw, 24px);
+  --gap: 12px;
+  padding-left: var(--padX);
+  padding-right: var(--padX);
+}
+
+/* 1) 상단 타이틀/설명 간격 */
+@media (max-width: 640px) {
+  .feedback-page h1,
+  .feedback-page h2 {
+    line-height: 1.15;
+    letter-spacing: -0.2px;
+  }
+
+  .feedback-page .page-title {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 28px; /* 너무 크면 26으로 */
+  }
+
+  .feedback-page .page-sub {
+    font-size: 12px;
+    line-height: 1.5;
+    opacity: 0.78;
+  }
+}
+
+/* 2) 상단 “정렬/등록/새로고침” 컨트롤 카드 */
+@media (max-width: 640px) {
+  .feedback-controls {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  /* 컨트롤 그룹을 세로 스택으로 */
+  .feedback-controls__row {
+    display: grid;
+    gap: 10px;
+  }
+
+  /* 정렬 토글은 한 줄에 2개로 */
+  .feedback-sort {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* 등록/새로고침은 한 줄에 2개 */
+  .feedback-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* 버튼/토글 공통: 터치 타겟 확대 */
+  .feedback-controls button,
+  .feedback-controls .seg-btn {
+    min-height: 44px; /* iOS 권장 */
+    padding: 12px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+}
+
+/* 3) 리스트 카드 */
+@media (max-width: 640px) {
+  .feedback-list {
+    margin-top: 14px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .feedback-card {
+    border-radius: 16px;
+    padding: 14px 14px 12px;
+  }
+
+  .feedback-card__title {
+    font-size: 16px;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+  }
+
+  .feedback-card__body {
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.85;
+    margin-top: 6px;
+  }
+
+  .feedback-card__meta {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 10px;
+  }
+}
+
+/* 4) 하단 “뒤로가기” 버튼 sticky */
+@media (max-width: 640px) {
+  .feedback-footer {
+    position: sticky;
+    bottom: 12px;
+    z-index: 5;
+
+    display: flex;
+    justify-content: center;
+
+    /* 배경 살짝 깔아주면 컨텐츠 위에서 떠도 안정적 */
+    padding-top: 10px;
+    pointer-events: none; /* 컨테이너는 클릭 막고 */
+  }
+
+  .feedback-footer .back-btn {
+    pointer-events: auto; /* 버튼만 클릭 가능 */
+    min-height: 48px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+
+    backdrop-filter: blur(10px);
+    background: rgba(10, 12, 18, 0.72);
+    border: 1px solid rgba(255,255,255,0.14);
+  }
+}
+
+/* 5) Tablet (641~1024): 살짝 넓게만 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .feedback-controls__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .feedback-sort {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .feedback-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}

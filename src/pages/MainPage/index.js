@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from "react";
-// import Nav from '../../components/Nav'
-import Banner from '../../components/banner'
-import Row from '../../components/Row'
-import Category from '../../components/category'
-import styled  from 'styled-components'
-import requests from '../../api/request'
+import React, { useEffect, useMemo, useState } from "react";
+import Banner from "../../components/banner";
+import Row from "../../components/Row";
+import Category from "../../components/category";
+import styled from "styled-components";
+import requests from "../../api/request";
+// import Update from "../../components/Update";
+import Feedback from "../../components/Feedback";
+import DemoActionSection from "../../components/DemoAction";
 
 const MainPage = () => {
   const [showDemoBanner, setShowDemoBanner] = useState(false);
+  // ✅ sessionStorage/localStorage 접근은 렌더마다 읽지 말고 memo로 한번만
+  const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
+
   useEffect(() => {
     const flag = sessionStorage.getItem("demo_banner");
     if (flag === "1") {
@@ -17,24 +22,58 @@ const MainPage = () => {
       return () => clearTimeout(t);
     }
   }, []);
+
+  // ✅ 게스트면 Row를 최소 구성으로 (2개 추천)
+  const rows = useMemo(() => {
+    if (isGuest) {
+      return [
+        { title: "Top Rated", id: "TR", fetchUrl: requests.fetchTopRated, showRank: true },
+        { title: "Trending Now", id: "TN", fetchUrl: requests.fetchTrending },
+      ];
+    }
+
+    // 일반 로그인(또는 기본)일 때는 기존 그대로
+    return [
+      { title: "Top Rated", id: "TR", fetchUrl: requests.fetchTopRated, showRank: true },
+      { title: "Trending Now", id: "TN", fetchUrl: requests.fetchTrending },
+      { title: "Action Movies", id: "AM", fetchUrl: requests.fetchActionMovies },
+      { title: "Comedy Movies", id: "CM", fetchUrl: requests.fetchComedyMovies },
+    ];
+  }, [isGuest]);
+
   return (
     <>
-    {showDemoBanner && (
-        <DemoBanner onClose={() => setShowDemoBanner(false)} />
-    )}
+      {showDemoBanner && <DemoBanner onClose={() => setShowDemoBanner(false)} />}
+
       <Container>
         <Banner />
-        <Category />
-        <Row title="Top Rated" id="TR" fetchUrl={requests.fetchTopRated} showRank />
-        <Row title="Trending Now" id="TN" fetchUrl={requests.fetchTrending} />
-        <Row title="Action Movies" id="AM" fetchUrl={requests.fetchActionMovies} />
-        <Row title="Comedy Movies" id="CM" fetchUrl={requests.fetchComedyMovies} />
+
+        {/* ✅ 게스트 전용: 섹션 */}
+        {isGuest && <DemoActionSection />}
+
+        {/* <Category /> */}
+
+        {!isGuest && <Category/>}
+
+        {rows.map((r) => (
+          <Row
+            key={r.id}
+            title={r.title}
+            id={r.id}
+            fetchUrl={r.fetchUrl}
+            showRank={r.showRank}
+          />
+        ))}
+
+        {/* ✅ 피드백 유도(원하면 게스트는 내부에서 제한/로그인 유도) */}
+        <Feedback variant="teaser" isGuest={isGuest} />
+        
       </Container>
     </>
-  )
-}
+  );
+};
 
-export default MainPage
+export default MainPage;
 
 const Container = styled.main`
   position: relative;
@@ -44,6 +83,7 @@ const Container = styled.main`
   padding: 72px calc(3.5vw + 5px) 0;
 `;
 
+/* DemoBanner 이하 네 기존 코드 그대로 */
 const DemoBanner = ({ onClose }) => {
   return (
     <DemoWrap role="status" aria-live="polite">

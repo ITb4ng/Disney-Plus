@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import tmdbAxios from "../../api/tmdbaxios";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -9,22 +9,45 @@ const SearchPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { search } = useLocation();
-  const location = useLocation(); // ✅ 통째로 받기 (구조분해 X)
+  const location = useLocation(); // ✅ 통째로 받기
+  const { search } = location;
+
+  // ✅ URL q 파싱
   const urlQ = useMemo(() => new URLSearchParams(search).get("q") ?? "", [search]);
+
+  // ✅ input은 하나의 소스
   const [inputValue, setInputValue] = useState(urlQ);
 
-  // URL이 바뀌면(데스크탑 nav input으로 검색 등) SearchPage input도 동기화
+  // ✅ (요청사항) 프리셋 진입 여부 플래그
+  // - 최초 1회만 “프리셋 진입인지” 판별하고 고정
+  const didInitPreset = useRef(false);
+  const [isPreset, setIsPreset] = useState(false);
+
+
+  // ✅ URL이 바뀌면 SearchPage input도 동기화
   useEffect(() => {
     setInputValue(urlQ);
   }, [urlQ]);
 
+  // ✅ 최초 진입 시 “프리셋 진입” 여부 결정
+  useEffect(() => {
+    if (didInitPreset.current) return;
+    didInitPreset.current = true;
+
+    // "q가 있으면 프리셋으로 들어온 것"으로 판단
+    // (DemoActionSection에서 q를 넣어주는 케이스)
+    setIsPreset(!!urlQ.trim());
+  }, [urlQ]);
+
+  // ✅ 검색어는 URL 기준 (네 검색 로직이 debounced=urlQ라 그대로 유지)
   const debounced = useDebounce(urlQ, 450);
+
   const goDetail = (type, id) => {
     navigate(`/detail/${type}/${id}`, {
       state: { from: location.pathname + location.search },
     });
   };
+
   useEffect(() => {
     const term = (debounced ?? "").trim();
 
@@ -76,8 +99,16 @@ const SearchPage = () => {
 
   const term = urlQ.trim();
 
+  // ✅ 입력 변화 처리
+  // - 유저가 타이핑 시작하면 “프리셋 상태”는 끝났다고 보는 게 자연스러움
   const onChangeQ = (v) => {
     setInputValue(v);
+
+    // ✅ 유저 인터랙션이 발생하면 프리셋 라벨은 꺼버림
+    // (단, 첫 렌더에서 urlQ->inputValue 동기화 같은 자동 세팅으로 꺼지지 않게 하려면
+    //  input 이벤트에서만 끄는 게 맞음. 지금은 onChange에서만 끄니까 OK.)
+    if (isPreset) setIsPreset(false);
+
     const t = v.trim();
 
     if (!t) {
@@ -88,16 +119,25 @@ const SearchPage = () => {
     navigate(`/search?q=${encodeURIComponent(t)}`, { replace: true }); // ✅ history 폭증 방지
   };
 
-  
-
   return (
     <div className="search-page page">
-      {/* ✅ 헤더: 좌측 정보, 우측 닫기(모든 디바이스 공통) */}
+      {/* ✅ 헤더 */}
       <header className="search-header">
         <div className="search-header__left">
-          <h2>{term ? `검색어 "${term}"` : "검색"}</h2>
+          {/* ✅ preset이면 살짝 “체험용” 뉘앙스 추가 가능 */}
+          <h2>
+            {term ? `검색어 "${term}"` : "검색"}
+            {isPreset && term ? <span className="search-header__badge">PRESET</span> : null}
+          </h2>
+
           <p className="search-header__meta">
-            {term ? (isLoading ? "검색 중…" : `${filteredResults.length}개 결과`) : "검색어를 입력해 주세요"}
+            {term
+              ? isLoading
+                ? "검색 중…"
+                : `${filteredResults.length}개 결과`
+              : isPreset
+                ? "추천 검색어가 미리 입력되어 있어요"
+                : "검색어를 입력해 주세요"}
           </p>
         </div>
 
@@ -105,8 +145,7 @@ const SearchPage = () => {
           type="button"
           className="search-header__close"
           onClick={() => {
-            // ✅ 검색 종료 = 메인으로 복귀
-            navigate("/main", { replace: true });
+            navigate(-1 , { replace: true });
           }}
           aria-label="검색 닫기"
         >
@@ -114,16 +153,17 @@ const SearchPage = () => {
         </button>
       </header>
 
-      {/* ✅ 모바일용 상단 인풋 (데스크탑에서는 CSS로 숨겨도 됨) */}
+      {/* ✅ 상단 인풋 */}
       <div className="search-top-input">
         <input
           type="search"
           value={inputValue}
           onChange={(e) => onChangeQ(e.target.value)}
-          placeholder="검색어를 입력하세요"
+          placeholder={isPreset ? "추천 검색어로 시작했어요" : "검색어를 입력하세요"}
           aria-label="검색어 입력"
           style={{ fontSize: 16 }} // ✅ iOS 줌 방지
         />
+
         {inputValue && (
           <button
             type="button"
@@ -139,7 +179,7 @@ const SearchPage = () => {
       <section className="search-container">
         {!term ? (
           <div className="no-results__text">
-            <p>검색어를 입력해 주세요.</p>
+            <p>{isPreset ? "추천 검색어로 시작해볼까요?" : "검색어를 입력해 주세요."}</p>
           </div>
         ) : isLoading ? (
           <div className="no-results__text">
@@ -152,19 +192,18 @@ const SearchPage = () => {
             const year = date ? date.slice(0, 4) : "";
             const typeLabel = item.media_type === "tv" ? "시리즈" : "영화";
 
-            const img =
-              item.backdrop_path
-                ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
-                : item.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-                  : "";
+            const img = item.backdrop_path
+              ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
+              : item.poster_path
+                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                : "";
 
             return (
               <button
                 className="card"
                 key={`${item.media_type}-${item.id}`}
                 type="button"
-                onClick={() => goDetail(item.media_type, item.id)} 
+                onClick={() => goDetail(item.media_type, item.id)}
                 aria-label={`${title} 상세로 이동`}
               >
                 <div className="card__media">

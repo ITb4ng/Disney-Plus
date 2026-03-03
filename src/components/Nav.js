@@ -457,7 +457,6 @@ const NavInner = styled.div`
   height: 100%;
   margin: 0 auto;
   padding: 0 calc(3.5vw + 5px);
-
   display: grid;
   grid-template-columns: 1fr auto 1fr; /* ✅ 핵심: 좌/우 동일 폭 */
   align-items: center;
@@ -588,11 +587,7 @@ const UserInitial = styled.span`
   letter-spacing: 0.2px;
   color: rgba(255, 255, 255, 0.92);
 
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(2, 231, 245, 0.35),
-    rgba(16, 18, 27, 0.9)
-  );
+  background: radial-gradient(circle at 30% 30%, rgb(0 240 255 / 90%), rgb(16 18 27 / 75%));
 
   border: 1px solid rgba(255, 255, 255, 0.12);
 `;
