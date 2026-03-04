@@ -4,10 +4,10 @@ import styled from "styled-components";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
+
 import MovieModal from "./MovieModal";
 import tmdbAxios from "../api/tmdbaxios";
 import "./Row.css";
-
 import "swiper/css";
 
 const ARROW_ZONE = 72;
@@ -16,20 +16,28 @@ const PHONE_MAX = 960;
 // ✅ 스켈레톤 카드 개수 (취향)
 const SKELETON_COUNT = 10;
 
-const Row = ({ 
-  title, id, fetchUrl, showRank = false,
-  mode = "modal",          
-  navType, 
-  onNavigate,              
-  }) => {
+// ✅ Row 결과 캐시 (리마운트/스크롤 왕복 방어)
+const ROW_CACHE = new Map();
+
+const Row = ({
+  title,
+  id,
+  fetchUrl,
+  showRank = false,
+  mode = "modal",
+  navType,
+  onNavigate,
+  onLoaded,
+  query: queryProp,
+}) => {
   const [movies, setMovies] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [movieSelected, setMovieSelection] = useState({});
   const navigate = useNavigate();
   const swiperRef = useRef(null);
 
-  // ✅ 스켈레톤용 상태
-  const [isLoading, setIsLoading] = useState(true);
+  // ✅ 스켈레톤용 상태 (초기: query가 있으면 true)
+  const [isLoading, setIsLoading] = useState(Boolean(queryProp ?? fetchUrl));
   const [hasError, setHasError] = useState(false);
 
   const [navState, setNavState] = useState({
@@ -41,8 +49,7 @@ const Row = ({
 
   /* -----------------------------
      📱 폰 레이아웃 감지
-     - 960px 이하
-     - 터치 기반 디바이스
+     - 960px 이하 + 터치 디바이스
   ----------------------------- */
   const [isPhoneLayout, setIsPhoneLayout] = useState(false);
 
@@ -55,7 +62,6 @@ const Row = ({
     const sync = () => setIsPhoneLayout(mqWidth.matches && mqTouch.matches);
 
     sync();
-
     mqWidth.addEventListener?.("change", sync);
     mqTouch.addEventListener?.("change", sync);
 
@@ -66,29 +72,69 @@ const Row = ({
   }, []);
 
   /* -----------------------------
-     fetchUrl 규격 통일
+     query 규격 통일
+     - queryProp 우선
+     - fetchUrl fallback
+     - path=[object Object] 방지
   ----------------------------- */
-  const query = useMemo(() => {
-    if (!fetchUrl) return null;
+  const queryObj = useMemo(() => {
+    const src = queryProp ?? fetchUrl;
+    if (!src) return null;
 
-    if (typeof fetchUrl === "string") {
-      return { path: fetchUrl };
-    }
+    if (typeof src === "string") return { path: src };
 
-    if (typeof fetchUrl === "object") {
-      const { path, ...params } = fetchUrl;
-      if (!path) return null;
-      return { path, ...params };
+    if (typeof src === "object") {
+      const { path, params, ...rest } = src;
+
+      const normalizedPath =
+        typeof path === "string"
+          ? path
+          : path && typeof path === "object" && typeof path.path === "string"
+          ? path.path
+          : "";
+
+      if (!normalizedPath) return null;
+
+      return {
+        path: normalizedPath,
+        ...(params && typeof params === "object" ? params : {}),
+        ...rest,
+      };
     }
 
     return null;
-  }, [fetchUrl]);
+  }, [queryProp, fetchUrl]);
+
+  // ✅ 캐시 키 (queryProp/fetchUrl 기준)
+  const queryKey = useMemo(() => {
+    const src = queryProp ?? fetchUrl;
+    return typeof src === "string" ? src : JSON.stringify(src ?? {});
+  }, [queryProp, fetchUrl]);
 
   /* -----------------------------
      데이터 로드
+     ✅ 캐시 hit: 즉시 복원(스켈레톤 재등장 방지)
+     ✅ 성공 시 캐시 저장(네 코드에 없던 핵심)
   ----------------------------- */
   useEffect(() => {
-    if (!query) return;
+    // ✅ query 없으면 로딩 끝
+    if (!queryObj) {
+      setIsLoading(false);
+      setHasError(false);
+      setMovies([]);
+      onLoaded?.(0);
+      return;
+    }
+
+    // ✅ 캐시 hit면 네트워크/스켈레톤 없이 복원
+    const cached = ROW_CACHE.get(queryKey);
+    if (cached?.movies) {
+      setMovies(cached.movies);
+      setIsLoading(false);
+      setHasError(false);
+      onLoaded?.(cached.movies.length);
+      return;
+    }
 
     let ignore = false;
 
@@ -97,20 +143,36 @@ const Row = ({
       setHasError(false);
 
       try {
-        const { path, ...params } = query;
-        const cleanPath = String(path).replace(/^\/+/, "");
+        const { path, ...params } = queryObj;
 
-        const res = await tmdbAxios.get("/", {
+        if (typeof path !== "string") {
+          throw new Error(`[Row:${id}] invalid path: ${String(path)}`);
+        }
+
+        const cleanPath = path.replace(/^\/+/, "");
+
+        const res = await tmdbAxios.get("", {
           params: { path: cleanPath, ...params },
         });
 
         const results = Array.isArray(res.data?.results) ? res.data.results : [];
-        if (!ignore) setMovies(results);
+
+        if (!ignore) {
+          setMovies(results);
+          onLoaded?.(results.length);
+
+          // ✅ 중요: 캐시에 저장해서 리마운트/스크롤 왕복 시 스켈레톤 재등장 방지
+          ROW_CACHE.set(queryKey, { movies: results, ts: Date.now() });
+        }
       } catch (e) {
         console.error(`[Row:${id}] fetch failed`, e);
         if (!ignore) {
           setHasError(true);
           setMovies([]);
+          onLoaded?.(0);
+
+          // (선택) 실패도 캐시할지 말지 취향
+          // ROW_CACHE.set(queryKey, { movies: [], ts: Date.now() });
         }
       } finally {
         if (!ignore) setIsLoading(false);
@@ -120,7 +182,7 @@ const Row = ({
     return () => {
       ignore = true;
     };
-  }, [query, id]);
+  }, [queryObj, queryKey, id, onLoaded]);
 
   /* -----------------------------
      이미지 없는 데이터 제거
@@ -136,8 +198,8 @@ const Row = ({
         onNavigate(movie);
         return;
       }
-      const type = navType || movie?.media_type || "movie";
-      navigate(`/detail/${type}/${movie.id}`, { replace: true });
+      const typeGuess = navType || movie?.media_type || "movie";
+      navigate(`/detail/${typeGuess}/${movie.id}`, { replace: true });
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -154,6 +216,7 @@ const Row = ({
 
   /* -----------------------------
      Swiper 초기 동기화
+     - 데이터 들어왔을 때 업데이트
   ----------------------------- */
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -183,7 +246,7 @@ const Row = ({
   const disableRight = useArrows && navState.isEnd;
 
   /* -----------------------------
-     스켈레톤 데이터
+     스켈레톤 리스트
   ----------------------------- */
   const skeletonSlides = useMemo(
     () =>
@@ -265,25 +328,41 @@ const Row = ({
                 );
               }
 
-              // ✅ 정상 슬라이드
+              const titleText =
+                movie?.title ||
+                movie?.name ||
+                movie?.original_title ||
+                movie?.original_name ||
+                "제목 없음";
+
+              const dateText = movie?.release_date || movie?.first_air_date || "";
+              const yearText = dateText ? dateText.slice(0, 4) : "";
+
               const imgPath = movie.backdrop_path || movie.poster_path;
               const altText = movie.title || movie.name || "movie";
               const rank = index + 1;
 
               return (
                 <SwiperSlide key={movie.id}>
-                  <Wrap>
+                  <Wrap onClick={() => handleClick(movie)} role="button" tabIndex={0}>
                     {/* ✅ Top Rated 등에서만 랭킹 표시 */}
-                   {showRank && (
+                    {showRank && (
                       <span className="rank--outline rank--tl rank--main">{rank}</span>
                     )}
 
                     <img
                       src={`https://image.tmdb.org/t/p/original${imgPath}`}
                       alt={altText}
-                      onClick={() => handleClick(movie)}
                       loading="lazy"
                     />
+
+                    {/* ✅ Hover Overlay (텍스트만) */}
+                    <div className="row__hoverOverlay" aria-hidden="true">
+                      <div className="row__hoverOverlayInner">
+                        <div className="row__hoverTitle">{titleText}</div>
+                        {!!yearText && <div className="row__hoverMeta">{yearText}</div>}
+                      </div>
+                    </div>
                   </Wrap>
                 </SwiperSlide>
               );
@@ -293,14 +372,17 @@ const Row = ({
           {/* ✅ 에러 메시지 */}
           {!isLoading && hasError && <RowHint role="status">Failed to load</RowHint>}
 
-          {/* ✅ 데이터는 로딩 끝났는데 비어있으면 */}
+          {/* ✅ 데이터 로딩 끝났는데 비어있으면 */}
           {!isLoading && !hasError && validMovies.length === 0 && (
             <RowHint role="status">No items</RowHint>
           )}
         </SwiperArea>
       </RowShell>
 
-      {modalOpen && <MovieModal {...movieSelected} setModalOpen={setModalOpen} />}
+      {/* ✅ Modal */}
+      {mode !== "navigate" && modalOpen && (
+        <MovieModal {...movieSelected} setModalOpen={setModalOpen} />
+      )}
     </Container>
   );
 };
@@ -347,7 +429,6 @@ const Wrap = styled.div`
     rgb(0 0 0/73%) 0px 16px 10px -10px;
 
   cursor: pointer;
-
   overflow: hidden;
 
   position: relative;

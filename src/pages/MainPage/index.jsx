@@ -12,7 +12,10 @@ const MainPage = () => {
   const [showDemoBanner, setShowDemoBanner] = useState(false);
   // ✅ sessionStorage/localStorage 접근은 렌더마다 읽지 말고 memo로 한번만
   const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
-
+  // 메타데이터 초기화
+  useEffect(() => {
+    document.title = "Disney+ Renewal";
+  }, []);
   useEffect(() => {
     const flag = sessionStorage.getItem("demo_banner");
     if (flag === "1") {

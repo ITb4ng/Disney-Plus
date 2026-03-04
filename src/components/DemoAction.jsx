@@ -8,7 +8,7 @@ const ROUTES = {
 };
 
 //주술회전
-const SAMPLE = { type: "tv", id: 95479 };
+const SAMPLE = { type: "movie", id: 674};
 
 const PRESS_DELAY_MS = 120;
 const LERP = 0.12;

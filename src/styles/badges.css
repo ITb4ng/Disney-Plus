@@ -46,9 +46,8 @@
 
 /* 메인 TL 위치 보정 */
 .rank--outline.rank--main.rank--tl {
-  top: auto;
-  bottom: 12px;
-  left: 12px;
+  top: 5px;
+  left: 8px;
 }
 
 /* B) Pill (Top10용) */

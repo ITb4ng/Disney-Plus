@@ -361,7 +361,8 @@
    Below (Row 영역)
 ========================= */
 .detail__below {
-  padding-top: 34px;
+  margin-top: -60px;
+  padding-top: 80px;
 }
 
 .detailRowScope {
@@ -382,4 +383,188 @@
   display: flex;
   justify-content: center;
   padding: 18px 0 26px;
+}
+.detail__below--padded {
+  padding: 72px calc(3.5vw + 5px) 0;
+}
+/* ===== Trailer ===== */
+.detail__trailer {
+  padding: 42px 0 42px;
+}
+
+.detail__sectionInner {
+  width: min(1200px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+/* .detail__trailer .detail__sectionInner {
+  width: min(980px, calc(100% - 40px));
+} */
+
+@media (max-width: 768px) {
+  .detail__trailer .detail__sectionInner {
+    width: calc(100% - 28px);
+  }
+}
+.detail__sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+.detail__trailerBox {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.detail__trailerBox iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ===== Cast ===== */
+.detail__castSection {
+  margin-top: 22px;
+}
+
+.detail__castGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.detail__castCard {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: default;
+}
+
+.detail__castCard img,
+.detail__castFallback {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  display: block;
+  background: rgba(255, 255, 255, 0.08);
+  object-fit: cover;
+}
+
+.detail__castName {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+  line-height: 1.25;
+}
+
+.detail__castRole {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+/* ===== Similar Rail ===== */
+.detail__similarRail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(180px, 240px);
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
+
+.detail__similarCard {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.detail__similarImgWrap {
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.detail__similarCard img,
+.detail__similarFallback {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.detail__similarTitle {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+  line-height: 1.25;
+}
+
+/* ===== Similar hover preview ===== */
+.detail__similarImgWrap {
+  position: relative;
+}
+
+.detail__previewFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.detail__previewFrame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.detail__similarOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.0) 40%,
+    rgba(0,0,0,0.45) 100%
+  );
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.detail__similarCard:hover .detail__similarOverlay {
+  opacity: 1;
+}
+
+.detail__similarCard {
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.detail__similarCard:hover {
+  transform: scale(1.03);
+}
+
+.detail {
+  overflow-x: clip; /* 최신 브라우저 */
+}
+@supports not (overflow-x: clip) {
+  .detail { overflow-x: hidden; }
 }
