@@ -18,7 +18,8 @@
   min-height: 100dvh;
   padding-top: var(--nav-h, 70px);
   overflow: hidden;
-
+  will-change: transform;
+  transform: translateZ(0);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -44,12 +45,26 @@
   }
 }
 
+
+@media (max-width:768px){
+
+.detail__hero{
+  min-height: 100vh;   /* 기본 hero 높이 */
+  height: auto;        /* 내부 콘텐츠에 맞게 확장 */
+  max-height: none;
+
+  background-position: center top;
+  background-size: cover;
+}
+
+}
+
+
+
+
 @media (max-width: 640px) {
   .detail__hero {
     --scrim: 0.20;
-    --edge: 0.58;
-    --top: 0.28;
-    --bottom: 0.12;
   }
 }
 @media (max-width: 640px) {
@@ -102,8 +117,12 @@
   z-index: 0; /* before/scrim과 같은 레벨 느낌 */
   background: rgba(9, 11, 19, 0.45);
   pointer-events: none;
+  opacity: 1;
+  transition: opacity .4s ease;
 }
-
+.detail__heroSk.loaded {
+  opacity: 0;
+}
 .detail__heroSkShimmer {
   position: absolute;
   inset: 0;
@@ -280,7 +299,7 @@
 .detail__wideSection {
   grid-column: 1 / -1;
   width: 100%;
-  margin-top: 18px;
+  margin-top: 50px
 }
 
 .detail__divider {
@@ -431,9 +450,16 @@
 
 /* ===== Cast ===== */
 .detail__castSection {
+  display: block;
   margin-top: 22px;
 }
+@media (max-width:768px){
 
+  .detail__castSection{
+    display:none;
+  }
+
+}
 .detail__castGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));

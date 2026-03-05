@@ -8,14 +8,15 @@ import requests from "../../api/request";
 import Feedback from "../../components/Feedback";
 import DemoActionSection from "../../components/DemoAction";
 
+
 const MainPage = () => {
   const [showDemoBanner, setShowDemoBanner] = useState(false);
-  // ✅ sessionStorage/localStorage 접근은 렌더마다 읽지 말고 memo로 한번만
+
+  // 브라우저 sessionStorage/localStorage 접근은 렌더마다 읽지 말고 memo로 한번만
   const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
-  // 메타데이터 초기화
-  useEffect(() => {
-    document.title = "Disney+ Renewal";
-  }, []);
+
+ 
+
   useEffect(() => {
     const flag = sessionStorage.getItem("demo_banner");
     if (flag === "1") {
@@ -26,7 +27,13 @@ const MainPage = () => {
     }
   }, []);
 
-  // ✅ 게스트면 Row를 최소 구성으로 (2개 추천)
+  // 디테일에서 넘오는 기존 메타데이터 초기화
+  useEffect(() => {
+    document.title = "Disney+ Renewal";
+  }, []);
+
+
+  // 체험용 게스트면 Row를 최소 구성으로 (2개 추천)
   const rows = useMemo(() => {
     if (isGuest) {
       return [
@@ -35,7 +42,7 @@ const MainPage = () => {
       ];
     }
 
-    // 일반 로그인(또는 기본)일 때는 기존 그대로
+  // 일반 로그인(또는 기본)일 때는 기존 그대로
     return [
       { title: "Top Rated", id: "TR", fetchUrl: requests.fetchTopRated, showRank: true },
       { title: "Trending Now", id: "TN", fetchUrl: requests.fetchTrending },
@@ -51,11 +58,10 @@ const MainPage = () => {
       <Container>
         <Banner />
 
-        {/* ✅ 게스트 전용: 섹션 */}
+        {/* 게스트 전용: 섹션 */}
         {isGuest && <DemoActionSection />}
 
-        {/* <Category /> */}
-
+        {/* 게스트는 카테고리 끔 */}
         {!isGuest && <Category/>}
 
         {rows.map((r) => (
@@ -68,7 +74,7 @@ const MainPage = () => {
           />
         ))}
 
-        {/* ✅ 피드백 유도(원하면 게스트는 내부에서 제한/로그인 유도) */}
+        {/* 피드백 유도(원하면 게스트는 내부에서 제한/로그인 유도) */}
         <Feedback variant="teaser" isGuest={isGuest} />
         
       </Container>
@@ -86,7 +92,6 @@ const Container = styled.main`
   padding: 72px calc(3.5vw + 5px) 0;
 `;
 
-/* DemoBanner 이하 네 기존 코드 그대로 */
 const DemoBanner = ({ onClose }) => {
   return (
     <DemoWrap role="status" aria-live="polite">
