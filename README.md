@@ -7,11 +7,17 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 
 ## 📦 Stable Release
 
-현재 안정화 버전: **v0.2.1**
+현재 안정화 버전: **v0.2.2**
 - 🌐 Live Demo (current dev deployment): https://b4ng-disney-plus.vercel.app/
 
 
 ### 🔖 Release History
+- **v0.2.2  Detail | Row UX 개선**
+  - Nav UX 개선
+  - DetailPage preload
+  - Row 캐시 안정화
+  - iframe lazy loading
+  - useMemo 렌더링 최적화
 - **v0.2.1  Detail UX 개선**
   - 영화 정보기반 Detail 동기화와 콘텐츠 별 구조 분리
   - 카드 Hover 시 영화 제목 및 출시년도 표시
@@ -26,13 +32,13 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 - v0.1.0
   - DetailPage 구조 개편 및 Hero 전환 UX 개선
 
-- 👉 GitHub - [v0.2.1 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.2.1)에서 v0.2.1 스냅샷(zip) 다운로드 가능
+- 👉 GitHub - [v0.2.1 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.2.2)에서 v0.2.2 스냅샷(zip) 다운로드 가능
 - 👉 또는 git clone 후 해당 태그로 체크아웃:
 
 ```bash
 git clone https://github.com/ITb4ng/Disney-Plus.git
 cd Disney-Plus
-git checkout v0.2.1
+git checkout v0.2.2
 ```
 ## 🧪 Local 개발 실행 방법 
 ```bash
@@ -107,6 +113,7 @@ UI/UX 개선과 구조 정리를 중심으로 지속적으로 업데이트 중�
 - [2026-03-03 release v0.2.0 작업](docs/2026-03-03-work.md)
 - [2026-03-04 release v0.2.0 수정](docs/2026-03-04-work.md)
 - [2026-03-05 release v0.2.1 개선](docs/2026-03-05-work.md)
+- [2026-03-06 release v0.2.2 개선](docs/2026-03-06-work.md)
 
   
 ### 🧭 다음 작업 예정
