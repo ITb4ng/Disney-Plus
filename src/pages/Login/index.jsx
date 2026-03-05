@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState,useEffect } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../../firebase";
 
@@ -123,6 +124,15 @@ export default function Login() {
       setPending(false);
     }
   };
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (user) {
+      navigate("/main", { replace: true });
+    }
+  });
+
+  return () => unsubscribe();
+}, [navigate]);
 
   return (
     <Wrap $fade={fadeOut}>

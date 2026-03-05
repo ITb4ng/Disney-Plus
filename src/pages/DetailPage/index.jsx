@@ -18,7 +18,7 @@ export default function DetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { type, movieId } = useParams();
-
+  
   const from = location.state?.from;
 
   const [data, setData] = useState(null);
@@ -26,7 +26,7 @@ export default function DetailPage() {
   // ✅ related(비슷한 콘텐츠) 로드 결과 추적 (트레일러는 있는데 related 0개면 fallback)
   const [relatedLoaded, setRelatedLoaded] = useState(false);
   const [relatedCount, setRelatedCount] = useState(0);
-
+  
   useEffect(() => {
     setRelatedLoaded(false);
     setRelatedCount(0);
@@ -46,7 +46,7 @@ export default function DetailPage() {
 
   const ogImagePath = data?.backdrop_path || data?.poster_path;
   const ogImageUrl = ogImagePath
-    ? `https://image.tmdb.org/t/p/w780${ogImagePath}`
+  ? `https://image.tmdb.org/t/p/w1280${ogImagePath}`
     : `${baseUrl}/og-image.jpg`;
 
   /* -------------------------
@@ -64,7 +64,19 @@ export default function DetailPage() {
   /* -------------------------
      Hero preload
   ------------------------- */
-  const [heroUrl, setHeroUrl] = useState("");
+  const heroUrl = useMemo(() => {
+    if (!data) return "";
+
+    const heroPath = data?.backdrop_path || data?.poster_path;
+    if (!heroPath) return "";
+
+    if (window.innerWidth < 768) {
+      return `https://image.tmdb.org/t/p/original${heroPath}`;
+    }
+
+    return tmdbImg(heroPath, heroSize);
+  }, [data, heroSize]);
+
   const [heroLoading, setHeroLoading] = useState(true);
 
   /* -------------------------
@@ -75,7 +87,7 @@ export default function DetailPage() {
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
-      const next = Math.min(1, Math.pow(y / 220, 0.85));
+      const next = Math.min(1, y / 300);
       setVignette(next);
     };
     onScroll();
@@ -86,63 +98,65 @@ export default function DetailPage() {
   /* -------------------------
      Fetch Detail + preload hero
   ------------------------- */
-  useEffect(() => {
-    let alive = true;
+useEffect(() => {
+  let alive = true;
 
-    (async () => {
-      try {
-        setHeroLoading(true);
+  (async () => {
+    try {
+      setHeroLoading(true);
 
-        const res = await tmdbAxios.get("", {
-          params: {
-            path: `${type}/${movieId}`,
-            language: "ko-KR",
-            append_to_response: "credits,videos,release_dates,content_ratings",
-          },
-        });
+      const res = await tmdbAxios.get("", {
+        params: {
+          path: `${type}/${movieId}`,
+          language: "ko-KR",
+          append_to_response: "credits,videos,release_dates,content_ratings",
+        },
+      });
 
-        if (!alive) return;
+      if (!alive) return;
 
-        const nextData = res.data;
-        setData(nextData);
+      const nextData = res.data;
+      setData(nextData);
 
-        const heroPath = pick(nextData?.backdrop_path, nextData?.poster_path) ?? "";
-        if (!heroPath) {
-          setHeroUrl("");
-          setHeroLoading(false);
-          return;
-        }
+    } catch (e) {
+      if (!alive) return;
+      console.error("[DetailPage] fetch failed", e);
+      setData(null);
+      setHeroLoading(false);
+    }
+  })();
 
-        const nextHeroUrl = tmdbImg(heroPath, heroSize);
+  return () => {
+    alive = false;
+  };
+}, [type, movieId]);
 
-        const img = new Image();
-        img.decoding = "async";
-        img.src = nextHeroUrl;
+useEffect(() => {
+  if (!heroUrl) {
+    setHeroLoading(false);
+    return;
+  }
 
-        img.onload = () => {
-          if (!alive) return;
-          setHeroUrl(nextHeroUrl);
-          setHeroLoading(false);
-        };
+  let alive = true;
 
-        img.onerror = () => {
-          if (!alive) return;
-          setHeroUrl("");
-          setHeroLoading(false);
-        };
-      } catch (e) {
-        if (!alive) return;
-        console.error("[DetailPage] fetch failed", e);
-        setData(null);
-        setHeroUrl("");
-        setHeroLoading(false);
-      }
-    })();
+  const img = new Image();
+  img.decoding = "async";
+  img.src = heroUrl;
 
-    return () => {
-      alive = false;
-    };
-  }, [type, movieId, heroSize]);
+  img.onload = () => {
+    if (!alive) return;
+    setHeroLoading(false);
+  };
+
+  img.onerror = () => {
+    if (!alive) return;
+    setHeroLoading(false);
+  };
+
+  return () => {
+    alive = false;
+  };
+}, [heroUrl]);
 
   /* -------------------------
      UI Derived
@@ -232,7 +246,9 @@ export default function DetailPage() {
   /* -------------------------
      Cast list
   ------------------------- */
-  const castList = useMemo(() => (data?.credits?.cast || []).slice(0, 10), [data]);
+  const castList = useMemo(() => {
+    return (data?.credits?.cast || []).slice(0, 10);
+  }, [data?.credits]);
 
   /* -------------------------
      Row queries (✅ useMemo 고정)
@@ -384,9 +400,9 @@ export default function DetailPage() {
               <div className="detail__trailerBox">
                 <iframe
                   src={`https://www.youtube.com/embed/${trailerKey}`}
-                  title="Trailer"
+                  title={`${ui.title} Trailer`}
                   loading="lazy"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               </div>
@@ -410,8 +426,8 @@ export default function DetailPage() {
               mode="navigate"
               navType="movie"
               onNavigate={(movie) => {
-                navigate(`/detail/movie/${movie.id}`, { replace: true });
                 window.scrollTo({ top: 0, behavior: "smooth" });
+                navigate(`/detail/movie/${movie.id}`, { replace: true });
               }}
             />
           )}

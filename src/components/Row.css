@@ -269,24 +269,72 @@
   100% { background-position: -200% 0; }
 }
 
-.row__hoverOverlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* =========================
+   Movie Card Overlay
+========================= */
 
-  display: flex;
-  align-items: flex-end;
+.row__hoverOverlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
 
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 180ms ease, transform 180ms ease;
+  display:flex;
+  align-items:flex-end;
 
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 52%,
-    rgba(0, 0, 0, 0.62) 100%
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity 180ms ease, transform 180ms ease;
+
+  z-index:2;
+
+  background:linear-gradient(
+  180deg,
+  rgba(0,0,0,0) 52%,
+  rgba(0,0,0,0.62) 100%
   );
 }
+
+/* Desktop hover + keyboard focus */
+@media (hover:hover){
+  .rowShell .swiper-slide:hover,
+  .rowShell .swiper-slide:focus-within{
+  border-color: rgba(249,249,249,0.8);
+}
+
+.rowShell .swiper-slide:hover .row__hoverOverlay,
+.rowShell .swiper-slide:focus-within .row__hoverOverlay{
+  opacity:1;
+  transform:translateY(0);
+  }
+}
+
+/* keyboard accessibility */
+.swiper-slide:focus-visible{
+  outline:2px solid rgba(255,255,255,.6);
+  outline-offset:4px;
+}
+
+/* Mobile 기본 overlay 표시 */
+@media (max-width:768px){
+  .row__hoverOverlay{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* 카드 인터랙션 */
+.swiper-slide{
+  transition:transform .2s ease;
+}
+
+/* 모바일 터치 피드백 */
+.swiper-slide:hover{
+  transform:scale(1.03);
+}
+
+/* =========================
+   Overlay Content
+========================= */
 
 .row__hoverOverlayInner {
   width: 100%;
@@ -310,14 +358,10 @@
   color: rgba(255, 255, 255, 0.72);
 }
 
-/* hover/focus에서만 표시 */
-.rowShell .swiper-slide:hover .row__hoverOverlay,
-.rowShell .swiper-slide:focus-within .row__hoverOverlay {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* =========================
+   Skeleton 상태에서는 숨김
+========================= */
 
-/* 스켈레톤은 오버레이 표시 안 함 */
 .skWrap .row__hoverOverlay {
   display: none;
 }
