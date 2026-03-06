@@ -14,10 +14,11 @@ const Nav = () => {
   const [isDropIn, setIsDropIn] = useState(false);
 
   const location = useLocation();
-  const { pathname } = location;
+  const { pathname, search } = location;
   const navigate = useNavigate();
-  const profileRef = useRef(null);
 
+  /* 2) 검색 관련 상태 (Desktop + Mobile 공용) */
+  const profileRef = useRef(null);
   const { transitionToken, transitionSource, triggerSearchTransition } =
     useSearchTransition();
 
@@ -77,14 +78,18 @@ const Nav = () => {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY || 0;
-      const next = Math.min(1, y / 300);
-      setNavOpacity(next);
-    };
+const handleScroll = () => {
+  const y = window.scrollY || 0;
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
+  // 0 ~ 300px 구간에서 opacity 증가
+  const next = Math.min(1, y / 300);
+
+  setNavOpacity(next);
+};
+
+handleScroll();
+
+window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -142,104 +147,108 @@ const Nav = () => {
   })();
 
   return (
-    <NavWrapper
-      className={`app-nav ${isDropIn ? "app-nav--drop-in" : ""}`}
-      $opacity={navOpacity}
-    >
-      <NavInner>
-        <Left>
-          <Logo to={userData ? "/main" : "/"}>
-            <img alt="Disney Plus Logo" src="/images/logo.svg" />
-          </Logo>
-        </Left>
+  <NavWrapper
+    className={`app-nav ${isDropIn ? "app-nav--drop-in" : ""}`}
+    $opacity={navOpacity} >
+    <NavInner>
+      <Left>
+        <Logo
+          to={userData ? "/main" : "/"}
+          onClick={() => {
+            setSearchValue("");
+            setIsSearchOpen(false);
+          }}
+        >
+          <img alt="Disney Plus Logo" src="/images/logo.svg" />
+        </Logo>
+      </Left>
 
-        <Right>
-          {pathname !== "/" && (
-            <button
-              type="button"
-              className="nav-mobile-search"
-              aria-label="검색 페이지로 이동"
-              onClick={() => {
-                triggerSearchTransition("nav");
-                navigate("/search", {
-                  state: {
-                    from: location.pathname + location.search,
-                  },
-                });
-              }}
-            >
-              <FiSearch size={20} />
-            </button>
-          )}
+      <Right>
+        {pathname !== "/" && isMobile && (
+          <button
+            type="button"
+            className="nav-mobile-search"
+            aria-label="검색 페이지로 이동"
+            onClick={() => {
+              triggerSearchTransition("nav");
+              navigate("/search", {
+                state: {
+                  from: location.pathname + location.search,
+                },
+              });
+            }}
+          >
+            <FiSearch size={20} />
+          </button>
+        )}
 
-          {!userData && (
-            <Login as="button" type="button" onClick={() => navigate("/login")}>
-              로그인
-            </Login>
-          )}
+        {!userData && (
+          <Login as="button" type="button" onClick={() => navigate("/login")}>
+            로그인
+          </Login>
+        )}
 
-          {userData && (
-            <>
-              {pathname === "/" && (
-                <Login
-                  as="button"
+        {userData && (
+          <>
+            {pathname === "/" && (
+              <Login
+                as="button"
+                type="button"
+                onClick={() => navigate("/main")}
+                style={{ marginRight: "12px" }}
+              >
+                App으로 가기
+              </Login>
+            )}
+
+            <SignOut ref={profileRef}>
+              <UserButton
+                type="button"
+                onClick={() => setIsProfileOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={isProfileOpen}
+              >
+                {userData?.photoURL ? (
+                  <UserImg
+                    src={userData.photoURL}
+                    alt={userData?.displayName || "user"}
+                  />
+                ) : (
+                  <UserInitial>{avatarText}</UserInitial>
+                )}
+              </UserButton>
+
+              <DropDown
+                role="menu"
+                $open={isProfileOpen}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MenuItem type="button" role="menuitem" onClick={closeProfile}>
+                  프로필
+                </MenuItem>
+
+                <MenuItem type="button" role="menuitem" onClick={closeProfile}>
+                  마이페이지
+                </MenuItem>
+
+                <Divider />
+
+                <MenuItem
                   type="button"
-                  onClick={() => navigate("/main")}
-                  style={{ marginRight: "12px" }}
+                  role="menuitem"
+                  $danger
+                  onClick={handleSignOut}
                 >
-                  App으로 가기
-                </Login>
-              )}
-
-              <SignOut ref={profileRef}>
-                <UserButton
-                  type="button"
-                  onClick={() => setIsProfileOpen((v) => !v)}
-                  aria-haspopup="menu"
-                  aria-expanded={isProfileOpen}
-                >
-                  {userData?.photoURL ? (
-                    <UserImg
-                      src={userData.photoURL}
-                      alt={userData?.displayName || "user"}
-                    />
-                  ) : (
-                    <UserInitial>{avatarText}</UserInitial>
-                  )}
-                </UserButton>
-
-                <DropDown
-                  role="menu"
-                  $open={isProfileOpen}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MenuItem type="button" role="menuitem" onClick={closeProfile}>
-                    프로필
-                  </MenuItem>
-
-                  <MenuItem type="button" role="menuitem" onClick={closeProfile}>
-                    마이페이지
-                  </MenuItem>
-
-                  <Divider />
-
-                  <MenuItem
-                    type="button"
-                    role="menuitem"
-                    $danger
-                    onClick={handleSignOut}
-                  >
-                    로그아웃
-                  </MenuItem>
-                </DropDown>
-              </SignOut>
-            </>
-          )}
-        </Right>
-      </NavInner>
-    </NavWrapper>
-  );
-};
+                  로그아웃
+                </MenuItem>
+              </DropDown>
+            </SignOut>
+          </>
+        )}
+      </Right>
+    </NavInner>
+  </NavWrapper>
+);
 
 export default Nav;
 
@@ -248,7 +257,6 @@ const NavWrapper = styled.nav`
   top: 0;
   left: 0;
   right: 0;
-
   height: 70px;
   background-color: rgba(9, 11, 19, ${(p) => p.$opacity});
   z-index: 10;
