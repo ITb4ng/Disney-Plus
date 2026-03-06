@@ -5,6 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from "react-helmet-async";
+import { AuthProvider } from "./contexts/AuthContext";
+import { SearchTransitionProvider } from "./contexts/SearchTransitionContext";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -22,11 +24,15 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <HelmetProvider>
-          <App />
-        </HelmetProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <SearchTransitionProvider>
+          <BrowserRouter>
+            <HelmetProvider>
+              <App />
+            </HelmetProvider>
+          </BrowserRouter>
+        </SearchTransitionProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

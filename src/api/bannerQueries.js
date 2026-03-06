@@ -1,19 +1,14 @@
-// src/api/bannerQueries.js
 import tmdbAxios from "./tmdbaxios";
-import requests from "./request";
+// import requests from "./request";
 
 export async function fetchBannerNowPlaying() {
-  const spec = requests.fetchNowplaying;
-  if (!spec || typeof spec !== "object" || !spec.path) return null;
+  const seedId = 93405; //66732, 71446, 93405, 94605 , 110316 , 214582, 194797 ,119769, 982843(movie)
 
-  const { path, ...params } = spec;
-
-  // 1️⃣ 리스트 먼저 가져오기
+  // 1️⃣ seed 기반 추천 목록
   const res = await tmdbAxios.get("", {
     params: {
-      path,
-      ...params,
-      language: "ko-KR",   // ✅ 여기 추가
+      path: `tv/${seedId}/recommendations`,
+      language: "ko-KR",
     },
   });
 
@@ -23,17 +18,17 @@ export async function fetchBannerNowPlaying() {
   const picked = results[Math.floor(Math.random() * results.length)];
   if (!picked?.id) return null;
 
-  // 2️⃣ 상세 정보 + videos 다시 요청
+  // 2️⃣ 상세 정보
   const { data: detail } = await tmdbAxios.get("", {
     params: {
-      path: `movie/${picked.id}`,
+      path: `${picked.media_type}/${picked.id}`,
       append_to_response: "videos",
-      language: "ko-KR",   // ✅ 여기 필수
+      language: "ko-KR",
     },
   });
 
   return {
     ...detail,
-    media_type: picked?.media_type ?? "movie",
+    media_type: picked.media_type,
   };
 }

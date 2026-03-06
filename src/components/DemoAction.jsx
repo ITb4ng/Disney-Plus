@@ -1,13 +1,14 @@
 import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSearchTransition } from "../contexts/SearchTransitionContext";
 
 const ROUTES = {
   search: "/search",
   detail: (type, id) => `/detail/${type}/${id}`,
 };
 
-//주술회전
+//해리포터 불의 잔 674 , 283366, 982843
 const SAMPLE = { type: "movie", id: 674};
 
 const PRESS_DELAY_MS = 120;
@@ -23,6 +24,8 @@ function pickRandom(arr) {
 
 export default function DemoActionSection() {
   const nav = useNavigate();
+  const location = useLocation();
+  const { triggerSearchTransition } = useSearchTransition();
 
   const [randomLoading, setRandomLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -41,8 +44,13 @@ export default function DemoActionSection() {
   const goSearch = useCallback(() => {
     const q = PRESET_QUERIES[Math.floor(Math.random() * PRESET_QUERIES.length)];
     const qs = new URLSearchParams({ q });
-    nav(`${ROUTES.search}?${qs.toString()}`);
-  }, [nav]);
+    triggerSearchTransition("demo-action");
+    nav(`${ROUTES.search}?${qs.toString()}`, {
+      state: {
+        from: location.pathname + location.search,
+      },
+    });
+  }, [location.pathname, location.search, nav, triggerSearchTransition]);
 
   const goSampleDetail = useCallback(() => {
     nav(ROUTES.detail(SAMPLE.type, SAMPLE.id));
@@ -60,7 +68,7 @@ export default function DemoActionSection() {
       const ac = new AbortController();
       abortRef.current = ac;
 
-      const res = await fetch("/api/tmdb?path=movie/popular&language=ko-KR&page=1", {
+      const res = await fetch("/api/tmdb?path=movie/911430/recommendations", {
         method: "GET",
         signal: ac.signal,
       });

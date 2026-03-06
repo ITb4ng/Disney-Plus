@@ -6,10 +6,10 @@ const requests = {
     include_adult: false,
     include_video: false,
     language: "ko-KR",
-    page: 1,
+    page: 3,
   },
   fetchNowplaying: {
-    path: "movie/now_playing",
+    path: "trending/all/day",
   },
 
   fetchTrending: {
