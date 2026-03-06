@@ -1,237 +1,343 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
 import tmdbAxios from "../../api/tmdbaxios";
 import { useDebounce } from "../../hooks/useDebounce";
+
+import SearchHeader from "./components/SearchHeader";
+import SearchInput from "./components/SearchInput";
+import SearchFilterBar from "./components/SearchFilterBar";
+import SearchResultGrid from "./components/SearchResultGrid";
+import SearchEmptyState from "./components/SearchEmptyState";
+import { useSearchTransition } from "../../contexts/SearchTransitionContext";
+
 import "./SearchPage.css";
 
-const SearchPage = () => {
-  const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+const VALID_TYPES = ["all", "movie", "tv"];
+const VALID_SORTS = ["relevance", "latest", "rating"];
+const RECENT_KEYWORDS_KEY = "search_recent_keywords_v1";
+const RECOMMENDED_KEYWORDS_KEY = "search_recommended_keywords_v1";
+const MAX_RECENT_KEYWORDS = 5;
+const DEFAULT_RECOMMENDED = ["마블", "디즈니", "픽사", "스타워즈", "애니메이션"];
 
-  const navigate = useNavigate();
-  const location = useLocation(); // ✅ 통째로 받기
-  const { search } = location;
+const normalizeType = (value) => (VALID_TYPES.includes(value) ? value : "all");
+const normalizeSort = (value) => (VALID_SORTS.includes(value) ? value : "relevance");
 
-  // ✅ URL q 파싱
-  const urlQ = useMemo(() => new URLSearchParams(search).get("q") ?? "", [search]);
+const parseKeywordList = (storageKey, fallback = []) => {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return fallback;
 
-  // ✅ input은 하나의 소스
-  const [inputValue, setInputValue] = useState(urlQ);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return fallback;
 
-  // ✅ (요청사항) 프리셋 진입 여부 플래그
-  // - 최초 1회만 “프리셋 진입인지” 판별하고 고정
-  const didInitPreset = useRef(false);
-  const [isPreset, setIsPreset] = useState(false);
+    return parsed
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
+      .slice(0, MAX_RECENT_KEYWORDS);
+  } catch {
+    return fallback;
+  }
+};
 
+const saveKeywordList = (storageKey, keywords) => {
+  localStorage.setItem(storageKey, JSON.stringify(keywords));
+};
 
-  // ✅ URL이 바뀌면 SearchPage input도 동기화
-  useEffect(() => {
-    setInputValue(urlQ);
-  }, [urlQ]);
+const upsertKeyword = (list, keyword) => {
+  const trimmed = keyword.trim();
+  if (!trimmed) return list;
+  return [trimmed, ...list.filter((item) => item !== trimmed)].slice(
+    0,
+    MAX_RECENT_KEYWORDS
+  );
+};
 
-  // ✅ 최초 진입 시 “프리셋 진입” 여부 결정
-  useEffect(() => {
-    if (didInitPreset.current) return;
-    didInitPreset.current = true;
+const sortResults = (results, sort) => {
+  if (sort === "relevance") return results;
 
-    // "q가 있으면 프리셋으로 들어온 것"으로 판단
-    // (DemoActionSection에서 q를 넣어주는 케이스)
-    setIsPreset(!!urlQ.trim());
-  }, [urlQ]);
+  const list = [...results];
 
-  // ✅ 검색어는 URL 기준 (네 검색 로직이 debounced=urlQ라 그대로 유지)
-  const debounced = useDebounce(urlQ, 450);
-
-  const goDetail = (type, id) => {
-    navigate(`/detail/${type}/${id}`, {
-      state: { from: location.pathname + location.search },
+  if (sort === "latest") {
+    list.sort((a, b) => {
+      const aDate = new Date(
+        a.release_date || a.first_air_date || "1900-01-01"
+      ).getTime();
+      const bDate = new Date(
+        b.release_date || b.first_air_date || "1900-01-01"
+      ).getTime();
+      return bDate - aDate;
     });
-  };
+    return list;
+  }
+
+  list.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+  return list;
+};
+
+const fetchSearchResults = async ({ queryTerm, type, sort }) => {
+  const path =
+    type === "movie" ? "search/movie" : type === "tv" ? "search/tv" : "search/multi";
+
+  const response = await tmdbAxios.get("", {
+    params: {
+      path,
+      query: queryTerm,
+      include_adult: false,
+      language: "ko-KR",
+    },
+  });
+
+  const rawResults = Array.isArray(response.data?.results)
+    ? response.data.results
+    : [];
+
+  const filtered = rawResults
+    .map((item) => {
+      if (type === "movie") return { ...item, media_type: "movie" };
+      if (type === "tv") return { ...item, media_type: "tv" };
+      return item;
+    })
+    .filter((item) => {
+      const mediaType = item.media_type;
+      const isContent = mediaType === "movie" || mediaType === "tv";
+      const hasImage = Boolean(item.backdrop_path || item.poster_path);
+      return isContent && hasImage;
+    });
+
+  return sortResults(filtered, sort);
+};
+
+const SearchPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { transitionToken, transitionSource } = useSearchTransition();
+  const [isEntering, setIsEntering] = useState(false);
+
+  const from = location.state?.from || "/main";
+
+  const rawType = searchParams.get("type") || "all";
+  const rawSort = searchParams.get("sort") || "relevance";
+  const type = normalizeType(rawType);
+  const sort = normalizeSort(rawSort);
+  const term = (searchParams.get("q") || "").trim();
+
+  const [inputValue, setInputValue] = useState(term);
+  const skipNextDebounceSyncRef = useRef(false);
+  const [recentKeywords, setRecentKeywords] = useState(() =>
+    parseKeywordList(RECENT_KEYWORDS_KEY, [])
+  );
+  const [recommendedKeywords, setRecommendedKeywords] = useState(() =>
+    parseKeywordList(RECOMMENDED_KEYWORDS_KEY, DEFAULT_RECOMMENDED)
+  );
+
+  const debouncedInput = useDebounce(inputValue, 450);
+
+  const updateSearchParams = useCallback(
+    (nextTerm, replace = true, nextType = type, nextSort = sort) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (nextTerm) {
+            next.set("q", nextTerm);
+          } else {
+            next.delete("q");
+          }
+          next.set("type", normalizeType(nextType));
+          next.set("sort", normalizeSort(nextSort));
+          return next;
+        },
+        { replace }
+      );
+    },
+    [setSearchParams, sort, type]
+  );
+
+  const addRecentKeyword = useCallback((keyword) => {
+    const trimmed = keyword.trim();
+    if (!trimmed) return;
+
+    setRecentKeywords((prev) => {
+      const next = upsertKeyword(prev, trimmed);
+      saveKeywordList(RECENT_KEYWORDS_KEY, next);
+      return next;
+    });
+
+    setRecommendedKeywords((prev) => {
+      const next = upsertKeyword(prev, trimmed);
+      saveKeywordList(RECOMMENDED_KEYWORDS_KEY, next);
+      return next;
+    });
+  }, []);
+
+  const handleRemoveKeyword = useCallback((group, keyword) => {
+    if (group === "recent") {
+      setRecentKeywords((prev) => {
+        const next = prev.filter((item) => item !== keyword);
+        saveKeywordList(RECENT_KEYWORDS_KEY, next);
+        return next;
+      });
+      return;
+    }
+
+    setRecommendedKeywords((prev) => {
+      const next = prev.filter((item) => item !== keyword);
+      saveKeywordList(RECOMMENDED_KEYWORDS_KEY, next);
+      return next;
+    });
+  }, []);
+
+  const handleClearKeywords = useCallback((group) => {
+    if (group === "recent") {
+      setRecentKeywords([]);
+      saveKeywordList(RECENT_KEYWORDS_KEY, []);
+      return;
+    }
+
+    setRecommendedKeywords([]);
+    saveKeywordList(RECOMMENDED_KEYWORDS_KEY, []);
+  }, []);
 
   useEffect(() => {
-    const term = (debounced ?? "").trim();
+    setInputValue(term);
+  }, [term]);
 
-    if (!term) {
-      setSearchResults([]);
-      setIsLoading(false);
+  useEffect(() => {
+    const shouldAnimate =
+      transitionSource === "nav" || transitionSource === "demo-action";
+    if (!shouldAnimate) return;
+
+    setIsEntering(true);
+    const timer = window.setTimeout(() => {
+      setIsEntering(false);
+    }, 520);
+
+    return () => window.clearTimeout(timer);
+  }, [transitionSource, transitionToken]);
+
+  useEffect(() => {
+    if (rawType === type && rawSort === sort) return;
+    updateSearchParams(term, true, type, sort);
+  }, [rawType, rawSort, sort, term, type, updateSearchParams]);
+
+  useEffect(() => {
+    const nextTerm = debouncedInput.trim();
+    if (skipNextDebounceSyncRef.current) {
+      skipNextDebounceSyncRef.current = false;
       return;
     }
+    if (nextTerm === term) return;
+    updateSearchParams(nextTerm, true);
+  }, [debouncedInput, term, updateSearchParams]);
 
-    let alive = true;
+  const searchQuery = useQuery({
+    queryKey: ["search", term, type, sort],
+    enabled: term.length > 0,
+    placeholderData: (previousData) => previousData,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    queryFn: () => fetchSearchResults({ queryTerm: term, type, sort }),
+  });
 
-    const run = async () => {
-      try {
-        setIsLoading(true);
-        const res = await tmdbAxios.get("", {
-          params: {
-            path: "search/multi",
-            include_adult: false,
-            query: term,
-            language: "ko-KR",
-          },
-        });
+  useEffect(() => {
+    if (!term || !searchQuery.isSuccess) return;
+    addRecentKeyword(term);
+  }, [addRecentKeyword, searchQuery.isSuccess, term]);
 
-        if (!alive) return;
-        setSearchResults(Array.isArray(res.data?.results) ? res.data.results : []);
-      } catch (e) {
-        console.log("search error:", e);
-        if (!alive) return;
-        setSearchResults([]);
-      } finally {
-        if (!alive) return;
-        setIsLoading(false);
-      }
-    };
+  const handleSearchSubmit = useCallback(
+    (value) => {
+      const nextTerm = value.trim();
+      skipNextDebounceSyncRef.current = true;
+      setInputValue(nextTerm);
+      updateSearchParams(nextTerm, false);
+      if (nextTerm) addRecentKeyword(nextTerm);
+    },
+    [addRecentKeyword, updateSearchParams]
+  );
 
-    run();
-    return () => {
-      alive = false;
-    };
-  }, [debounced]);
+  const handlePickKeyword = useCallback(
+    (keyword) => {
+      const nextTerm = keyword.trim();
+      if (!nextTerm) return;
+      skipNextDebounceSyncRef.current = true;
+      setInputValue(nextTerm);
+      updateSearchParams(nextTerm, false);
+      addRecentKeyword(nextTerm);
+    },
+    [addRecentKeyword, updateSearchParams]
+  );
 
-  const filteredResults = useMemo(() => {
-    return searchResults.filter(
-      (item) =>
-        item.media_type !== "person" &&
-        (item.backdrop_path !== null || item.poster_path !== null)
-    );
-  }, [searchResults]);
+  const handleTypeChange = useCallback(
+    (nextType) => {
+      updateSearchParams(term, true, nextType, sort);
+    },
+    [sort, term, updateSearchParams]
+  );
 
-  const term = urlQ.trim();
+  const handleSortChange = useCallback(
+    (nextSort) => {
+      updateSearchParams(term, true, type, nextSort);
+    },
+    [term, type, updateSearchParams]
+  );
 
-  // ✅ 입력 변화 처리
-  // - 유저가 타이핑 시작하면 “프리셋 상태”는 끝났다고 보는 게 자연스러움
-  const onChangeQ = (v) => {
-    setInputValue(v);
+  const goDetail = useCallback(
+    (mediaType, movieId) => {
+      navigate(`/detail/${mediaType}/${movieId}`, {
+        state: { from: location.pathname + location.search },
+      });
+    },
+    [location.pathname, location.search, navigate]
+  );
 
-    // ✅ 유저 인터랙션이 발생하면 프리셋 라벨은 꺼버림
-    // (단, 첫 렌더에서 urlQ->inputValue 동기화 같은 자동 세팅으로 꺼지지 않게 하려면
-    //  input 이벤트에서만 끄는 게 맞음. 지금은 onChange에서만 끄니까 OK.)
-    if (isPreset) setIsPreset(false);
+  const results = searchQuery.data || [];
+  const hasResults = results.length > 0;
 
-    const t = v.trim();
-
-    if (!t) {
-      navigate("/search", { replace: true }); // ✅ q 제거하고 search에 머무름
-      return;
-    }
-
-    navigate(`/search?q=${encodeURIComponent(t)}`, { replace: true }); // ✅ history 폭증 방지
-  };
+  let stateMode = "idle";
+  if (term && searchQuery.isPending && !searchQuery.data) stateMode = "loading";
+  if (searchQuery.isError) stateMode = "error";
+  if (term && !searchQuery.isPending && !searchQuery.isError && !hasResults) {
+    stateMode = "empty";
+  }
 
   return (
-    <div className="search-page page">
-      {/* ✅ 헤더 */}
-      <header className="search-header">
-        <div className="search-header__left">
-          {/* ✅ preset이면 살짝 “체험용” 뉘앙스 추가 가능 */}
-          <h2>
-            {term ? `검색어 "${term}"` : "검색"}
-            {isPreset && term ? <span className="search-header__badge">PRESET</span> : null}
-          </h2>
+    <div className={`search-page page ${isEntering ? "search-page--entering" : ""}`}>
+      <SearchHeader
+        term={term}
+        resultCount={results.length}
+        isFetching={searchQuery.isFetching}
+        onClose={() => navigate(from, { replace: true })}
+      />
 
-          <p className="search-header__meta">
-            {term
-              ? isLoading
-                ? "검색 중…"
-                : `${filteredResults.length}개 결과`
-              : isPreset
-                ? "추천 검색어가 미리 입력되어 있어요"
-                : "검색어를 입력해 주세요"}
-          </p>
-        </div>
+      <SearchInput
+        value={inputValue}
+        onChange={setInputValue}
+        onSubmit={handleSearchSubmit}
+        recentKeywords={recentKeywords}
+        recommendedKeywords={recommendedKeywords}
+        onPickKeyword={handlePickKeyword}
+        onRemoveKeyword={handleRemoveKeyword}
+        onClearKeywords={handleClearKeywords}
+      />
 
-        <button
-          type="button"
-          className="search-header__close"
-          onClick={() => {
-            navigate(-1 , { replace: true });
-          }}
-          aria-label="검색 닫기"
-        >
-          닫기
-        </button>
-      </header>
+      <SearchFilterBar
+        type={type}
+        sort={sort}
+        onTypeChange={handleTypeChange}
+        onSortChange={handleSortChange}
+      />
 
-      {/* ✅ 상단 인풋 */}
-      <div className="search-top-input">
-        <input
-          type="search"
-          value={inputValue}
-          onChange={(e) => onChangeQ(e.target.value)}
-          placeholder={isPreset ? "추천 검색어로 시작했어요" : "검색어를 입력하세요"}
-          aria-label="검색어 입력"
-          style={{ fontSize: 16 }} // ✅ iOS 줌 방지
+      {hasResults ? (
+        <SearchResultGrid results={results} onSelect={goDetail} />
+      ) : (
+        <SearchEmptyState
+          mode={stateMode}
+          term={term}
+          onRetry={() => searchQuery.refetch()}
         />
-
-        {inputValue && (
-          <button
-            type="button"
-            className="search-top-input__clear"
-            onClick={() => onChangeQ("")}
-            aria-label="검색어 지우기"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      <section className="search-container">
-        {!term ? (
-          <div className="no-results__text">
-            <p>{isPreset ? "추천 검색어로 시작해볼까요?" : "검색어를 입력해 주세요."}</p>
-          </div>
-        ) : isLoading ? (
-          <div className="no-results__text">
-            <p>검색 중…</p>
-          </div>
-        ) : filteredResults.length > 0 ? (
-          filteredResults.map((item) => {
-            const title = item.title || item.name || "제목 없음";
-            const date = item.release_date || item.first_air_date || "";
-            const year = date ? date.slice(0, 4) : "";
-            const typeLabel = item.media_type === "tv" ? "시리즈" : "영화";
-
-            const img = item.backdrop_path
-              ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
-              : item.poster_path
-                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-                : "";
-
-            return (
-              <button
-                className="card"
-                key={`${item.media_type}-${item.id}`}
-                type="button"
-                onClick={() => goDetail(item.media_type, item.id)}
-                aria-label={`${title} 상세로 이동`}
-              >
-                <div className="card__media">
-                  {img ? (
-                    <img src={img} alt={title} loading="lazy" />
-                  ) : (
-                    <div className="card__fallback">No Image</div>
-                  )}
-
-                  <div className="card__overlay">
-                    <div className="card__title" title={title}>
-                      {title}
-                    </div>
-                    <div className="card__meta">
-                      {typeLabel}
-                      {year ? ` · ${year}` : ""}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            );
-          })
-        ) : (
-          <div className="no-results__text">
-            <p>검색어 "{term}" 에 맞는 결과가 없습니다.</p>
-          </div>
-        )}
-      </section>
+      )}
     </div>
   );
 };

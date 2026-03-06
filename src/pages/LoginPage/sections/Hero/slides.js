@@ -2,11 +2,11 @@ export const slides = [
   {
     id: 0,
     image: {
-      md: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/9E4B6089245A73DD190921FF00B34895BB3251596FDFD1C57169C0ABB319B5AA/compose?format=webp&width=1024",
-      xl: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/6AF207D09623FF42A82CCC08F6B11821412B565949B526EC1B9948F2913D6E15/compose?format=webp&width=2560",
+      md: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/D77B548133871A86001FFE0B75E4A9F1B1511AA8EB89FF0778F5B1D7A3708742/compose?format=webp&width=1024",
+      xl: "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/D680DEA400CE043AACF5D04C741FD0CA30C2FCDA75CA898189795B622667111A/compose?format=webp&width=1920",
     },
-    title: "디즈니+ 티빙 웨이브 번들",
-    status: "",
+    title: "운명전쟁 49",
+    status: "지금 스트리밍 중",
   },
   {
     id: 1,

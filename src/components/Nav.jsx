@@ -1,90 +1,27 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 import "../components/Nav.css";
 
-import {
-  onAuthStateChanged,
-  signOut,
-} from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
-
 import { FiSearch } from "react-icons/fi";
+import { useSearchTransition } from "../contexts/SearchTransitionContext";
 
 const Nav = () => {
-  /* 1) Router / UI 기본 상태 */
-  const [navOpacity, setNavOpacity] = useState(0);   // 스크롤 시 Nav 배경 처리(navOpacity)
-  const {pathname, search } = useLocation();         // 현재 라우트 경로
-  const navigate = useNavigate();                    // 라우팅 이동
+  const [navOpacity, setNavOpacity] = useState(0);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isDropIn, setIsDropIn] = useState(false);
+
+  const location = useLocation();
+  const { pathname } = location;
+  const navigate = useNavigate();
 
   /* 2) 검색 관련 상태 (Desktop + Mobile 공용) */
-  const [searchValue, setSearchValue] = useState(""); // 검색어 입력 값
-  const [isSearchOpen, setIsSearchOpen] = useState(false); // 모바일 검색 Pill 열림/닫힘
-  const searchWrapRef = useRef(null);                 // 모바일 검색 영역(아이콘+input) 바깥 클릭 감지용 ref
+  const profileRef = useRef(null);
+  const { transitionToken, transitionSource, triggerSearchTransition } =
+    useSearchTransition();
 
-  // 모바일 검색 닫기(공통으로 재사용)
-  const closeSearch = () => setIsSearchOpen(false);
-
-  /* 3) 반응형 상태 (Mobile 여부) */
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window === "undefined" ? false : window.innerWidth <= 767
-  );
-
-  useEffect(() => {
-  const nav = document.querySelector(".app-nav");
-  if (!nav) return;
-
-  const set = () => {
-    const h = nav.getBoundingClientRect().height;
-    document.documentElement.style.setProperty("--nav-h", `${h}px`);
-  };
-
-  set();
-
-  const ro = new ResizeObserver(set);
-  ro.observe(nav);
-
-  window.addEventListener("resize", set);
-
-  return () => {
-    ro.disconnect();
-    window.removeEventListener("resize", set);
-  };
-}, []);
-
-  // 화면 리사이즈 감지: Mobile 여부 업데이트
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 767);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-  const q = new URLSearchParams(search).get("q") ?? "";
-
-  // ✅ /search에서는 URL q를 input에 반영
-  if (pathname.startsWith("/search")) {
-    setSearchValue(q);
-    return;
-  }
-
-  // ✅ /search가 아닌 곳으로 나가면 검색값 초기화
-  setSearchValue("");
-  setIsSearchOpen(false);
-}, [pathname, search]);
-
-  /* =========================================================
-   * 4) 프로필 메뉴(드롭다운) 토글 상태
-   * ======================================================= */
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // 프로필 메뉴 열림/닫힘
-  const profileRef = useRef(null);                            // 프로필 버튼 + 메뉴 래퍼 (바깥 클릭 감지용)
-
-  const closeProfile = () => setIsProfileOpen(false);
-
-  /* =========================================================
-   * 5) 로그인 사용자 데이터 (localStorage + Firebase auth sync)
-   * ======================================================= */
   const [userData, setUserData] = useState(() => {
     try {
       const raw = localStorage.getItem("userData");
@@ -94,8 +31,29 @@ const Nav = () => {
     }
   });
 
+  const closeProfile = () => setIsProfileOpen(false);
 
-  // Firebase auth 상태 변화 감지 → localStorage 저장/삭제 + 라우팅 처리
+  useEffect(() => {
+    const nav = document.querySelector(".app-nav");
+    if (!nav) return;
+
+    const setNavHeight = () => {
+      const h = nav.getBoundingClientRect().height;
+      document.documentElement.style.setProperty("--nav-h", `${h}px`);
+    };
+
+    setNavHeight();
+
+    const ro = new ResizeObserver(setNavHeight);
+    ro.observe(nav);
+    window.addEventListener("resize", setNavHeight);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", setNavHeight);
+    };
+  }, []);
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -108,7 +66,6 @@ const Nav = () => {
         localStorage.setItem("userData", JSON.stringify(next));
         setUserData(next);
 
-        // 로그인 페이지에서 로그인되면 메인으로 이동
         if (pathname === "/login") navigate("/main", { replace: true });
       } else {
         localStorage.removeItem("userData");
@@ -120,95 +77,35 @@ const Nav = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =========================================================
-   * 6) 스크롤 UI: Nav 배경 show 처리
-   * ======================================================= */
   useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY || 0;
+const handleScroll = () => {
+  const y = window.scrollY || 0;
 
-      // 0 ~ 240px 구간에서 opacity 증가
-     const next = Math.min(1, y / 300);
+  // 0 ~ 300px 구간에서 opacity 증가
+  const next = Math.min(1, y / 300);
 
-      setNavOpacity(next);
-    };
+  setNavOpacity(next);
+};
 
-    handleScroll();
+handleScroll();
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* =========================================================
-   * 7) Mobile 검색 UX 정책
-   *    - 모바일에서 /search 라우트거나 검색어가 있으면 열어둠
-   *    - 그 외에는 닫음
-   * ======================================================= */
   useEffect(() => {
-    if (!isMobile) return;
-
     const isSearchRoute = pathname.startsWith("/search");
-    const hasQuery = searchValue.trim().length > 0;
+    const shouldDropIn =
+      isSearchRoute &&
+      (transitionSource === "nav" || transitionSource === "demo-action");
 
-    if (isSearchRoute || hasQuery) {
-      setIsSearchOpen(true);
-      return;
-    }
+    if (!shouldDropIn) return;
 
-    setIsSearchOpen(false);
-  }, [pathname, isMobile, searchValue]);
+    setIsDropIn(true);
+    const timer = window.setTimeout(() => setIsDropIn(false), 520);
+    return () => window.clearTimeout(timer);
+  }, [pathname, transitionSource, transitionToken]);
 
-  /* =========================================================
-   * 8) Mobile 검색 닫힘 트리거(열려 있을 때만)
-   *    - ESC / 바깥 클릭(터치 포함) / 스크롤
-   * ======================================================= */
-
-  // ESC → 모바일 검색 닫기
-  useEffect(() => {
-    if (!isMobile || !isSearchOpen) return;
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") closeSearch();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isMobile, isSearchOpen]);
-
-  // 바깥 클릭/터치 → 모바일 검색 닫기
-  useEffect(() => {
-    if (!isMobile || !isSearchOpen) return;
-
-    const onDown = (e) => {
-      if (!searchWrapRef.current) return;
-      if (!searchWrapRef.current.contains(e.target)) closeSearch();
-    };
-
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("touchstart", onDown, { passive: true });
-
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("touchstart", onDown);
-    };
-  }, [isMobile, isSearchOpen]);
-
-  // 스크롤 → 모바일 검색 닫기
-  useEffect(() => {
-    if (!isMobile || !isSearchOpen) return;
-
-    const onScroll = () => closeSearch();
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [isMobile, isSearchOpen]);
-
-  /* =========================================================
-   * 9) 프로필 메뉴 닫힘 트리거
-   *    - ESC / 바깥 클릭
-   * ======================================================= */
-
-  // ESC → 프로필 메뉴 닫기
   useEffect(() => {
     if (!isProfileOpen) return;
 
@@ -220,7 +117,6 @@ const Nav = () => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isProfileOpen]);
 
-  // 바깥 클릭 → 프로필 메뉴 닫기
   useEffect(() => {
     if (!isProfileOpen) return;
 
@@ -233,72 +129,16 @@ const Nav = () => {
     return () => document.removeEventListener("mousedown", onDown);
   }, [isProfileOpen]);
 
-  /* =========================================================
-   * 10) 이벤트 핸들러(검색/로그인/로그아웃/토글)
-   * ======================================================= */
-
-  // Enter → 검색 페이지 이동(데스크탑/모바일 공용)
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const q = searchValue.trim();
-      if (!q) return;
-      navigate(`/search?q=${encodeURIComponent(q)}`);
-    }
-  };
-
-  // 검색 input 변경 → 검색 페이지 이동(입력값 반영)
-  const handleChange = (e) => {
-    const v = e.target.value;
-    setSearchValue(v);
-    const trimmed = v.trim();
-
-    if (isMobile) setIsSearchOpen(true);
-
-    // ✅ [FIX] backspace로 빈 값이 되어도 /main으로 보내지 말기
-    if (!trimmed) {
-      // ✅ [FIX] search 라우트에 있을 때만 q 제거해서 /search로 정리
-      if (pathname.startsWith("/search")) {
-        navigate("/search", { replace: true });
-      }
-      // ✅ [FIX] main에서는 그냥 입력값만 비우고 끝 (리다이렉트 X)
-      return;
-    }
-    // ✅ [FIX] 입력 중에는 history 쌓지 말고 replace
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true });
-  };
-
-  // Google 로그인
-  // const handleLogin = async () => {
-  //   try {
-  //     await signInWithPopup(auth, provider);
-  //   } catch (error) {
-  //     console.log(error);
-  //     alert(error?.message ?? "로그인 실패");
-  //   }
-  // };
-//   const handleLogin = () => {
-//   navigate("/login");
-// };
-
-  // 로그아웃 → 로그인 페이지로 리다이렉트
   const handleSignOut = async () => {
     try {
       await signOut(auth);
       closeProfile();
-      navigate(`/`, { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       console.log(error);
     }
   };
 
-
-  /* =========================================================
-   * 11) 파생 값(렌더링 조건/아바타 텍스트 등)
-   * ======================================================= */
-  // const isLoginPage = pathname === "/login";
-
-  // 아바타 이니셜(이미지 없을 때)
   const avatarText = (() => {
     const name = userData?.displayName?.trim();
     const email = userData?.email?.trim();
@@ -306,164 +146,115 @@ const Nav = () => {
     return src[0]?.toUpperCase() ?? "?";
   })();
 
+  return (
+    <NavWrapper
+      className={`app-nav ${isDropIn ? "app-nav--drop-in" : ""}`}
+      $opacity={navOpacity}
+    >
+      <NavInner>
+        <Left>
+          <Logo to={userData ? "/main" : "/"}>
+            <img alt="Disney Plus Logo" src="/images/logo.svg" />
+          </Logo>
+        </Left>
 
-return (
-  <NavWrapper className="app-nav" $opacity={navOpacity}>
-    <NavInner>
-      <Left>
-        <Logo
-          to={userData ? "/main" : "/"}
-          onClick={() => {
-            setSearchValue("");
-            setIsSearchOpen(false); // (남아있어도 무방)
-          }}
-        >
-          <img alt="Disney Plus Logo" src="/images/logo.svg" />
-        </Logo>
-      </Left>
+        <Right>
+          {pathname !== "/" && (
+            <button
+              type="button"
+              className="nav-mobile-search"
+              aria-label="검색 페이지로 이동"
+              onClick={() => {
+                triggerSearchTransition("nav");
+                navigate("/search", {
+                  state: {
+                    from: location.pathname + location.search,
+                  },
+                });
+              }}
+            >
+              <FiSearch size={20} />
+            </button>
+          )}
 
-      <Center>
-        {/* ✅ 데스크탑에서만 중앙 인풋 */}
-        {pathname === "/" ? null : (
-          !isMobile ? (
-            <div className="nav-search">
-              <input
-                className="nav__input"
-                id="nav-search"
-                name="search"
-                value={searchValue}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                type="search"
-                aria-label="영화 검색"
-                placeholder="영화를 검색해주세요"
-                style={{ fontSize: 16 }} // ✅ iOS zoom 방지
-              />
+          {!userData && (
+            <Login as="button" type="button" onClick={() => navigate("/login")}>
+              로그인
+            </Login>
+          )}
 
-              {/* ✅ 커스텀 X (기본 캔슬 버튼 숨겨도 OK) */}
-              {searchValue && (
-                <button
+          {userData && (
+            <>
+              {pathname === "/" && (
+                <Login
+                  as="button"
                   type="button"
-                  className="nav-search__clear"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setSearchValue("");
-
-                    // ✅ search 라우트면 q만 제거 (메인 강제 이동 X)
-                    if (pathname.startsWith("/search")) {
-                      navigate("/search", { replace: true });
-                    }
-                  }}
-                  aria-label="검색어 지우기"
+                  onClick={() => navigate("/main")}
+                  style={{ marginRight: "12px" }}
                 >
-                  ✕
-                </button>
+                  App으로 가기
+                </Login>
               )}
-            </div>
-          ) : null
-        )}
-      </Center>
 
-      <Right>
-        {/* ✅ 모바일에서만: 프로필 왼쪽에 검색 아이콘 */}
-        {pathname !== "/" && isMobile && (
-          <button
-            type="button"
-            className="nav-mobile-search"
-            aria-label="검색 열기"
-            onClick={() => navigate("/search")}
-          >
-            <FiSearch size={18} />
-          </button>
-        )}
-
-        {/* 로그인 안됨 */}
-        {!userData && (
-          <Login as="button" type="button" onClick={() => navigate("/login")}>
-            로그인
-          </Login>
-        )}
-
-        {/* 로그인 상태 */}
-        {userData && (
-          <>
-            {/* / 에서만 앱으로 가기 */}
-            {pathname === "/" && (
-              <Login
-                as="button"
-                type="button"
-                onClick={() => navigate("/main")}
-                style={{ marginRight: "12px" }}
-              >
-                App으로 가기
-              </Login>
-            )}
-
-            <SignOut ref={profileRef}>
-              <UserButton
-                type="button"
-                onClick={() => setIsProfileOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={isProfileOpen}
-              >
-                {userData?.photoURL ? (
-                  <UserImg
-                    src={userData.photoURL}
-                    alt={userData?.displayName || "user"}
-                  />
-                ) : (
-                  <UserInitial>{avatarText}</UserInitial>
-                )}
-              </UserButton>
-
-              <DropDown
-                role="menu"
-                $open={isProfileOpen}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MenuItem type="button" role="menuitem" onClick={closeProfile}>
-                  찜
-                </MenuItem>
-
-                <MenuItem type="button" role="menuitem" onClick={closeProfile}>
-                  마이페이지
-                </MenuItem>
-
-                <Divider />
-
-                <MenuItem
+              <SignOut ref={profileRef}>
+                <UserButton
                   type="button"
-                  role="menuitem"
-                  $danger
-                  onClick={handleSignOut}
+                  onClick={() => setIsProfileOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={isProfileOpen}
                 >
-                  로그아웃
-                </MenuItem>
-              </DropDown>
-            </SignOut>
-          </>
-        )}
-      </Right>
-    </NavInner>
-  </NavWrapper>
-);
-}
+                  {userData?.photoURL ? (
+                    <UserImg
+                      src={userData.photoURL}
+                      alt={userData?.displayName || "user"}
+                    />
+                  ) : (
+                    <UserInitial>{avatarText}</UserInitial>
+                  )}
+                </UserButton>
 
+                <DropDown
+                  role="menu"
+                  $open={isProfileOpen}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MenuItem type="button" role="menuitem" onClick={closeProfile}>
+                    프로필
+                  </MenuItem>
+
+                  <MenuItem type="button" role="menuitem" onClick={closeProfile}>
+                    마이페이지
+                  </MenuItem>
+
+                  <Divider />
+
+                  <MenuItem
+                    type="button"
+                    role="menuitem"
+                    $danger
+                    onClick={handleSignOut}
+                  >
+                    로그아웃
+                  </MenuItem>
+                </DropDown>
+              </SignOut>
+            </>
+          )}
+        </Right>
+      </NavInner>
+    </NavWrapper>
+  );
+};
 
 export default Nav;
-
-/* ====== styled-components ====== */
 
 const NavWrapper = styled.nav`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-
   height: 70px;
   background-color: rgba(9, 11, 19, ${(p) => p.$opacity});
-
   z-index: 10;
 
   @media (max-width: 1024px) {
@@ -480,8 +271,8 @@ const NavInner = styled.div`
   height: 100%;
   margin: 0 auto;
   padding: 0 calc(3.5vw + 5px);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr; /* ✅ 핵심: 좌/우 동일 폭 */
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   column-gap: 12px;
 `;
@@ -493,17 +284,12 @@ const Left = styled.div`
   min-width: 0;
 `;
 
-const Center = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 const Right = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
+  gap: 10px;
 `;
 
 const Logo = styled(Link)`
@@ -577,10 +363,8 @@ const UserButton = styled.button`
   border-radius: 999px;
   cursor: pointer;
   background: transparent;
-
   display: grid;
   place-items: center;
-
   outline: none;
 
   &:focus-visible {
@@ -601,17 +385,17 @@ const UserInitial = styled.span`
   width: 100%;
   height: 100%;
   border-radius: 999px;
-
   display: grid;
   place-items: center;
-
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.2px;
   color: rgba(255, 255, 255, 0.92);
-
-  background: radial-gradient(circle at 30% 30%, rgb(0 240 255 / 90%), rgb(16 18 27 / 75%));
-
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgb(0 240 255 / 90%),
+    rgb(16 18 27 / 75%)
+  );
   border: 1px solid rgba(255, 255, 255, 0.12);
 `;
 
@@ -619,52 +403,37 @@ const DropDown = styled.div`
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-
-  padding: 10px;          /* 패널 여백 */
+  padding: 10px;
   width: 190px;
-
   background: rgba(12, 14, 22, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-
-  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
-
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
-  gap: 6px;               /* ✅ 아이템 간격 작게: 메뉴 느낌 */
-
+  gap: 6px;
   transform-origin: top right;
   opacity: ${(p) => (p.$open ? 1 : 0)};
   transform: ${(p) =>
     p.$open ? "translateY(0) scale(1)" : "translateY(6px) scale(0.98)"};
   pointer-events: ${(p) => (p.$open ? "auto" : "none")};
-
   transition: opacity 160ms ease, transform 180ms cubic-bezier(0.2, 0.9, 0.2, 1);
-
-  /* ✅ 위쪽 모양이 부자연스러우면 caret 제거 or 더 미니멀하게 */
-
 `;
-
-
 
 const MenuItem = styled.button`
   width: 100%;
   border: 0;
   cursor: pointer;
-
-  padding: 12px 12px;     /* 터치 영역 확보 */
+  padding: 12px 12px;
   border-radius: 12px;
-
   text-align: left;
   font-size: 15px;
   font-weight: 700;
-
-  color: ${(p) => (p.$danger ? "rgba(255, 120, 120, 0.95)" : "rgba(255,255,255,0.92)")};
-  background: rgba(255, 255, 255, 0.03); /* ✅ 너무 ‘카드’ 느낌 안 나게 살짝만 */
-
+  color: ${(p) =>
+    p.$danger ? "rgba(255, 120, 120, 0.95)" : "rgba(255,255,255,0.92)"};
+  background: rgba(255, 255, 255, 0.03);
   transition: background 0.15s ease, transform 0.12s ease;
 
   &:hover {
@@ -680,6 +449,5 @@ const MenuItem = styled.button`
 const Divider = styled.div`
   height: 1px;
   margin: 4px 2px;
-  background: rgba(255, 255, 255, 0.08); /* ✅ 더 은은하게 */
+  background: rgba(255, 255, 255, 0.08);
 `;
-

@@ -9,9 +9,9 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../../firebase";
+import { useAuth } from "../../contexts/AuthContext";
 
 function EyeIcon() {
   return (
@@ -34,6 +34,7 @@ function EyeOffIcon() {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { userData, authLoading } = useAuth();
   const provider = useMemo(() => new GoogleAuthProvider(), []);
   const [fadeOut, setFadeOut] = useState(false);
   const [email, setEmail] = useState("");
@@ -125,14 +126,10 @@ export default function Login() {
     }
   };
 useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (user) {
-      navigate("/main", { replace: true });
-    }
-  });
-
-  return () => unsubscribe();
-}, [navigate]);
+  if (!authLoading && userData) {
+    navigate("/main", { replace: true });
+  }
+}, [authLoading, userData, navigate]);
 
   return (
     <Wrap $fade={fadeOut}>
