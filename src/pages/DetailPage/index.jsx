@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState,useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import tmdbAxios from "../../api/tmdbaxios";
 import requests from "../../api/request";
 import Row from "../../components/Row";
 import { tmdbImg, pickHeroSize } from "../../utils/tmdbImage";
+
+import { useDetailPageData } from "./useDetailPageData";
+import DetailStateView from "./DetailStateView";
 
 import "./DetailPage.css";
 
@@ -18,19 +20,39 @@ export default function DetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { type, movieId } = useParams();
-  
+
   const from = location.state?.from;
 
-  const [data, setData] = useState(null);
+  // 상태 처리
+  const { pageStatus, data, errorMessage, retryKey, retry } = useDetailPageData(
+    type,
+    movieId
+  );
 
-  // ✅ related(비슷한 콘텐츠) 로드 결과 추적 (트레일러는 있는데 related 0개면 fallback)
-  const [relatedLoaded, setRelatedLoaded] = useState(false);
-  const [relatedCount, setRelatedCount] = useState(0);
-  
+  // 디버깅 용
+  /*
+  const handleRetry = () => {
+    const params = new URLSearchParams(location.search);
+    params.delete("debugState");
+    params.delete("debugDelay");
+
+    navigate({
+      pathname: location.pathname,
+      search: params.toString() ? `?${params.toString()}` : "",
+    }, { replace: true });
+
+    retry();
+  };
+  */
+
+  const [relatedState, setRelatedState] = useState({
+    status: "idle", // idle | ready | empty
+    count: 0,
+  });
+
   useEffect(() => {
-    setRelatedLoaded(false);
-    setRelatedCount(0);
-  }, [type, movieId]);
+    setRelatedState({ status: "idle", count: 0 });
+  }, [type, movieId, retryKey]);
 
   /* -------------------------
      SEO
@@ -42,11 +64,11 @@ export default function DetailPage() {
   const titleText = data?.title || data?.name || "콘텐츠 상세";
   const overviewText = data?.overview
     ? data.overview.replace(/\s+/g, " ").trim().slice(0, 160)
-    : "Disney+ UI/UX Renewal 기반 클론 프로젝트 상세 페이지입니다.";
+    : "Disney+ UI/UX Renewal 프로젝트 상세 페이지입니다.";
 
   const ogImagePath = data?.backdrop_path || data?.poster_path;
   const ogImageUrl = ogImagePath
-  ? `https://image.tmdb.org/t/p/w1280${ogImagePath}`
+    ? `https://image.tmdb.org/t/p/w1280${ogImagePath}`
     : `${baseUrl}/og-image.jpg`;
 
   /* -------------------------
@@ -79,6 +101,44 @@ export default function DetailPage() {
 
   const [heroLoading, setHeroLoading] = useState(true);
 
+  useEffect(() => {
+    if (pageStatus !== "success") {
+      setHeroLoading(false);
+      return;
+    }
+
+    setHeroLoading(true);
+  }, [pageStatus, heroUrl]);
+
+  useEffect(() => {
+    if (pageStatus !== "success") return;
+
+    if (!heroUrl) {
+      setHeroLoading(false);
+      return;
+    }
+
+    let alive = true;
+
+    const img = new Image();
+    img.decoding = "async";
+    img.src = heroUrl;
+
+    img.onload = () => {
+      if (!alive) return;
+      setHeroLoading(false);
+    };
+
+    img.onerror = () => {
+      if (!alive) return;
+      setHeroLoading(false);
+    };
+
+    return () => {
+      alive = false;
+    };
+  }, [heroUrl, pageStatus]);
+
   /* -------------------------
      Scroll Vignette
   ------------------------- */
@@ -90,73 +150,11 @@ export default function DetailPage() {
       const next = Math.min(1, y / 300);
       setVignette(next);
     };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  /* -------------------------
-     Fetch Detail + preload hero
-  ------------------------- */
-useEffect(() => {
-  let alive = true;
-
-  (async () => {
-    try {
-      setHeroLoading(true);
-
-      const res = await tmdbAxios.get("", {
-        params: {
-          path: `${type}/${movieId}`,
-          language: "ko-KR",
-          append_to_response: "credits,videos,release_dates,content_ratings",
-        },
-      });
-
-      if (!alive) return;
-
-      const nextData = res.data;
-      setData(nextData);
-
-    } catch (e) {
-      if (!alive) return;
-      console.error("[DetailPage] fetch failed", e);
-      setData(null);
-      setHeroLoading(false);
-    }
-  })();
-
-  return () => {
-    alive = false;
-  };
-}, [type, movieId]);
-
-useEffect(() => {
-  if (!heroUrl) {
-    setHeroLoading(false);
-    return;
-  }
-
-  let alive = true;
-
-  const img = new Image();
-  img.decoding = "async";
-  img.src = heroUrl;
-
-  img.onload = () => {
-    if (!alive) return;
-    setHeroLoading(false);
-  };
-
-  img.onerror = () => {
-    if (!alive) return;
-    setHeroLoading(false);
-  };
-
-  return () => {
-    alive = false;
-  };
-}, [heroUrl]);
 
   /* -------------------------
      UI Derived
@@ -184,8 +182,9 @@ useEffect(() => {
         Array.isArray(d?.episode_run_time) &&
         d.episode_run_time.length &&
         d.episode_run_time[0] > 0
-      )
+      ) {
         return `회당 ${d.episode_run_time[0]}분`;
+      }
 
       return FALLBACK;
     })();
@@ -208,7 +207,8 @@ useEffect(() => {
       if (type === "movie") {
         const kr = d?.release_dates?.results?.find((r) => r?.iso_3166_1 === "KR");
         return (
-          kr?.release_dates?.find((x) => x?.certification)?.certification ?? FALLBACK
+          kr?.release_dates?.find((x) => x?.certification)?.certification ??
+          FALLBACK
         );
       }
 
@@ -240,6 +240,7 @@ useEffect(() => {
       vids.find((v) => v?.site === "YouTube" && v?.type === "Trailer") ||
       vids.find((v) => v?.site === "YouTube" && v?.type === "Teaser") ||
       vids.find((v) => v?.site === "YouTube");
+
     return trailer?.key || "";
   }, [data]);
 
@@ -251,7 +252,7 @@ useEffect(() => {
   }, [data?.credits]);
 
   /* -------------------------
-     Row queries (✅ useMemo 고정)
+     Row queries
   ------------------------- */
   const relatedQuery = useMemo(
     () => ({ path: `${type}/${movieId}/recommendations`, language: "ko-KR" }),
@@ -267,6 +268,77 @@ useEffect(() => {
     if (from) return navigate(from, { replace: true });
     navigate(-1);
   };
+
+  const handleMoveHome = () => {
+    navigate("/main", { replace: true });
+  };
+
+  const handleMoveSearch = () => {
+    navigate("/search", { replace: true });
+  };
+
+  const handleRelatedLoaded = useCallback((count) => {
+    console.log("[DetailPage] related loaded count:", count, Date.now());
+    setRelatedState((prev) => {
+      const nextStatus = count > 0 ? "ready" : "empty";
+
+      if (prev.status === nextStatus && prev.count === count) {
+        return prev;
+      }
+
+      return {
+        status: nextStatus,
+        count,
+      };
+    });
+  }, []);
+
+  const handleRelatedNavigate = useCallback(
+    (movie) => {
+      navigate(`/detail/${type}/${movie.id}`, { replace: true });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [navigate, type]
+  );
+
+  const handleTopNavigate = useCallback(
+    (movie) => {
+      navigate(`/detail/movie/${movie.id}`, { replace: true });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [navigate]
+  );
+
+  if (pageStatus !== "success") {
+    return (
+      <>
+        <Helmet>
+          <title>{titleText} | {siteName}</title>
+          <meta name="description" content={overviewText} />
+          <link rel="canonical" href={canonicalUrl} />
+          <meta property="og:site_name" content={siteName} />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={`${titleText} | ${siteName}`} />
+          <meta property="og:description" content={overviewText} />
+          <meta property="og:url" content={canonicalUrl} />
+          <meta property="og:image" content={ogImageUrl} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${titleText} | ${siteName}`} />
+          <meta name="twitter:description" content={overviewText} />
+          <meta name="twitter:image" content={ogImageUrl} />
+        </Helmet>
+
+        <DetailStateView
+          status={pageStatus}
+          message={errorMessage}
+          onBack={handleBack}
+          onRetry={retry}
+          onHome={handleMoveHome}
+          onSearch={handleMoveSearch}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -291,9 +363,6 @@ useEffect(() => {
       </Helmet>
 
       <div className="detail">
-        {/* =========================
-            HERO
-        ========================= */}
         <section
           className="detail__hero"
           style={{
@@ -390,9 +459,6 @@ useEffect(() => {
           </div>
         </section>
 
-        {/* =========================
-            TRAILER (있을 때만)
-        ========================= */}
         {trailerKey && (
           <section className="detail__trailer">
             <div className="detail__sectionInner">
@@ -410,18 +476,11 @@ useEffect(() => {
           </section>
         )}
 
-        {/* =========================
-            ROWS (요구 로직)
-            1) 트레일러 없음 -> TopRated만
-            2) 트레일러 있음 -> Related 우선
-               - Related 0개면 TopRated fallback
-        ========================= */}
         <section className="detail__below detail__below--padded">
-          {/* 트레일러 없으면 TopRated만 */}
           {!trailerKey && (
             <Row
               title="자주 찾는 콘텐츠"
-              id="detail-toprated"
+              id={`detail-toprated-${type}-${movieId}`}
               query={topQuery}
               mode="navigate"
               navType="movie"
@@ -432,40 +491,28 @@ useEffect(() => {
             />
           )}
 
-          {/* 트레일러 있으면 Related 우선, 0개면 fallback */}
           {trailerKey && (
             <>
-              {/* related 로딩 전 or count>0이면 related 표시 */}
-              {(!relatedLoaded || relatedCount > 0) && (
+              {(relatedState.status === "idle" || relatedState.status === "ready") && (
                 <Row
                   title="비슷한 콘텐츠"
                   id={`detail-related-${type}-${movieId}`}
                   query={relatedQuery}
                   mode="navigate"
                   navType={type}
-                  onLoaded={(count) => {
-                    setRelatedLoaded(true);
-                    setRelatedCount(count);
-                  }}
-                  onNavigate={(movie) => {
-                    navigate(`/detail/${type}/${movie.id}`, { replace: true });
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
+                  onLoaded={handleRelatedLoaded}
+                  onNavigate={handleRelatedNavigate}
                 />
               )}
 
-              {/* related 로드 완료 + 0개면 TopRated fallback */}
-              {relatedLoaded && relatedCount === 0 && (
+              {relatedState.status === "empty" && (
                 <Row
                   title="자주 찾는 콘텐츠"
-                  id="detail-toprated"
+                  id={`detail-toprated-fallback-${type}-${movieId}`}
                   query={topQuery}
                   mode="navigate"
                   navType="movie"
-                  onNavigate={(movie) => {
-                    navigate(`/detail/movie/${movie.id}`, { replace: true });
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
+                  onNavigate={handleTopNavigate}
                 />
               )}
             </>

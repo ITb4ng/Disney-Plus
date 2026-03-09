@@ -229,9 +229,9 @@
 /* title: clamp로 초소형까지 대응 */
 .detail__title {
   margin: 14px 0 10px;
-  font-size: clamp(30px, 4.6vw, 56px);
+  font-size: clamp(30px, 4.6vw, 52px);
   line-height: 1.05;
-  letter-spacing: -0.5px;
+  /* letter-spacing: -0.5px; */
 }
 
 /* meta row */
@@ -593,4 +593,61 @@
 }
 @supports not (overflow-x: clip) {
   .detail { overflow-x: hidden; }
+}
+
+
+
+/* 상세페이지 상태 분리 css */
+
+.detail--state {
+  min-height: 100dvh;
+}
+
+.detail__hero--state {
+  min-height: 100dvh;
+  position: relative;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 35%),
+    linear-gradient(180deg, #0f1118 0%, #090b12 100%);
+}
+
+.detail__stateBlock {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail__stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.detail__stateSkeletonLine {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  margin-bottom: 12px;
+}
+
+.detail__stateSkeletonLine--lg {
+  height: 24px;
+  width: min(80%, 520px);
+}
+
+.detail__stateSkeletonLine--sm {
+  width: min(48%, 260px);
+}
+
+.btn--ghost {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.btn--ghost:hover {
+  background: rgba(255,255,255,0.12);
 }
