@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
-
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import MovieModal from "./MovieModal";
 import tmdbAxios from "../api/tmdbaxios";
 import "./Row.css";
@@ -272,14 +272,16 @@ const Row = ({
           <ArrowZone
             className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
             type="button"
-            aria-label="Previous"
+            aria-label="이전 콘텐츠"
             aria-hidden={!showLeft}
             onClick={() => {
               if (!showLeft) return;
               swiperRef.current?.slidePrev();
             }}
           >
-            <ArrowIcon>‹</ArrowIcon>
+            <ArrowButton aria-hidden="true">
+              <ArrowIconLeft />
+            </ArrowButton>
           </ArrowZone>
         )}
 
@@ -287,7 +289,7 @@ const Row = ({
           <ArrowZone
             className="arrowZone right"
             type="button"
-            aria-label="Next"
+            aria-label="다음 콘텐츠"
             disabled={disableRight}
             aria-disabled={disableRight}
             onClick={() => {
@@ -295,7 +297,9 @@ const Row = ({
               swiperRef.current?.slideNext();
             }}
           >
-            <ArrowIcon>›</ArrowIcon>
+            <ArrowButton aria-hidden="true">
+              <ArrowIconRight />
+            </ArrowButton>
           </ArrowZone>
         )}
 
@@ -478,6 +482,27 @@ const SwiperArea = styled.div`
   overflow: hidden;
   position: relative;
 `;
+const ArrowButton = styled.span`
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(8, 12, 22, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(8px);
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+`;
 
 const ArrowZone = styled.button`
   position: absolute;
@@ -490,36 +515,90 @@ const ArrowZone = styled.button`
   align-items: center;
   justify-content: center;
 
+  padding: 0;
   border: none;
   cursor: pointer;
   background: transparent;
-  transition: opacity 160ms ease;
-  opacity: 0.9;
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+
+  opacity: 0.96;
 
   &.left {
     left: 0;
+    background: linear-gradient(
+      to right,
+      rgba(4, 8, 16, 0.72) 0%,
+      rgba(4, 8, 16, 0.32) 48%,
+      rgba(4, 8, 16, 0) 100%
+    );
   }
 
   &.right {
     right: 0;
+    background: linear-gradient(
+      to left,
+      rgba(4, 8, 16, 0.72) 0%,
+      rgba(4, 8, 16, 0.32) 48%,
+      rgba(4, 8, 16, 0) 100%
+    );
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 1;
+  }
+
+  &:hover:not(:disabled) ${ArrowButton} {
+    transform: scale(1.06);
+    background: rgba(8, 12, 22, 0.9);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  &:active:not(:disabled) ${ArrowButton} {
+    transform: scale(0.98);
   }
 
   &.isHidden {
     opacity: 0;
     pointer-events: none;
+    transform: translateX(-8px);
   }
 
   &:disabled {
-    opacity: 0.25;
+    opacity: 0.22;
     cursor: default;
+  }
+
+  &:disabled ${ArrowButton} {
+    transform: none;
+    background: rgba(8, 12, 22, 0.42);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  @media (max-width: 1024px) {
+    width: 56px;
+  }
+
+  @media (max-width: 768px) {
+    display: none !important;
   }
 `;
 
-const ArrowIcon = styled.span`
-  font-size: 34px;
-  line-height: 1;
-  user-select: none;
-  color: rgba(255, 255, 255, 0.9);
+const ArrowIconLeft = styled(FiChevronLeft)`
+  width: 22px;
+  height: 22px;
+  color: rgba(255, 255, 255, 0.96);
+  flex-shrink: 0;
+`;
+
+const ArrowIconRight = styled(FiChevronRight)`
+  width: 22px;
+  height: 22px;
+  color: rgba(255, 255, 255, 0.96);
+  flex-shrink: 0;
 `;
 
 // ✅ 에러/빈상태 힌트 (아주 작게)

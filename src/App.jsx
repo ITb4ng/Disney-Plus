@@ -11,6 +11,7 @@ import UpdatesPage from "./pages/DemoPage/UpdatePage";
 import FeedbackPage from "./pages/DemoPage/FeedbackPage";
 import FeedbackForm from "./pages/DemoPage/Form/FeedbackForm";
 import ScrollManager from "./components/ScrollManager";
+import NotFoundPage from "./pages/NotFoundPage";
 import "./styles/badges.css";
 import { useEffect } from "react";
 
@@ -82,12 +83,16 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="main" element={<MainPage />} />
           <Route path="search" element={<SearchPage />} />
+          <Route path="/detail" element={<NotFoundPage />} />
+          <Route path="/detail/*" element={<NotFoundPage />} />
           <Route path="detail/:type/:movieId" element={<DetailPage />} />
           <Route path="login" element={<Login />} />
           <Route path="updates" element={<UpdatesPage />} />
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="feedback/new" element={<FeedbackForm />} />
           <Route path="feedback/:id/edit" element={<FeedbackForm mode="edit" />} />
+          {/* 전체 fallback */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </div>
