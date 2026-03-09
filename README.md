@@ -7,11 +7,17 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 
 ## 📦 Stable Release
 
-현재 안정화 버전: **v0.2.2**
+현재 안정화 버전: **v0.2.3**
 - 🌐 Live Demo (current dev deployment): https://b4ng-disney-plus.vercel.app/
 
 
 ### 🔖 Release History
+- **v0.2.3  SearchPage | Nav | banner UX 개선**
+  - Nav UX 개선
+  - DetailPage preload
+  - Row 캐시 안정화
+  - iframe lazy loading
+  - useMemo 렌더링 최적화
 - **v0.2.2  Detail | Row UX 개선**
   - Nav UX 개선
   - DetailPage preload
@@ -32,13 +38,13 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 - v0.1.0
   - DetailPage 구조 개편 및 Hero 전환 UX 개선
 
-- 👉 GitHub - [v0.2.1 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.2.2)에서 v0.2.2 스냅샷(zip) 다운로드 가능
+- 👉 GitHub - [v0.2.1 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.2.3)에서 v0.2.2 스냅샷(zip) 다운로드 가능
 - 👉 또는 git clone 후 해당 태그로 체크아웃:
 
 ```bash
 git clone https://github.com/ITb4ng/Disney-Plus.git
 cd Disney-Plus
-git checkout v0.2.2
+git checkout v0.2.3
 ```
 ## 🧪 Local 개발 실행 방법 
 ```bash
