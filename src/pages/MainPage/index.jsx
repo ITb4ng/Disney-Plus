@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import Banner from "../../components/banner";
+import Banner from "../../components/Banner/banner";
 import Row from "../../components/Row";
 import Category from "../../components/category";
 import styled from "styled-components";

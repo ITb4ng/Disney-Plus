@@ -12,6 +12,8 @@ import FeedbackPage from "./pages/DemoPage/FeedbackPage";
 import FeedbackForm from "./pages/DemoPage/Form/FeedbackForm";
 import ScrollManager from "./components/ScrollManager";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/Common/ProtectedRoute";
+import PublicOnlyRoute from "./components/Common/PublicOnlyRoute";
 import "./styles/badges.css";
 import { useEffect } from "react";
 
@@ -24,7 +26,8 @@ const Layout = () => {
   const isUpdatesRoute = pathname.startsWith("/updates");
 
   const hideNav = isLoginRoute;
-  const hideFooter = isLoginRoute || isSearchRoute || isFeedbackRoute || isUpdatesRoute;
+  const hideFooter =
+    isLoginRoute || isSearchRoute || isFeedbackRoute || isUpdatesRoute;
 
   return (
     <div className="layout">
@@ -38,12 +41,10 @@ const Layout = () => {
 
 function App() {
   useEffect(() => {
-    // ✅ 브라우저 기본 스크롤 복구 끄기 (한 번만)
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
 
-    // ✅ nav 높이 계산
     const nav = document.querySelector(".app-nav");
 
     const apply = () => {
@@ -80,17 +81,28 @@ function App() {
 
       <Routes>
         <Route element={<Layout />}>
+          {/* 공개 라우트 */}
           <Route path="/" element={<LoginPage />} />
-          <Route path="main" element={<MainPage />} />
-          <Route path="search" element={<SearchPage />} />
+
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="login" element={<Login />} />
+          </Route>
+
+          {/* 보호 라우트 */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="main" element={<MainPage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="detail/:type/:movieId" element={<DetailPage />} />
+            <Route path="updates" element={<UpdatesPage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+            <Route path="feedback/new" element={<FeedbackForm />} />
+            <Route path="feedback/:id/edit" element={<FeedbackForm mode="edit" />} />
+          </Route>
+
+          {/* 잘못된 detail 접근 */}
           <Route path="/detail" element={<NotFoundPage />} />
           <Route path="/detail/*" element={<NotFoundPage />} />
-          <Route path="detail/:type/:movieId" element={<DetailPage />} />
-          <Route path="login" element={<Login />} />
-          <Route path="updates" element={<UpdatesPage />} />
-          <Route path="feedback" element={<FeedbackPage />} />
-          <Route path="feedback/new" element={<FeedbackForm />} />
-          <Route path="feedback/:id/edit" element={<FeedbackForm mode="edit" />} />
+
           {/* 전체 fallback */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
