@@ -1,6 +1,7 @@
 // components/Feedback.jsx
 import React, { useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { getAppScrollY } from "../utils/scrollPosition";
 
 /**
  * props
@@ -10,7 +11,7 @@ import { useNavigate, useLocation } from "react-router-dom";
  */
 const Feedback = ({ variant = "teaser", isGuest = false, onSubmit }) => {
   const nav = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   const isPage = variant === "page" || pathname === "/feedback";
 
@@ -78,7 +79,15 @@ const Feedback = ({ variant = "teaser", isGuest = false, onSubmit }) => {
             </div>
           </div>
           <button
-            onClick={() => nav("/feedback")}
+            onClick={() =>
+              nav("/feedback", {
+                state: {
+                  from: pathname + search,
+                  scrollY: getAppScrollY(),
+                },
+              })
+            }
+            data-testid="feedback-open-btn"
             style={{
               cursor: "pointer",
               borderRadius: 999,

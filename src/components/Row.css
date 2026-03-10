@@ -1,46 +1,59 @@
+﻿/* =========================================================
+   1. 공통 변수
+   - Row / Top10 공통으로 사용하는 기본 토큰
+========================================================= */
+:root {
+  --row-radius: 10px;
+  --row-arrow-zone: 72px;
+
+  --row-border-color: rgba(249, 249, 249, 0.1);
+  --row-border-color-hover: rgba(249, 249, 249, 0.8);
+
+  --row-overlay-bg: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 52%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+
+  --row-hover-scale-default: 1.03;
+  --row-swiper-pad-top10: 60px;
+
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+}
+
+/* =========================================================
+   2. 공통 클래스
+   - 공통 RowSection
+   - 기본 구조 / 공통 swiper / 공통 overlay / 공통 skeleton
+========================================================= */
+
 /* ===============================
-   RowShell: Swiper가 삐져나와도 화면 안 찢어지게
+   공통 RowSection
+   - Swiper가 잘려 보이지 않도록 채워지게
 ================================= */
 .rowShell {
-  --arrow-zone: 72px;
+  --arrow-zone: var(--row-arrow-zone);
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: var(--row-radius);
 }
 
 /* ===============================
-   SwiperArea: 화살표 hit-zone 만큼 패딩 확보
-   - 왼쪽은 data-left="1"일 때만 패딩
-   - 오른쪽은 항상 패딩(취향 유지)
-   - iOS safe-area까지 보정(카톡 인앱/사파리에서 가장 티남)
+   공통 SwiperArea
+   - swiper / arrow absolute 기준점
+   - 공통 박스 역할
 ================================= */
 .rowShell .swiperArea {
-  --safe-left: env(safe-area-inset-left);
-  --safe-right: env(safe-area-inset-right);
-
-  padding-right: calc(var(--arrow-zone) + var(--safe-right));
-  padding-left: var(--safe-left);
-
   box-sizing: border-box;
   overflow: hidden;
-
-  /* arrowZone absolute 기준점 */
   position: relative;
-
-  /* 디버깅 중 수직 정렬 확인용 (필요시 사용)
-     display:flex를 켜면 내부(swiper/arrow)가 중앙 정렬되는 효과가 있음 */
-  display: flex;
-  /* border: 1px solid #333; */
-}
-
-/* 왼쪽 화살표가 보일 때만 왼쪽 패딩을 arrow-zone 만큼 추가 */
-.rowShell[data-left="1"] .swiperArea {
-  padding-left: calc(var(--arrow-zone) + env(safe-area-inset-left));
 }
 
 /* ===============================
-   Swiper 기본 요소들: 가로 overflow/터치 이슈 방지
+   공통 Swiper 기본 요소
+   - 가로 overflow / 위치 이슈 방지
 ================================= */
 .rowShell .swiper {
   width: 100%;
@@ -49,30 +62,21 @@
   touch-action: pan-y; /* 모바일에서 세로 스크롤 우선 */
 }
 
-/* 트랙: 수직 중앙 정렬 */
+/* 공통 트랙 정렬 */
 .rowShell .swiper-wrapper {
   will-change: transform;
   align-items: center;
 }
 
-/* slidesPerView="auto" 이므로 slide width는 CSS가 지배함 */
-.rowShell .swiper-slide {
-  width: 300px;
-  max-width: 100%;
-
-  /* ✅ 이미지 붕뜸 방지: slide 자체도 중앙 정렬 */
-  display: flex;
-  align-items: center;
-}
-
-/* ✅ 이미지 baseline/붕뜸 방지 */
+/* 공통 slide 이미지 baseline/뭉침 방지 */
 .rowShell .swiper-slide img {
   display: block;
   align-self: center;
 }
 
 /* ===============================
-   화살표 hit-zone: overlay 유지 (Row.jsx가 제어)
+   공통 오버레이 hit-zone
+   - overlay 제어 (Row.jsx에서 핸들)
 ================================= */
 .arrowZone {
   position: absolute;
@@ -89,17 +93,17 @@
   border: none;
   cursor: pointer;
 
-  transition: background 160ms ease, opacity 160ms ease, transform 160ms ease;
   opacity: 0.9;
+  transition: background 160ms ease, opacity 160ms ease, transform 160ms ease;
 }
 
-/* rowShell 내부에서 arrowZone의 top/bottom을 강제(안전장치)
-   - 구조가 바뀌어도 hit-zone이 세로로 꽉 차게 유지 */
+/* rowShell 내부에서 arrowZone 세로 기준 강제 */
 .rowShell .arrowZone {
   top: 0;
   bottom: 0;
 }
 
+/* 공통 왼쪽 오버레이 */
 .arrowZone.left {
   left: 0;
   background: linear-gradient(
@@ -112,6 +116,7 @@
   /* border-right: 1px solid red; */
 }
 
+/* 공통 오른쪽 오버레이 */
 .arrowZone.right {
   right: 0;
   background: linear-gradient(
@@ -119,10 +124,6 @@
     rgba(0, 0, 0, 0.01),
     rgba(0, 0, 0, 0)
   );
-}
-
-.arrowZone:hover {
-  opacity: 1;
 }
 
 /* 처음엔 left 버튼 숨김 (공간/클릭 차단) */
@@ -142,113 +143,7 @@
 }
 
 /* ===============================
-   모바일/태블릿 최적화
-================================= */
-
-/* 모바일 최적화: 카드 크기 다운 + 화살표 영역 축소/숨김 */
-@media (max-width: 1024px) {
-  .rowShell {
-    --arrow-zone: 52px;
-  }
-
-  .rowShell .swiper-slide {
-    width: 180px;
-  }
-
-  /* tablet에서 버튼 폭만 조정하고 싶다면 이걸 유지 */
-  .arrowZone {
-    width: 56px !important;
-  }
-}
-
-@media (max-width: 768px) {
-  /* 폰에서는 화살표 overlay가 스크롤을 방해하는 경우가 많음
-     => 모바일 UX는 스와이프가 기본이니 과감히 숨김 */
-  .arrowZone {
-    display: none !important;
-  }
-
-  /* 화살표가 없으니 패딩도 제거해서 “딱 붙는” 레이아웃 */
-  .rowShell .swiperArea {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-
-  .rowShell .swiper-slide {
-    width: 230px;
-  }
-}
-
-/* 폰 레이아웃(data-touch="1")에서는 arrow-zone 패딩을 아예 쓰지 않음 */
-.rowShell[data-touch="1"] .swiperArea {
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-/* 폰 레이아웃에서는 data-left 영향을 무시 (왼쪽 패딩이 생기면 안 됨) */
-.rowShell[data-touch="1"][data-left="1"] .swiperArea {
-  padding-left: env(safe-area-inset-left);
-}
-
-/* ===============================
-   Small phones tuning (<= 375 / 360 / 340)
-   목적: 카드 너무 커 보이는 느낌 제거 + 스와이프 체감 부드럽게
-================================= */
-
-/* iPhone SE/mini, small Android (360~375) */
-@media (max-width: 375px) {
-  .rowShell {
-    border-radius: 10px;
-  }
-
-  /* 슬라이드 폭 살짝 줄여서 2장 구성이 더 자연스럽게 */
-  .rowShell .swiper-slide {
-    width: 210px;
-  }
-
-  /* 폰에서는 화살표 숨기므로 패딩 최소화 유지 */
-  .rowShell .swiperArea {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-}
-
-/* 더 작은 폰 (<= 360) */
-@media (max-width: 360px) {
-  .rowShell .swiper-slide {
-    width: 200px;
-  }
-}
-
-/* 초소형 (<= 340, iPhone SE 1세대급/아주 작은 Android) */
-@media (max-width: 340px) {
-  .rowShell .swiper-slide {
-    width: 190px;
-  }
-}
-
-/* 모바일(터치)에서는 화살표 존 컨셉 제거 */
-@media (max-width: 960px) {
-  .rowShell[data-touch="1"] {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .rowShell[data-touch="1"] .swiperArea {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .rowShell[data-touch="1"] .swiper {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-}
-
-/* ===============================
-   Row skeleton card
+   공통 Skeleton 카드
 ================================= */
 .skCard {
   position: absolute;
@@ -261,81 +156,79 @@
     rgba(255, 255, 255, 0.06) 100%
   );
   background-size: 200% 100%;
-  animation: row-shimmer 1.2s ease-in-out infinite;
+  animation: row-shimmer 1.25s ease-in-out infinite;
 }
 
-@keyframes row-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+/* 로딩 플레이스홀더: 타이틀/연도 라인 */
+.skMeta {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  pointer-events: none;
+  display: grid;
+  gap: 7px;
 }
 
-/* =========================
-   Movie Card Overlay
-========================= */
+.skTitle,
+.skYear {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background-size: 200% 100%;
+  will-change: background-position, opacity;
+}
 
-.row__hoverOverlay{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-
-  display:flex;
-  align-items:flex-end;
-
-  opacity:0;
-  transform:translateY(6px);
-  transition:opacity 180ms ease, transform 180ms ease;
-
-  z-index:2;
-
-  background:linear-gradient(
-  180deg,
-  rgba(0,0,0,0) 52%,
-  rgba(0,0,0,0.62) 100%
+/* 변경: div는 고정하고 배경 그라데이션만 좌->우로 흐르게 처리 */
+.skTitle {
+  width: 58%;
+  height: 11px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.07) 100%
   );
+  animation: row-shimmer 1.35s ease-in-out infinite;
 }
 
-/* Desktop hover + keyboard focus */
-@media (hover:hover){
-  .rowShell .swiper-slide:hover,
-  .rowShell .swiper-slide:focus-within{
-  border-color: rgba(249,249,249,0.8);
+.skYear {
+  width: 24%;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  animation: row-shimmer 1.5s ease-in-out infinite;
+  animation-delay: 0.12s;
 }
 
-.rowShell .swiper-slide:hover .row__hoverOverlay,
-.rowShell .swiper-slide:focus-within .row__hoverOverlay{
-  opacity:1;
-  transform:translateY(0);
-  }
-}
+/* 안내: 텍스트 스켈레톤은 요소 이동 없이 배경만 shimmer 처리 */
+/* =========================
+   공통 Movie Card Overlay
+========================= */
+.row__hoverOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 
-/* keyboard accessibility */
-.swiper-slide:focus-visible{
-  outline:2px solid rgba(255,255,255,.6);
-  outline-offset:4px;
-}
+  display: flex;
+  align-items: flex-end;
 
-/* Mobile 기본 overlay 표시 */
-@media (max-width:768px){
-  .row__hoverOverlay{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 180ms ease, transform 180ms ease;
 
-/* 카드 인터랙션 */
-.swiper-slide{
-  transition:transform .2s ease;
-}
-
-/* 모바일 터치 피드백 */
-.swiper-slide:hover{
-  transform:scale(1.03);
+  z-index: 2;
+  background: var(--row-overlay-bg);
 }
 
 /* =========================
-   Overlay Content
+   공통 Overlay Content
 ========================= */
-
 .row__hoverOverlayInner {
   width: 100%;
   padding: 12px;
@@ -359,9 +252,347 @@
 }
 
 /* =========================
-   Skeleton 상태에서는 숨김
+   Skeleton 상태에서는 overlay 숨김
 ========================= */
-
 .skWrap .row__hoverOverlay {
   display: none;
 }
+
+/* =========================================================
+   3. 기본 Row 전용 클래스
+   - /main, /detail, /search 공통 가로 Row
+========================================================= */
+
+/* ===============================
+   기본 Row swiperArea
+   - 오버레이 hit-zone 만큼 패딩 확보
+   - 왼쪽은 data-left="1"일 때만 패딩
+   - 오른쪽은 항상 패딩 유지
+   - iOS safe-area 보정
+================================= */
+.rowShell[data-variant="default"] .swiperArea {
+  padding-right: calc(var(--arrow-zone) + var(--safe-right));
+  padding-left: var(--safe-left);
+  display: flex;
+}
+
+/* 왼쪽 오버레이가 보일 때만 왼쪽 패딩 추가 */
+.rowShell[data-variant="default"][data-left="1"] .swiperArea {
+  padding-left: calc(var(--arrow-zone) + var(--safe-left));
+}
+
+/* 기본 Row slide width
+   - slidesPerView="auto" 이므로 CSS가 폭을 지배 */
+.rowShell[data-variant="default"] .swiper-slide {
+  width: 300px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* =========================================================
+   4. Top10 Row 전용 클래스
+   - landing teaser 성격의 Top10 Row
+========================================================= */
+
+/* ===============================
+   Top10 전용 swiperArea
+   - 양쪽 오버레이를 별도 레이어 구조로 단순화
+   - 기본값은 padding 없음
+================================= */
+.rowShell[data-variant="top10"] .swiperArea {
+  padding-left: 0;
+  padding-right: 0;
+  /* display: block; */
+}
+
+/* 기본 상태(맨 처음)에서는 왼쪽 breathing space 적용 */
+.top10Shell[data-start="1"] .rowShell[data-variant="top10"] .swiperArea {
+  padding-left: var(--row-swiper-pad-top10);
+}
+
+/* 오른쪽은 기본 상태에서 여백 없음 */
+.top10Shell[data-start="1"] .rowShell[data-variant="top10"] .swiperArea {
+  padding-right: 0;
+}
+
+/* 첫 이동이 오른쪽이면 왼쪽 여백 제거 */
+.top10Shell[data-start="0"] .rowShell[data-variant="top10"] .swiperArea {
+  padding-left: 0;
+}
+
+/* 끝에 도달해도 오른쪽 여백은 일단 만들지 않음
+   - 필요하면 추후 end 상태에서만 추가 */
+.top10Shell[data-end="1"] .rowShell[data-variant="top10"] .swiperArea {
+  padding-right: var(--row-swiper-pad-top10);;
+}
+
+/* Top10 내부 swiper 자체는 padding 없음 */
+.rowShell[data-variant="top10"] .swiper {
+  padding: 0;
+}
+
+/* Top10 전용 slide
+   - width는 swiper breakpoints와 맞춤
+================================= */
+.rowShell[data-variant="top10"] .swiper-slide {
+  display: flex;
+  align-items: center;
+  width: auto;
+  max-width: none;
+}
+
+/* =========================================================
+   5. 클래스 효과
+   - hover / focus / disabled / interaction
+   - 기본 Row / Top10 Row 분리
+========================================================= */
+
+/* ===============================
+   공통 오버레이 효과
+================================= */
+.arrowZone:hover {
+  opacity: 1;
+}
+
+/* ===============================
+   공통 keyboard 접근성
+================================= */
+.swiper-slide:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 4px;
+}
+
+/* ===============================
+   기본 Row 효과
+================================= */
+
+/* Desktop hover + keyboard focus */
+@media (hover: hover) {
+  .rowShell[data-variant="default"] .swiper-slide:hover,
+  .rowShell[data-variant="default"] .swiper-slide:focus-within {
+    border-color: var(--row-border-color-hover);
+  }
+
+  .rowShell[data-variant="default"] .swiper-slide:hover .row__hoverOverlay,
+  .rowShell[data-variant="default"] .swiper-slide:focus-within .row__hoverOverlay {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 기본 Row 카드 인터랙션 */
+.rowShell[data-variant="default"] .swiper-slide {
+  transition: transform 0.2s ease;
+}
+
+/* 기본 Row hover scale */
+.rowShell[data-variant="default"] .swiper-slide:hover {
+  transform: scale(var(--row-hover-scale-default));
+}
+
+/* ===============================
+   Top10 Row 효과
+================================= */
+
+/* Top10은 추후 hover / focus 확장 가능하도록 미리 분리 */
+.rowShell[data-variant="top10"] .swiper-slide {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  transform-origin: center center;
+}
+
+/* 필요 시 추후 hover/focus 전용 규칙 추가 가능 */
+/*
+@media (hover: hover) and (pointer: fine) {
+  .rowShell[data-variant="top10"] .swiper-slide:hover {
+    transform: scale(1.035);
+    z-index: 3;
+  }
+}
+
+.rowShell[data-variant="top10"] .swiper-slide:focus-within {
+  transform: scale(1.035);
+  z-index: 4;
+}
+*/
+
+/* =========================================================
+   6. 반응형
+   - 공통 > 기본 Row > Top10 Row 순
+========================================================= */
+
+/* ===============================
+   태블릿 이하 공통
+================================= */
+@media (max-width: 1024px) {
+  .rowShell {
+    --arrow-zone: 52px;
+  }
+
+  /* tablet에서 버튼 폭만 조정하고 나머지 요소는 유지 */
+  .arrowZone {
+    width: 56px !important;
+  }
+
+  /* 기본 Row 전용 slide 폭 축소 */
+  .rowShell[data-variant="default"] .swiper-slide {
+    width: 180px;
+  }
+}
+
+/* ===============================
+   모바일 공통
+================================= */
+@media (max-width: 768px) {
+  /* 모바일에서는 오버레이가 스크롤을 방해하는 경우가 많음
+     => 모바일 UX는 스와이프가 기본이니 과감히 숨김 */
+  .arrowZone {
+    display: none !important;
+  }
+
+  /* 오버레이가 없으면 기본 swiperArea 패딩 제거 */
+  .rowShell .swiperArea {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* 모바일 기본 overlay 표시 */
+  .row__hoverOverlay {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 기본 Row 전용 slide 폭 */
+  .rowShell[data-variant="default"] .swiper-slide {
+    width: 230px;
+  }
+}
+
+/* ===============================
+   터치 디바이스(data-touch="1") 공통
+   - arrow-zone 그라데이션 제거
+================================= */
+.rowShell[data-touch="1"] .swiperArea {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* data-left 방향값 무시 */
+.rowShell[data-touch="1"][data-left="1"] .swiperArea {
+  padding-left: env(safe-area-inset-left);
+}
+
+/* 모바일(터치)에서는 오버레이 조건 콘텐츠 숨김 */
+@media (max-width: 960px) {
+  .rowShell[data-touch="1"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .rowShell[data-touch="1"] .swiperArea {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .rowShell[data-touch="1"] .swiper {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* ===============================
+   Small phones tuning
+   목적: 카드 내부 콘텐츠 겹침/번짐 제거
+================================= */
+
+/* iPhone SE/mini, small Android (360~375) */
+@media (max-width: 375px) {
+  .rowShell {
+    border-radius: 10px;
+  }
+
+  /* 기본 Row 슬라이드 폭 추가 축소 */
+  .rowShell[data-variant="default"] .swiper-slide {
+    width: 210px;
+  }
+
+  /* 모바일에서는 오버레이 클릭영역이라 패딩 최소화 유지 */
+  .rowShell .swiperArea {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* 초소형 폭 (<= 360) */
+@media (max-width: 360px) {
+  .rowShell[data-variant="default"] .swiper-slide {
+    width: 200px;
+  }
+}
+
+/* 극소형 폭 (<= 340, iPhone SE 1세대 및 아주 작은 Android) */
+@media (max-width: 340px) {
+  .rowShell[data-variant="default"] .swiper-slide {
+    width: 190px;
+  }
+}
+
+/* ===============================
+   Top10 전용 반응형
+================================= */
+@media (max-width: 998px) {
+  .rowShell[data-variant="top10"] .swiper {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 625px) {
+  .rowShell[data-variant="top10"] .swiper {
+    padding: 0 16px;
+  }
+}
+
+/* =========================================================
+   7. 애니메이션
+   - shimmer / 추후 top10 진입 애니메이션 확장 가능
+========================================================= */
+
+/* Skeleton shimmer */
+@keyframes row-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 변경: 텍스트 플레이스홀더 라인 자체가 좌->우로 흐르는 효과 */
+@keyframes row-text-flow {
+  0% {
+    transform: translateX(-10px);
+    opacity: 0.62;
+  }
+  100% {
+    transform: translateX(12px);
+    opacity: 1;
+  }
+}
+
+/* 추후 Top10 첫 카드 등장 애니메이션 확장용 */
+/*
+@keyframes top10-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+*/
+
+

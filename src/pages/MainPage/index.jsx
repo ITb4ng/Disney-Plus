@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
-import Banner from "../../components/banner";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import Banner from "../../components/Banner/banner";
 import Row from "../../components/Row";
 import Category from "../../components/category";
 import styled from "styled-components";
@@ -7,22 +8,25 @@ import requests from "../../api/request";
 // import Update from "../../components/Update";
 import Feedback from "../../components/Feedback";
 import DemoActionSection from "../../components/DemoAction";
+import { COMMON_DEBUG_STATES, pickDebugStateFromSearchParams } from "../../utils/debugState";
 
 
 const MainPage = () => {
+  const [searchParams] = useSearchParams();
   const [showDemoBanner, setShowDemoBanner] = useState(false);
-
+  const shouldShowDemoBannerRef = useRef(false);
   // 브라우저 sessionStorage/localStorage 접근은 렌더마다 읽지 말고 memo로 한번만
   const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
-
- 
-
   useEffect(() => {
     const flag = sessionStorage.getItem("demo_banner");
     if (flag === "1") {
-      setShowDemoBanner(true);
+      shouldShowDemoBannerRef.current = true;
       sessionStorage.removeItem("demo_banner"); // 1회만
-      const t = setTimeout(() => setShowDemoBanner(false), 4500);
+    }
+
+    if (shouldShowDemoBannerRef.current) {
+      setShowDemoBanner(true);
+      const t = setTimeout(() => setShowDemoBanner(false), 2000);
       return () => clearTimeout(t);
     }
   }, []);
@@ -51,12 +55,28 @@ const MainPage = () => {
     ];
   }, [isGuest]);
 
+  // 기본 Row 디버그 상태 테스트용: "success" | "loading" | "error" | "empty" | "no-image" | "cdn-fail"
+  const rowDebugState = pickDebugStateFromSearchParams(searchParams, "rowDebug", {
+    fallback: "success",
+    allowed: COMMON_DEBUG_STATES,
+  });
+
+  const bannerDebugRaw = pickDebugStateFromSearchParams(searchParams, "bannerDebug", {
+    fallback: "success",
+    // 배너는 URL에서 image-error를 직접 받아 이미지 실패 상태를 테스트할 수 있게 확장
+    allowed: [...COMMON_DEBUG_STATES, "image-error"],
+  });
+  const bannerDebugState =
+    bannerDebugRaw === "no-image" || bannerDebugRaw === "cdn-fail"
+      ? "image-error"
+      : bannerDebugRaw;
+
   return (
     <>
       {showDemoBanner && <DemoBanner onClose={() => setShowDemoBanner(false)} />}
 
       <Container>
-        <Banner />
+        <Banner debugState={bannerDebugState} />
 
         {/* 게스트 전용: 섹션 */}
         {isGuest && <DemoActionSection />}
@@ -71,6 +91,7 @@ const MainPage = () => {
             id={r.id}
             fetchUrl={r.fetchUrl}
             showRank={r.showRank}
+            debugState={rowDebugState}
           />
         ))}
 

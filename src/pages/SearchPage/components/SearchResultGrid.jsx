@@ -1,6 +1,9 @@
 import React from "react";
 
-const getImageSources = (item) => {
+const getImageSources = (item, debugState) => {
+  const forceFallbackImage =
+    debugState === "no-image" || debugState === "cdn-fail";
+
   const backdrop = item.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
     : null;
@@ -8,19 +11,24 @@ const getImageSources = (item) => {
     ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
     : null;
 
-  const fallback = "https://placehold.co/780x439/111827/9ca3af?text=No+Image";
-  const src = backdrop || poster || fallback;
+  const fallback =
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='none'><rect width='1600' height='900' fill='%23111827'/></svg>";
+  const src = forceFallbackImage ? fallback : backdrop || poster || fallback;
+  const showFallbackLabel =
+    forceFallbackImage || (!backdrop && !poster);
 
-  const srcSet = backdrop
+  const srcSet = forceFallbackImage
+    ? undefined
+    : backdrop
     ? `https://image.tmdb.org/t/p/w300${item.backdrop_path} 300w, https://image.tmdb.org/t/p/w780${item.backdrop_path} 780w`
     : poster
       ? `https://image.tmdb.org/t/p/w342${item.poster_path} 342w, https://image.tmdb.org/t/p/w500${item.poster_path} 500w`
       : undefined;
 
-  return { src, srcSet };
+  return { src, srcSet, showFallbackLabel };
 };
 
-const SearchResultGrid = ({ results, onSelect }) => {
+const SearchResultGrid = ({ results, onSelect, debugState = "success" }) => {
   return (
     <section className="search-result-grid" aria-label="검색 결과">
       {results.map((item) => {
@@ -29,7 +37,7 @@ const SearchResultGrid = ({ results, onSelect }) => {
         const year = date ? date.slice(0, 4) : "";
         const typeLabel = item.media_type === "tv" ? "시리즈" : "영화";
         const score = Number(item.vote_average || 0).toFixed(1);
-        const { src, srcSet } = getImageSources(item);
+        const { src, srcSet, showFallbackLabel } = getImageSources(item, debugState);
 
         return (
           <button
@@ -48,6 +56,11 @@ const SearchResultGrid = ({ results, onSelect }) => {
                 loading="lazy"
                 decoding="async"
               />
+              {showFallbackLabel && (
+                <div className="card__fallbackLabel" aria-hidden="true">
+                  이미지 없음
+                </div>
+              )}
 
               <div className="card__overlay">
                 <div className="card__title" title={title}>

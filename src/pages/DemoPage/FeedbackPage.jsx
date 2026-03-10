@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FiRefreshCcw } from "react-icons/fi";
 import {
   collection,
@@ -18,9 +18,12 @@ const SUPER_UIDS = ["xAoBncJDaUfVvoRWuSzYocD9NiF2"]; // ✅ 파일 상단으로 
 
 const FeedbackPage = () => {
   const nav = useNavigate();
+  const location = useLocation();
   const auth = useMemo(() => getAuth(), []);
   const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
   const meUid = auth.currentUser?.uid ?? null;
+  const from = location.state?.from || "/main";
+  const fromScrollY = location.state?.scrollY;
 
   
   const [sort, setSort] = useState("new"); // "new" | "old"
@@ -259,7 +262,18 @@ const FeedbackPage = () => {
       </ListWrap>
 
       <BackWrap>
-        <BackButton onClick={() => nav("/main", { state: { restoreScroll: true } })}>
+        <BackButton
+          data-testid="feedback-back-btn"
+          onClick={() =>
+            nav(from, {
+              replace: true,
+              state:
+                typeof fromScrollY === "number"
+                  ? { restoreScroll: true, restoreScrollY: fromScrollY }
+                  : undefined,
+            })
+          }
+        >
           ← 뒤로가기
         </BackButton>
       </BackWrap>

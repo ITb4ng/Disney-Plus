@@ -11,6 +11,7 @@ import SearchFilterBar from "./components/SearchFilterBar";
 import SearchResultGrid from "./components/SearchResultGrid";
 import SearchEmptyState from "./components/SearchEmptyState";
 import { useSearchTransition } from "../../contexts/SearchTransitionContext";
+import { COMMON_DEBUG_STATES, pickDebugStateFromSearchParams } from "../../utils/debugState";
 
 import "./SearchPage.css";
 
@@ -117,6 +118,7 @@ const SearchPage = () => {
   const [isEntering, setIsEntering] = useState(false);
 
   const from = location.state?.from || "/main";
+  const fromScrollY = location.state?.scrollY;
 
   const rawType = searchParams.get("type") || "all";
   const rawSort = searchParams.get("sort") || "relevance";
@@ -125,6 +127,15 @@ const SearchPage = () => {
   const term = (searchParams.get("q") || "").trim();
 
   const [inputValue, setInputValue] = useState(term);
+  // SearchPage 디버그 상태 테스트용
+  const normalizedSearchDebugState = pickDebugStateFromSearchParams(
+    searchParams,
+    "searchDebug",
+    {
+      fallback: "success",
+      allowed: COMMON_DEBUG_STATES,
+    }
+  );
   const skipNextDebounceSyncRef = useRef(false);
   const [recentKeywords, setRecentKeywords] = useState(() =>
     parseKeywordList(RECENT_KEYWORDS_KEY, [])
@@ -234,7 +245,9 @@ const SearchPage = () => {
 
   const searchQuery = useQuery({
     queryKey: ["search", term, type, sort],
-    enabled: term.length > 0,
+    enabled:
+      term.length > 0 &&
+      !["loading", "error", "empty"].includes(normalizedSearchDebugState),
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
@@ -293,12 +306,32 @@ const SearchPage = () => {
   );
 
   const results = searchQuery.data || [];
-  const hasResults = results.length > 0;
+  const debugList =
+    normalizedSearchDebugState === "no-image" ||
+    normalizedSearchDebugState === "cdn-fail"
+      ? results.length > 0
+        ? results
+        : Array.from({ length: 6 }, (_, idx) => ({
+            id: `debug-${idx + 1}`,
+            media_type: idx % 2 === 0 ? "movie" : "tv",
+            title: `Debug Content ${idx + 1}`,
+            name: `Debug Content ${idx + 1}`,
+            release_date: "2025-01-01",
+            first_air_date: "2025-01-01",
+            vote_average: 7.5,
+            backdrop_path: null,
+            poster_path: null,
+          }))
+      : results;
+  const hasResults = debugList.length > 0;
 
   let stateMode = "idle";
-  if (term && searchQuery.isPending && !searchQuery.data) stateMode = "loading";
-  if (searchQuery.isError) stateMode = "error";
-  if (term && !searchQuery.isPending && !searchQuery.isError && !hasResults) {
+  if (normalizedSearchDebugState === "loading") stateMode = "loading";
+  else if (normalizedSearchDebugState === "error") stateMode = "error";
+  else if (normalizedSearchDebugState === "empty") stateMode = "empty";
+  else if (term && searchQuery.isPending && !searchQuery.data) stateMode = "loading";
+  else if (searchQuery.isError) stateMode = "error";
+  else if (term && !searchQuery.isPending && !searchQuery.isError && !hasResults) {
     stateMode = "empty";
   }
 
@@ -306,9 +339,18 @@ const SearchPage = () => {
     <div className={`search-page page ${isEntering ? "search-page--entering" : ""}`}>
       <SearchHeader
         term={term}
-        resultCount={results.length}
+        resultCount={debugList.length}
         isFetching={searchQuery.isFetching}
-        onClose={() => navigate(from, { replace: true })}
+        isLoadingState={stateMode === "loading"}
+        onClose={() =>
+          navigate(from, {
+            replace: true,
+            state:
+              typeof fromScrollY === "number"
+                ? { restoreScroll: true, restoreScrollY: fromScrollY }
+                : undefined,
+          })
+        }
       />
 
       <SearchInput
@@ -330,7 +372,11 @@ const SearchPage = () => {
       />
 
       {hasResults ? (
-        <SearchResultGrid results={results} onSelect={goDetail} />
+        <SearchResultGrid
+          results={debugList}
+          onSelect={goDetail}
+          debugState={normalizedSearchDebugState}
+        />
       ) : (
         <SearchEmptyState
           mode={stateMode}

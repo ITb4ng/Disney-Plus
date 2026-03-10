@@ -1,0 +1,439 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]:
+      - link "Disney Plus Logo" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img "Disney Plus Logo" [ref=e9]
+      - generic [ref=e10]:
+        - button "검색 페이지로 이동" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+        - button "로그인" [ref=e15]
+  - main [ref=e16]:
+    - generic [ref=e19]:
+      - heading "테스트 배너 콘텐츠" [level=1] [ref=e20]
+      - generic "콘텐츠 메타 정보" [ref=e21]:
+        - generic [ref=e22]: ⭐ 8.4
+        - generic [ref=e23]: "2026"
+        - generic [ref=e24]: SF · Adventure
+        - generic [ref=e25]: 2h 22m
+      - button "상세 페이지로 이동" [ref=e27] [cursor=pointer]: 자세히 보기
+    - region "체험 액션" [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: 이렇게 체험해 보세요
+        - heading "핵심 인터랙션 빠르게 둘러보기" [level=2] [ref=e31]
+        - generic [ref=e32]: 카드에 마우스를 올려 이동해보세요
+      - generic [ref=e33]:
+        - button "검색 체험하기" [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - generic [ref=e37]: 🔎
+              - generic [ref=e38]: 추천
+            - generic [ref=e39]: 검색 체험하기
+            - generic [ref=e40]: 검색 UX와 결과 동기화를 확인해보세요.
+            - generic [ref=e41]: 클릭하면 이동
+        - button "샘플 디테일 보기" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - generic [ref=e45]: 🎬
+              - generic [ref=e46]: 안정
+            - generic [ref=e47]: 샘플 디테일 보기
+            - generic [ref=e48]: 연출(비네팅/스크롤)과 정보 레이아웃을 확인해보세요.
+            - generic [ref=e49]: 클릭하면 이동
+        - button "랜덤 인기 디테일" [ref=e50] [cursor=pointer]:
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]: 🎲
+              - generic [ref=e54]: 재미
+            - generic [ref=e55]: 랜덤 인기 디테일
+            - generic [ref=e56]: 인기 목록에서 무작위로 하나 골라 디테일로 이동합니다.
+            - generic [ref=e57]: 클릭할 때마다 바뀜
+    - generic [ref=e58]:
+      - heading "Top Rated" [level=2] [ref=e59]
+      - generic [ref=e60]:
+        - button "이전 콘텐츠" [ref=e61] [cursor=pointer]:
+          - img [ref=e63]
+        - button "다음 콘텐츠" [ref=e65] [cursor=pointer]:
+          - img [ref=e67]
+        - generic [ref=e71]:
+          - group "1 / 20" [ref=e72]:
+            - button "1 테스트 콘텐츠 1000" [ref=e73] [cursor=pointer]:
+              - generic: "1"
+              - img "테스트 콘텐츠 1000" [ref=e74]
+              - generic:
+                - generic:
+                  - generic: 테스트 콘텐츠 1000
+                  - generic: "2024"
+          - group "2 / 20" [ref=e75]:
+            - button "2 콘텐츠 이미지 준비중 테스트 콘텐츠 1001 2024" [ref=e76] [cursor=pointer]:
+              - generic: "2"
+              - generic [ref=e78]:
+                - generic [ref=e79]: 콘텐츠 이미지 준비중
+                - generic [ref=e80]: 테스트 콘텐츠 1001
+                - generic [ref=e81]: "2024"
+          - group "3 / 20" [ref=e82]:
+            - button "3 콘텐츠 이미지 준비중 테스트 콘텐츠 1002 2024" [ref=e83] [cursor=pointer]:
+              - generic: "3"
+              - generic [ref=e85]:
+                - generic [ref=e86]: 콘텐츠 이미지 준비중
+                - generic [ref=e87]: 테스트 콘텐츠 1002
+                - generic [ref=e88]: "2024"
+          - group "4 / 20" [ref=e89]:
+            - button "4 콘텐츠 이미지 준비중 테스트 콘텐츠 1003 2024" [ref=e90] [cursor=pointer]:
+              - generic: "4"
+              - generic [ref=e92]:
+                - generic [ref=e93]: 콘텐츠 이미지 준비중
+                - generic [ref=e94]: 테스트 콘텐츠 1003
+                - generic [ref=e95]: "2024"
+          - group "5 / 20" [ref=e96]:
+            - button "5 콘텐츠 이미지 준비중 테스트 콘텐츠 1004 2024" [ref=e97] [cursor=pointer]:
+              - generic: "5"
+              - generic [ref=e99]:
+                - generic [ref=e100]: 콘텐츠 이미지 준비중
+                - generic [ref=e101]: 테스트 콘텐츠 1004
+                - generic [ref=e102]: "2024"
+          - group "6 / 20" [ref=e103]:
+            - button "6 콘텐츠 이미지 준비중 테스트 콘텐츠 1005 2024" [ref=e104] [cursor=pointer]:
+              - generic: "6"
+              - generic [ref=e106]:
+                - generic [ref=e107]: 콘텐츠 이미지 준비중
+                - generic [ref=e108]: 테스트 콘텐츠 1005
+                - generic [ref=e109]: "2024"
+          - group "7 / 20" [ref=e110]:
+            - button "7 콘텐츠 이미지 준비중 테스트 콘텐츠 1006 2024" [ref=e111] [cursor=pointer]:
+              - generic: "7"
+              - generic [ref=e113]:
+                - generic [ref=e114]: 콘텐츠 이미지 준비중
+                - generic [ref=e115]: 테스트 콘텐츠 1006
+                - generic [ref=e116]: "2024"
+          - group "8 / 20" [ref=e117]:
+            - button "8 콘텐츠 이미지 준비중 테스트 콘텐츠 1007 2024" [ref=e118] [cursor=pointer]:
+              - generic: "8"
+              - generic [ref=e120]:
+                - generic [ref=e121]: 콘텐츠 이미지 준비중
+                - generic [ref=e122]: 테스트 콘텐츠 1007
+                - generic [ref=e123]: "2024"
+          - group "9 / 20" [ref=e124]:
+            - button "9 콘텐츠 이미지 준비중 테스트 콘텐츠 1008 2024" [ref=e125] [cursor=pointer]:
+              - generic: "9"
+              - generic [ref=e127]:
+                - generic [ref=e128]: 콘텐츠 이미지 준비중
+                - generic [ref=e129]: 테스트 콘텐츠 1008
+                - generic [ref=e130]: "2024"
+          - group "10 / 20" [ref=e131]:
+            - button "10 콘텐츠 이미지 준비중 테스트 콘텐츠 1009 2024" [ref=e132] [cursor=pointer]:
+              - generic: "10"
+              - generic [ref=e134]:
+                - generic [ref=e135]: 콘텐츠 이미지 준비중
+                - generic [ref=e136]: 테스트 콘텐츠 1009
+                - generic [ref=e137]: "2024"
+          - group "11 / 20" [ref=e138]:
+            - button "11 콘텐츠 이미지 준비중 테스트 콘텐츠 1010 2024" [ref=e139] [cursor=pointer]:
+              - generic: "11"
+              - generic [ref=e141]:
+                - generic [ref=e142]: 콘텐츠 이미지 준비중
+                - generic [ref=e143]: 테스트 콘텐츠 1010
+                - generic [ref=e144]: "2024"
+          - group "12 / 20" [ref=e145]:
+            - button "12 콘텐츠 이미지 준비중 테스트 콘텐츠 1011 2024" [ref=e146] [cursor=pointer]:
+              - generic: "12"
+              - generic [ref=e148]:
+                - generic [ref=e149]: 콘텐츠 이미지 준비중
+                - generic [ref=e150]: 테스트 콘텐츠 1011
+                - generic [ref=e151]: "2024"
+          - group "13 / 20" [ref=e152]:
+            - button "13 콘텐츠 이미지 준비중 테스트 콘텐츠 1012 2024" [ref=e153] [cursor=pointer]:
+              - generic: "13"
+              - generic [ref=e155]:
+                - generic [ref=e156]: 콘텐츠 이미지 준비중
+                - generic [ref=e157]: 테스트 콘텐츠 1012
+                - generic [ref=e158]: "2024"
+          - group "14 / 20" [ref=e159]:
+            - button "14 콘텐츠 이미지 준비중 테스트 콘텐츠 1013 2024" [ref=e160] [cursor=pointer]:
+              - generic: "14"
+              - generic [ref=e162]:
+                - generic [ref=e163]: 콘텐츠 이미지 준비중
+                - generic [ref=e164]: 테스트 콘텐츠 1013
+                - generic [ref=e165]: "2024"
+          - group "15 / 20" [ref=e166]:
+            - button "15 콘텐츠 이미지 준비중 테스트 콘텐츠 1014 2024" [ref=e167] [cursor=pointer]:
+              - generic: "15"
+              - generic [ref=e169]:
+                - generic [ref=e170]: 콘텐츠 이미지 준비중
+                - generic [ref=e171]: 테스트 콘텐츠 1014
+                - generic [ref=e172]: "2024"
+          - group "16 / 20" [ref=e173]:
+            - button "16 콘텐츠 이미지 준비중 테스트 콘텐츠 1015 2024" [ref=e174] [cursor=pointer]:
+              - generic: "16"
+              - generic [ref=e176]:
+                - generic [ref=e177]: 콘텐츠 이미지 준비중
+                - generic [ref=e178]: 테스트 콘텐츠 1015
+                - generic [ref=e179]: "2024"
+          - group "17 / 20" [ref=e180]:
+            - button "17 콘텐츠 이미지 준비중 테스트 콘텐츠 1016 2024" [ref=e181] [cursor=pointer]:
+              - generic: "17"
+              - generic [ref=e183]:
+                - generic [ref=e184]: 콘텐츠 이미지 준비중
+                - generic [ref=e185]: 테스트 콘텐츠 1016
+                - generic [ref=e186]: "2024"
+          - group "18 / 20" [ref=e187]:
+            - button "18 콘텐츠 이미지 준비중 테스트 콘텐츠 1017 2024" [ref=e188] [cursor=pointer]:
+              - generic: "18"
+              - generic [ref=e190]:
+                - generic [ref=e191]: 콘텐츠 이미지 준비중
+                - generic [ref=e192]: 테스트 콘텐츠 1017
+                - generic [ref=e193]: "2024"
+          - group "19 / 20" [ref=e194]:
+            - button "19 콘텐츠 이미지 준비중 테스트 콘텐츠 1018 2024" [ref=e195] [cursor=pointer]:
+              - generic: "19"
+              - generic [ref=e197]:
+                - generic [ref=e198]: 콘텐츠 이미지 준비중
+                - generic [ref=e199]: 테스트 콘텐츠 1018
+                - generic [ref=e200]: "2024"
+          - group "20 / 20" [ref=e201]:
+            - button "20 콘텐츠 이미지 준비중 테스트 콘텐츠 1019 2024" [ref=e202] [cursor=pointer]:
+              - generic: "20"
+              - generic [ref=e204]:
+                - generic [ref=e205]: 콘텐츠 이미지 준비중
+                - generic [ref=e206]: 테스트 콘텐츠 1019
+                - generic [ref=e207]: "2024"
+    - generic [ref=e208]:
+      - heading "Trending Now" [level=2] [ref=e209]
+      - generic [ref=e210]:
+        - button:
+          - generic:
+            - img
+        - button "다음 콘텐츠" [ref=e211] [cursor=pointer]:
+          - img [ref=e213]
+        - generic [ref=e217]:
+          - group "1 / 20" [ref=e218]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1000 2024" [ref=e219] [cursor=pointer]:
+              - generic [ref=e221]:
+                - generic [ref=e222]: 콘텐츠 이미지 준비중
+                - generic [ref=e223]: 테스트 콘텐츠 1000
+                - generic [ref=e224]: "2024"
+          - group "2 / 20" [ref=e225]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1001 2024" [ref=e226] [cursor=pointer]:
+              - generic [ref=e228]:
+                - generic [ref=e229]: 콘텐츠 이미지 준비중
+                - generic [ref=e230]: 테스트 콘텐츠 1001
+                - generic [ref=e231]: "2024"
+          - group "3 / 20" [ref=e232]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1002 2024" [ref=e233] [cursor=pointer]:
+              - generic [ref=e235]:
+                - generic [ref=e236]: 콘텐츠 이미지 준비중
+                - generic [ref=e237]: 테스트 콘텐츠 1002
+                - generic [ref=e238]: "2024"
+          - group "4 / 20" [ref=e239]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1003 2024" [ref=e240] [cursor=pointer]:
+              - generic [ref=e242]:
+                - generic [ref=e243]: 콘텐츠 이미지 준비중
+                - generic [ref=e244]: 테스트 콘텐츠 1003
+                - generic [ref=e245]: "2024"
+          - group "5 / 20" [ref=e246]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1004 2024" [ref=e247] [cursor=pointer]:
+              - generic [ref=e249]:
+                - generic [ref=e250]: 콘텐츠 이미지 준비중
+                - generic [ref=e251]: 테스트 콘텐츠 1004
+                - generic [ref=e252]: "2024"
+          - group "6 / 20" [ref=e253]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1005 2024" [ref=e254] [cursor=pointer]:
+              - generic [ref=e256]:
+                - generic [ref=e257]: 콘텐츠 이미지 준비중
+                - generic [ref=e258]: 테스트 콘텐츠 1005
+                - generic [ref=e259]: "2024"
+          - group "7 / 20" [ref=e260]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1006 2024" [ref=e261] [cursor=pointer]:
+              - generic [ref=e263]:
+                - generic [ref=e264]: 콘텐츠 이미지 준비중
+                - generic [ref=e265]: 테스트 콘텐츠 1006
+                - generic [ref=e266]: "2024"
+          - group "8 / 20" [ref=e267]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1007 2024" [ref=e268] [cursor=pointer]:
+              - generic [ref=e270]:
+                - generic [ref=e271]: 콘텐츠 이미지 준비중
+                - generic [ref=e272]: 테스트 콘텐츠 1007
+                - generic [ref=e273]: "2024"
+          - group "9 / 20" [ref=e274]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1008 2024" [ref=e275] [cursor=pointer]:
+              - generic [ref=e277]:
+                - generic [ref=e278]: 콘텐츠 이미지 준비중
+                - generic [ref=e279]: 테스트 콘텐츠 1008
+                - generic [ref=e280]: "2024"
+          - group "10 / 20" [ref=e281]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1009 2024" [ref=e282] [cursor=pointer]:
+              - generic [ref=e284]:
+                - generic [ref=e285]: 콘텐츠 이미지 준비중
+                - generic [ref=e286]: 테스트 콘텐츠 1009
+                - generic [ref=e287]: "2024"
+          - group "11 / 20" [ref=e288]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1010 2024" [ref=e289] [cursor=pointer]:
+              - generic [ref=e291]:
+                - generic [ref=e292]: 콘텐츠 이미지 준비중
+                - generic [ref=e293]: 테스트 콘텐츠 1010
+                - generic [ref=e294]: "2024"
+          - group "12 / 20" [ref=e295]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1011 2024" [ref=e296] [cursor=pointer]:
+              - generic [ref=e298]:
+                - generic [ref=e299]: 콘텐츠 이미지 준비중
+                - generic [ref=e300]: 테스트 콘텐츠 1011
+                - generic [ref=e301]: "2024"
+          - group "13 / 20" [ref=e302]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1012 2024" [ref=e303] [cursor=pointer]:
+              - generic [ref=e305]:
+                - generic [ref=e306]: 콘텐츠 이미지 준비중
+                - generic [ref=e307]: 테스트 콘텐츠 1012
+                - generic [ref=e308]: "2024"
+          - group "14 / 20" [ref=e309]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1013 2024" [ref=e310] [cursor=pointer]:
+              - generic [ref=e312]:
+                - generic [ref=e313]: 콘텐츠 이미지 준비중
+                - generic [ref=e314]: 테스트 콘텐츠 1013
+                - generic [ref=e315]: "2024"
+          - group "15 / 20" [ref=e316]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1014 2024" [ref=e317] [cursor=pointer]:
+              - generic [ref=e319]:
+                - generic [ref=e320]: 콘텐츠 이미지 준비중
+                - generic [ref=e321]: 테스트 콘텐츠 1014
+                - generic [ref=e322]: "2024"
+          - group "16 / 20" [ref=e323]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1015 2024" [ref=e324] [cursor=pointer]:
+              - generic [ref=e326]:
+                - generic [ref=e327]: 콘텐츠 이미지 준비중
+                - generic [ref=e328]: 테스트 콘텐츠 1015
+                - generic [ref=e329]: "2024"
+          - group "17 / 20" [ref=e330]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1016 2024" [ref=e331] [cursor=pointer]:
+              - generic [ref=e333]:
+                - generic [ref=e334]: 콘텐츠 이미지 준비중
+                - generic [ref=e335]: 테스트 콘텐츠 1016
+                - generic [ref=e336]: "2024"
+          - group "18 / 20" [ref=e337]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1017 2024" [ref=e338] [cursor=pointer]:
+              - generic [ref=e340]:
+                - generic [ref=e341]: 콘텐츠 이미지 준비중
+                - generic [ref=e342]: 테스트 콘텐츠 1017
+                - generic [ref=e343]: "2024"
+          - group "19 / 20" [ref=e344]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1018 2024" [ref=e345] [cursor=pointer]:
+              - generic [ref=e347]:
+                - generic [ref=e348]: 콘텐츠 이미지 준비중
+                - generic [ref=e349]: 테스트 콘텐츠 1018
+                - generic [ref=e350]: "2024"
+          - group "20 / 20" [ref=e351]:
+            - button "콘텐츠 이미지 준비중 테스트 콘텐츠 1019 2024" [ref=e352] [cursor=pointer]:
+              - generic [ref=e354]:
+                - generic [ref=e355]: 콘텐츠 이미지 준비중
+                - generic [ref=e356]: 테스트 콘텐츠 1019
+                - generic [ref=e357]: "2024"
+    - generic [ref=e359]:
+      - generic [ref=e360]:
+        - generic [ref=e361]: 불편한 점 / 개선 아이디어
+        - generic [ref=e362]: 한 줄만 남겨도 다음 업데이트에 반영할 명분이 생깁니다.
+      - button "피드백 남기기" [ref=e363] [cursor=pointer]
+  - contentinfo [ref=e364]:
+    - generic [ref=e366]:
+      - generic [ref=e368]:
+        - generic [ref=e369]: 언어
+        - combobox "언어" [ref=e370] [cursor=pointer]:
+          - option "한국어" [selected]
+          - option "English"
+        - generic:
+          - img
+        - generic:
+          - img
+      - generic [ref=e372]:
+        - generic [ref=e374]:
+          - heading "더 알아보기" [level=6] [ref=e375]
+          - list [ref=e376]:
+            - listitem [ref=e377]: 디즈니+ 이용약관
+            - listitem [ref=e378]: 개인정보 처리방침
+            - listitem [ref=e379]: 개인정보 처리방침 부속서
+            - listitem [ref=e380]: 관심 기반 광고
+        - generic [ref=e382]:
+          - heading "고객지원" [level=6] [ref=e383]
+          - list [ref=e384]:
+            - listitem [ref=e385]:
+              - link "고객센터" [ref=e386] [cursor=pointer]:
+                - /url: https://help.disneyplus.com/
+            - listitem [ref=e387]:
+              - link "다양한 시청 방법" [ref=e388] [cursor=pointer]:
+                - /url: https://help.disneyplus.com/article/disneyplus-devices-supported/
+            - listitem [ref=e389]:
+              - link "디즈니+ 소개" [ref=e390] [cursor=pointer]:
+                - /url: https://help.disneyplus.com/article/disneyplus-introduction
+            - listitem [ref=e391]:
+              - link "통신판매업 사업자정보확인" [ref=e392] [cursor=pointer]:
+                - /url: https://www.ftc.go.kr/bizCommPop.do?wrkr_no=2208103347
+        - generic [ref=e394]:
+          - heading "브랜드" [level=6] [ref=e395]
+          - list [ref=e396]:
+            - listitem [ref=e397]:
+              - link "디즈니" [ref=e398] [cursor=pointer]:
+                - /url: https://www.disneyplus.com/ko-kr/browse/page-4c4b78ed-4a17-43eb-8221-14a3959e4517
+            - listitem [ref=e399]:
+              - link "픽사" [ref=e400] [cursor=pointer]:
+                - /url: https://www.disneyplus.com/ko-kr/browse/page-9143212f-5696-4ee3-a37a-f2fbcd14749a
+            - listitem [ref=e401]:
+              - link "마블" [ref=e402] [cursor=pointer]:
+                - /url: https://www.disneyplus.com/ko-kr/browse/page-60f4707d-19bb-4c0c-9390-ab269137be50
+            - listitem [ref=e403]:
+              - link "스타워즈" [ref=e404] [cursor=pointer]:
+                - /url: https://www.disneyplus.com/ko-kr/browse/page-b4e74f38-aa35-4b12-965c-93f4a931f78a
+            - listitem [ref=e405]:
+              - link "내셔널지오그래픽" [ref=e406] [cursor=pointer]:
+                - /url: https://www.disneyplus.com/ko-kr/browse/page-a577ee5e-2f37-443f-bc13-594a20520492
+            - listitem [ref=e407]:
+              - link "훌루(Hulu)" [ref=e408] [cursor=pointer]:
+                - /url: https://www.disneyplus.com/ko-kr/browse/page-ff723d29-20d5-4303-9cce-4a9aac8e269e
+        - generic [ref=e410]:
+          - heading "컬렉션" [level=6] [ref=e411]
+          - list [ref=e412]:
+            - listitem [ref=e413]: 모든 컬렉션
+            - listitem [ref=e414]: Made in Korea
+            - listitem [ref=e415]: 액션 & 어드벤처
+            - listitem [ref=e416]: 코미디
+            - listitem [ref=e417]: 드라마
+            - listitem [ref=e418]: 주목할 만한 아시아 콘텐츠
+            - listitem [ref=e419]: 호러
+            - listitem [ref=e420]: Shorts
+      - list [ref=e422]:
+        - listitem [ref=e423]:
+          - link "Twitter/X" [ref=e424] [cursor=pointer]:
+            - /url: https://twitter.com/disneypluskr
+            - img [ref=e425]
+        - listitem [ref=e427]:
+          - link "Facebook" [ref=e428] [cursor=pointer]:
+            - /url: https://www.facebook.com/DisneyPlusKR/
+            - img [ref=e429]
+        - listitem [ref=e431]:
+          - link "Instagram" [ref=e432] [cursor=pointer]:
+            - /url: https://www.instagram.com/disneypluskr
+            - img [ref=e433]
+        - listitem [ref=e435]:
+          - link "TikTok" [ref=e436] [cursor=pointer]:
+            - /url: https://www.tiktok.com/@disneyplus
+            - img [ref=e437]
+        - listitem [ref=e439]:
+          - link "YouTube" [ref=e440] [cursor=pointer]:
+            - /url: https://www.youtube.com/@DisneyPlusKR
+            - img [ref=e441]
+      - link "홈으로 이동" [ref=e445] [cursor=pointer]:
+        - /url: /
+        - img "Disney+" [ref=e446]
+      - list [ref=e448]:
+        - listitem [ref=e449]: 이 웹사이트는 개인 포트폴리오 목적의 UI/UX 리뉴얼 프로젝트입니다. (비상업적)
+        - listitem [ref=e450]: Disney+ 및 관련 로고/상표/콘텐츠에 대한 모든 권리는 해당 권리자에게 있으며, 본 사이트는 공식 서비스가 아닙니다.
+        - listitem [ref=e451]:
+          - link "GitHub" [ref=e452] [cursor=pointer]:
+            - /url: https://github.com/itb4ng
+            - img [ref=e453]
+          - link "Email" [ref=e455] [cursor=pointer]:
+            - /url: mailto:bsh801099@gmail.com
+            - img [ref=e456]
+          - generic "Portfolio" [ref=e458]:
+            - img [ref=e459]
+        - listitem [ref=e461]: © 2026 방Siri. All Rights Reserved.
+```

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState,useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import requests from "../../api/request";
 import Row from "../../components/Row";
@@ -8,6 +8,7 @@ import { tmdbImg, pickHeroSize } from "../../utils/tmdbImage";
 
 import { useDetailPageData } from "./useDetailPageData";
 import DetailStateView from "./DetailStateView";
+import { normalizeDebugState } from "../../utils/debugState";
 
 import "./DetailPage.css";
 
@@ -19,9 +20,18 @@ const pick = (...vals) =>
 export default function DetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { type, movieId } = useParams();
-
   const from = location.state?.from;
+  const restoreScrollY = location.state?.scrollY;
+  const detailDebugStateFromQuery = normalizeDebugState(
+    searchParams.get("detailDebugState"),
+    ["no-image", "cdn-fail"],
+    ""
+  );
+  const detailDebugState = location.state?.detailDebugState || detailDebugStateFromQuery;
+  const forceNoHeroImage =
+    detailDebugState === "no-image" || detailDebugState === "cdn-fail";
 
   // 상태 처리
   const { pageStatus, data, errorMessage, retryKey, retry } = useDetailPageData(
@@ -88,6 +98,7 @@ export default function DetailPage() {
   ------------------------- */
   const heroUrl = useMemo(() => {
     if (!data) return "";
+    if (forceNoHeroImage) return "";
 
     const heroPath = data?.backdrop_path || data?.poster_path;
     if (!heroPath) return "";
@@ -97,7 +108,7 @@ export default function DetailPage() {
     }
 
     return tmdbImg(heroPath, heroSize);
-  }, [data, heroSize]);
+  }, [data, heroSize, forceNoHeroImage]);
 
   const [heroLoading, setHeroLoading] = useState(true);
 
@@ -265,9 +276,21 @@ export default function DetailPage() {
   );
 
   const handleBack = () => {
-    if (from) return navigate(from, { replace: true });
+    if (from) {
+      const nextState = { restoreScroll: true };
+      if (typeof restoreScrollY === "number") {
+        nextState.restoreScrollY = restoreScrollY;
+      }
+      return navigate(from, { replace: true, state: nextState });
+    }
     navigate(-1);
   };
+  
+  // const handleBack = () => {
+  //   navigate(from, {
+  //     state: { restoreScroll: scrollY },
+  //   });
+  // };
 
   const handleMoveHome = () => {
     navigate("/main", { replace: true });
@@ -309,6 +332,12 @@ export default function DetailPage() {
     [navigate]
   );
 
+  // Detail 상태 분리 테스트 시 하단 Row도 함께 검증할 수 있도록 상태를 매핑한다.
+  const stateRowDebugState =
+    pageStatus === "loading" || pageStatus === "error" || pageStatus === "empty"
+      ? pageStatus
+      : "success";
+
   if (pageStatus !== "success") {
     return (
       <>
@@ -336,6 +365,19 @@ export default function DetailPage() {
           onHome={handleMoveHome}
           onSearch={handleMoveSearch}
         />
+
+        {/* 상태 화면에서도 하단 Row를 유지해 상태+Row 동시 테스트가 가능하도록 처리 */}
+        <section className="detail__below detail__below--padded">
+          <Row
+            title="자주 찾는 콘텐츠"
+            id={`detail-state-toprated-${type}-${movieId}-${retryKey}`}
+            query={topQuery}
+            mode="navigate"
+            navType="movie"
+            debugState={stateRowDebugState}
+            onNavigate={handleTopNavigate}
+          />
+        </section>
       </>
     );
   }
