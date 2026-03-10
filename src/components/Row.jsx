@@ -1,23 +1,153 @@
-// Row.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import styled, { css } from "styled-components";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y } from "swiper/modules";
-import { useNavigate } from "react-router-dom";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { useLocation, useNavigate, useNavigationType } from "react-router-dom";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiAlertCircle,
+  FiRefreshCw,
+  FiInbox,
+} from "react-icons/fi";
 import MovieModal from "./MovieModal";
 import tmdbAxios from "../api/tmdbaxios";
+import { useAuth } from "../contexts/AuthContext";
 import "./Row.css";
 import "swiper/css";
 
 const ARROW_ZONE = 72;
 const PHONE_MAX = 960;
-
-// ✅ 스켈레톤 카드 개수 (취향)
 const SKELETON_COUNT = 10;
+const ERROR_FALLBACK_COUNT = 6;
+const IMG_BASE = "https://image.tmdb.org/t/p/original";
+const ROW_SWIPE_KEY = "row:swipe:v1";
 
-// ✅ Row 결과 캐시 (리마운트/스크롤 왕복 방어)
+// Row 결과 캐시
 const ROW_CACHE = new Map();
+
+function loadSwipeMap() {
+  try {
+    return JSON.parse(sessionStorage.getItem(ROW_SWIPE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveSwipeMap(map) {
+  sessionStorage.setItem(ROW_SWIPE_KEY, JSON.stringify(map));
+}
+
+function normalizeSwipeState(raw) {
+  if (typeof raw === "number") {
+    return { activeIndex: raw, translate: null, progress: null };
+  }
+  if (raw && typeof raw === "object") {
+    return {
+      activeIndex: Number.isFinite(Number(raw.activeIndex))
+        ? Number(raw.activeIndex)
+        : 0,
+      translate: Number.isFinite(Number(raw.translate))
+        ? Number(raw.translate)
+        : null,
+      progress: Number.isFinite(Number(raw.progress)) ? Number(raw.progress) : null,
+    };
+  }
+  return { activeIndex: 0, translate: null, progress: null };
+}
+
+/* =========================================================
+   카드 미디어
+   - 이미지가 없거나 CDN 로드 실패여도 fallback 카드를 유지
+========================================================= */
+function CardMedia({
+  imgPath,
+  altText,
+  titleText,
+  yearText,
+  isTop10,
+  showOverlay,
+  forceFailImage = false,
+  debugState,
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  const hasImage = Boolean(imgPath) && !imgError && !forceFailImage;
+  const isSuccessState = !debugState || debugState === "success";
+  const showFallbackBadge = isSuccessState;
+  const showCenteredReadyLabel = isTop10 && forceFailImage;
+
+  return (
+    <>
+      {hasImage ? (
+        <img
+          src={`${IMG_BASE}${imgPath}`}
+          alt={altText}
+          loading="lazy"
+          onError={() => {
+            setImgError(true);
+          }}
+        />
+      ) : (
+        <FallbackMedia $isTop10={isTop10}>
+          {showCenteredReadyLabel && (
+            <CenteredFallbackLabel>콘텐츠 이미지 준비중</CenteredFallbackLabel>
+          )}
+          <FallbackInner>
+            {showFallbackBadge && <FallbackBadge>콘텐츠 이미지 준비중</FallbackBadge>}
+            <FallbackTitle>{titleText || "제목 없음"}</FallbackTitle>
+            {!!yearText && <FallbackMeta>{yearText}</FallbackMeta>}
+          </FallbackInner>
+        </FallbackMedia>
+      )}
+
+      {showOverlay && hasImage && (
+        <div className="row__hoverOverlay" aria-hidden="true">
+          <div className="row__hoverOverlayInner">
+            <div className="row__hoverTitle">{titleText}</div>
+            {!!yearText && <div className="row__hoverMeta">{yearText}</div>}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function DefaultRowErrorState() {
+  return (
+    <DefaultStateWrap>
+      <DefaultStateBox role="alert" aria-live="polite">
+        <DefaultStateIcon>
+          <FiAlertCircle />
+        </DefaultStateIcon>
+        <DefaultStateText>
+          <DefaultStateTitle>콘텐츠를 불러오지 못했습니다</DefaultStateTitle>
+          <DefaultStateDesc>잠시 후 다시 시도해 주세요.</DefaultStateDesc>
+        </DefaultStateText>
+        <DefaultStateRetry type="button" onClick={() => window.location.reload()}>
+          <FiRefreshCw />
+          <span>다시 시도</span>
+        </DefaultStateRetry>
+      </DefaultStateBox>
+    </DefaultStateWrap>
+  );
+}
+
+function DefaultRowEmptyState() {
+  return (
+    <DefaultStateWrap>
+      <DefaultStateBox aria-live="polite">
+        <DefaultStateIcon>
+          <FiInbox />
+        </DefaultStateIcon>
+        <DefaultStateText>
+          <DefaultStateTitle>표시할 콘텐츠가 없습니다</DefaultStateTitle>
+          <DefaultStateDesc>조건을 변경하거나 잠시 후 다시 확인해 주세요.</DefaultStateDesc>
+        </DefaultStateText>
+      </DefaultStateBox>
+    </DefaultStateWrap>
+  );
+}
 
 const Row = ({
   title,
@@ -29,14 +159,30 @@ const Row = ({
   onNavigate,
   onLoaded,
   query: queryProp,
+
+  // 확장 props
+  variant = "default", // "default" | "top10"
+  limit,
+  disableOverlay = false,
+  useExternalNav = false,
+  onSwiperReady,
+  onNavStateChange,
+  emptyMessage = "표시할 콘텐츠가 없습니다.",
+  errorMessage = "콘텐츠를 불러오지 못했습니다.",
+
+  // 상태 분리 테스트용
+  // "loading" | "error" | "empty" | "no-image" | "cdn-fail"
+  debugState,
 }) => {
   const [movies, setMovies] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [movieSelected, setMovieSelection] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const navActionType = useNavigationType();
+  const { userData } = useAuth();
   const swiperRef = useRef(null);
 
-  // ✅ 스켈레톤용 상태 (초기: query가 있으면 true)
   const [isLoading, setIsLoading] = useState(Boolean(queryProp ?? fetchUrl));
   const [hasError, setHasError] = useState(false);
 
@@ -46,10 +192,35 @@ const Row = ({
   });
 
   const didInitRef = useRef(false);
+  const isTop10 = variant === "top10";
+  const isLoggedIn = Boolean(userData);
+  const sourcePath = location.pathname || "/";
+  const sourceTag = isTop10 ? "top10" : "row";
+  const rowRouteKey = useMemo(
+    () => `${location.pathname || "/"}${location.search || ""}`,
+    [location.pathname, location.search]
+  );
+  const swipeStoreKey = useMemo(() => `${rowRouteKey}::${id}`, [rowRouteKey, id]);
+  const isReloadEntry = useMemo(() => {
+    try {
+      const nav = performance.getEntriesByType("navigation")?.[0];
+      return nav?.type === "reload";
+    } catch {
+      return false;
+    }
+  }, []);
+  const shouldRestoreSwipe =
+    location.state?.restoreScroll === true ||
+    navActionType === "POP" ||
+    isReloadEntry;
+  const restoreSwipeState = useMemo(() => {
+    if (!shouldRestoreSwipe) return normalizeSwipeState(0);
+    const map = loadSwipeMap();
+    return normalizeSwipeState(map[swipeStoreKey]);
+  }, [shouldRestoreSwipe, swipeStoreKey]);
 
   /* -----------------------------
-     📱 폰 레이아웃 감지
-     - 960px 이하 + 터치 디바이스
+     레이아웃 감지
   ----------------------------- */
   const [isPhoneLayout, setIsPhoneLayout] = useState(false);
 
@@ -73,9 +244,6 @@ const Row = ({
 
   /* -----------------------------
      query 규격 통일
-     - queryProp 우선
-     - fetchUrl fallback
-     - path=[object Object] 방지
   ----------------------------- */
   const queryObj = useMemo(() => {
     const src = queryProp ?? fetchUrl;
@@ -105,7 +273,6 @@ const Row = ({
     return null;
   }, [queryProp, fetchUrl]);
 
-  // ✅ 캐시 키 (queryProp/fetchUrl 기준)
   const queryKey = useMemo(() => {
     const src = queryProp ?? fetchUrl;
     return typeof src === "string" ? src : JSON.stringify(src ?? {});
@@ -113,11 +280,31 @@ const Row = ({
 
   /* -----------------------------
      데이터 로드
-     ✅ 캐시 hit: 즉시 복원(스켈레톤 재등장 방지)
-     ✅ 성공 시 캐시 저장(네 코드에 없던 핵심)
   ----------------------------- */
   useEffect(() => {
-    // ✅ query 없으면 로딩 끝
+    if (debugState === "loading") {
+      setIsLoading(true);
+      setHasError(false);
+      setMovies([]);
+      return;
+    }
+
+    if (debugState === "error") {
+      setIsLoading(false);
+      setHasError(true);
+      setMovies([]);
+      onLoaded?.(0);
+      return;
+    }
+
+    if (debugState === "empty") {
+      setIsLoading(false);
+      setHasError(false);
+      setMovies([]);
+      onLoaded?.(0);
+      return;
+    }
+
     if (!queryObj) {
       setIsLoading(false);
       setHasError(false);
@@ -126,7 +313,6 @@ const Row = ({
       return;
     }
 
-    // ✅ 캐시 hit면 네트워크/스켈레톤 없이 복원
     const cached = ROW_CACHE.get(queryKey);
     if (cached?.movies) {
       setMovies(cached.movies);
@@ -160,19 +346,15 @@ const Row = ({
         if (!ignore) {
           setMovies(results);
           onLoaded?.(results.length);
-
-          // ✅ 중요: 캐시에 저장해서 리마운트/스크롤 왕복 시 스켈레톤 재등장 방지
           ROW_CACHE.set(queryKey, { movies: results, ts: Date.now() });
         }
       } catch (e) {
         console.error(`[Row:${id}] fetch failed`, e);
+
         if (!ignore) {
           setHasError(true);
           setMovies([]);
           onLoaded?.(0);
-
-          // (선택) 실패도 캐시할지 말지 취향
-          // ROW_CACHE.set(queryKey, { movies: [], ts: Date.now() });
         }
       } finally {
         if (!ignore) setIsLoading(false);
@@ -182,41 +364,195 @@ const Row = ({
     return () => {
       ignore = true;
     };
-  }, [queryObj, queryKey, id, onLoaded]);
+  }, [queryObj, queryKey, id, onLoaded, debugState]);
 
   /* -----------------------------
-     이미지 없는 데이터 제거
+     렌더 데이터 정규화
   ----------------------------- */
-  const validMovies = useMemo(
-    () => movies.filter((m) => m?.backdrop_path || m?.poster_path),
-    [movies]
+  const normalizedMovies = useMemo(() => {
+    const sourceMovies = movies.map((movie) => ({
+      ...movie,
+      _titleText:
+        movie?.title ||
+        movie?.name ||
+        movie?.original_title ||
+        movie?.original_name ||
+        "제목 없음",
+      _dateText: movie?.release_date || movie?.first_air_date || "",
+      _yearText: (movie?.release_date || movie?.first_air_date || "").slice(0, 4),
+      _imgPath: movie?.backdrop_path || movie?.poster_path || "",
+      _altText: movie?.title || movie?.name || "movie",
+    }));
+
+    if (debugState === "no-image") {
+      return sourceMovies.length
+        ? sourceMovies.map((movie) => ({
+            ...movie,
+            _imgPath: "",
+          }))
+        : Array.from({ length: isTop10 ? 10 : 6 }, (_, idx) => ({
+            id: `no-image-${id}-${idx}`,
+            _titleText: `테스트 콘텐츠 ${idx + 1}`,
+            _yearText: "2025",
+            _imgPath: "",
+            _altText: "fallback movie",
+            media_type: "movie",
+          }));
+    }
+
+    return sourceMovies;
+  }, [movies, debugState, id, isTop10]);
+
+  const limitedMovies = useMemo(() => {
+    if (typeof limit === "number") {
+      return normalizedMovies.slice(0, limit);
+    }
+    return normalizedMovies;
+  }, [normalizedMovies, limit]);
+
+  const errorFallbackSlides = useMemo(
+    () =>
+      Array.from(
+        { length: isTop10 ? Math.min(limit || 10, 5) : ERROR_FALLBACK_COUNT },
+        (_, i) => ({
+          id: `fb-${id}-${i}`,
+          _fb: true,
+          _titleText: "불러오지 못한 콘텐츠",
+          _yearText: "",
+        })
+      ),
+    [id, isTop10, limit]
   );
 
   const handleClick = (movie) => {
+    if (movie?._fb || movie?._sk) return;
+
+    // 카드 클릭 직전 최신 스와이프 위치를 저장해서
+    // 전환 타이밍 중 클릭해도 복원 정확도를 높인다.
+    if (swiperRef.current && !swiperRef.current.destroyed) {
+      syncNav(swiperRef.current);
+    }
+
     if (mode === "navigate") {
       if (typeof onNavigate === "function") {
         onNavigate(movie);
         return;
       }
+
       const typeGuess = navType || movie?.media_type || "movie";
       navigate(`/detail/${typeGuess}/${movie.id}`, { replace: true });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    setModalOpen(true);
-    setMovieSelection(movie);
-  };
 
-  const syncNav = (swiper) => {
-    setNavState({
-      isBeginning: swiper.isBeginning,
-      isEnd: swiper.isEnd,
+    const shouldHideModalImage =
+      debugState === "no-image" || debugState === "cdn-fail";
+
+    setModalOpen(true);
+    setMovieSelection({
+      ...movie,
+      // 디버그 상태에서는 카드/모달 이미지 정책을 동일하게 맞춤
+      backdrop_path: shouldHideModalImage ? null : movie?.backdrop_path,
+      poster_path: shouldHideModalImage ? null : movie?.poster_path,
     });
   };
 
+  const syncNav = useCallback(
+    (swiper) => {
+      const nextState = {
+        isBeginning: swiper.isBeginning,
+        isEnd: swiper.isEnd,
+      };
+
+      setNavState(nextState);
+      onNavStateChange?.(nextState);
+
+      const activeIndex = Number(swiper?.activeIndex ?? 0);
+      if (Number.isFinite(activeIndex) && activeIndex >= 0) {
+        const map = loadSwipeMap();
+        map[swipeStoreKey] = {
+          activeIndex,
+          translate: Number(swiper?.translate ?? 0),
+          progress: Number(swiper?.progress ?? 0),
+        };
+        saveSwipeMap(map);
+      }
+    },
+    [onNavStateChange, swipeStoreKey]
+  );
+
+  const restoreSwipePosition = useCallback(
+    (swiper, targetStateRaw) => {
+      if (!swiper || swiper.destroyed) return;
+
+      let tries = 0;
+      const maxTries = 18;
+
+      const settle = () => {
+        if (!swiper || swiper.destroyed) return;
+
+        swiper.update();
+
+        const targetState = normalizeSwipeState(targetStateRaw);
+        const maxIndex = Math.max(0, (swiper.slides?.length || 1) - 1);
+
+        const hasTranslate = Number.isFinite(targetState.translate);
+        const hasProgress = Number.isFinite(targetState.progress);
+        let boundedTranslate = null;
+
+        if (hasTranslate) {
+          const a = Number(swiper.minTranslate?.());
+          const b = Number(swiper.maxTranslate?.());
+          const lower = Number.isFinite(a) && Number.isFinite(b) ? Math.min(a, b) : null;
+          const upper = Number.isFinite(a) && Number.isFinite(b) ? Math.max(a, b) : null;
+
+          boundedTranslate =
+            lower !== null && upper !== null
+              ? Math.max(lower, Math.min(upper, Number(targetState.translate)))
+              : Number(targetState.translate);
+
+          swiper.setTranslate?.(boundedTranslate);
+          swiper.updateProgress?.(boundedTranslate);
+          swiper.updateActiveIndex?.();
+          swiper.updateSlidesClasses?.();
+        } else if (hasProgress) {
+          const boundedProgress = Math.max(0, Math.min(1, Number(targetState.progress)));
+          swiper.setProgress?.(boundedProgress, 0);
+          swiper.updateActiveIndex?.();
+          swiper.updateSlidesClasses?.();
+        } else {
+          const boundedIndex = Math.min(targetState.activeIndex, maxIndex);
+          swiper.slideTo?.(boundedIndex, 0, false);
+        }
+
+        const boundedIndex = Math.min(targetState.activeIndex, maxIndex);
+        syncNav(swiper);
+
+        const current = Number(swiper.activeIndex ?? 0);
+        const reachedByIndex =
+          Math.abs(current - boundedIndex) <= 1 ||
+          (swiper.isEnd && boundedIndex >= maxIndex - 1);
+        const reachedByTranslate =
+          boundedTranslate !== null &&
+          Number.isFinite(swiper.translate) &&
+          Math.abs(Number(swiper.translate) - boundedTranslate) <= 2;
+        const reached = reachedByIndex || reachedByTranslate;
+
+        if (reached || tries >= maxTries) return;
+        tries += 1;
+
+        requestAnimationFrame(() => {
+          setTimeout(settle, 36);
+        });
+      };
+
+      settle();
+    },
+    [syncNav]
+  );
+
   /* -----------------------------
      Swiper 초기 동기화
-     - 데이터 들어왔을 때 업데이트
   ----------------------------- */
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -229,24 +565,32 @@ const Row = ({
 
       if (!didInitRef.current) {
         didInitRef.current = true;
-        swiper.slideTo?.(0, 0);
+        restoreSwipePosition(swiper, restoreSwipeState);
       }
 
       syncNav(swiper);
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [validMovies.length, id, isLoading]);
+  }, [
+    limitedMovies.length,
+    id,
+    isLoading,
+    hasError,
+    restoreSwipeState,
+    restoreSwipePosition,
+    syncNav,
+  ]);
 
   /* -----------------------------
      화살표 사용 여부
   ----------------------------- */
-  const useArrows = !isPhoneLayout;
-  const showLeft = useArrows && !navState.isBeginning;
-  const disableRight = useArrows && navState.isEnd;
+  const useInternalArrows = !isPhoneLayout && !useExternalNav && !isTop10;
+  const showLeft = useInternalArrows && !navState.isBeginning;
+  const disableRight = useInternalArrows && navState.isEnd;
 
   /* -----------------------------
-     스켈레톤 리스트
+     스켈레톤
   ----------------------------- */
   const skeletonSlides = useMemo(
     () =>
@@ -257,18 +601,71 @@ const Row = ({
     [id]
   );
 
-  const renderList = isLoading ? skeletonSlides : validMovies;
+  const renderList = isLoading
+    ? skeletonSlides
+    : hasError
+    ? errorFallbackSlides
+    : limitedMovies;
+
+  const showOverlay = !disableOverlay && !isTop10;
+  const isForcedCdnFail = debugState === "cdn-fail";
+  const showBadge =
+    showRank && (!debugState || debugState === "success" || debugState === "loading");
+  const showDefaultErrorState = !isTop10 && debugState === "error";
+  const showDefaultEmptyState = !isTop10 && debugState === "empty";
+
+  const top10Breakpoints = {
+    1378: { slidesPerView: 5.4, slidesPerGroup: 5 },
+    998: { slidesPerView: 4.4, slidesPerGroup: 4 },
+    625: { slidesPerView: 3.4, slidesPerGroup: 3 },
+    390: { slidesPerView: 2.05, slidesPerGroup: 2, spaceBetween: 14 },
+    360: { slidesPerView: 1.92, slidesPerGroup: 1, spaceBetween: 12 },
+    0: { slidesPerView: 1.72, slidesPerGroup: 1, spaceBetween: 10 },
+  };
+
+  const defaultSwiperProps = {
+    watchOverflow: true,
+    loop: false,
+    speed: 900,
+    spaceBetween: 10,
+    slidesPerView: "auto",
+    slidesPerGroupAuto: true,
+    threshold: 10,
+  };
+
+  const top10SwiperProps = {
+    loop: false,
+    speed: 700,
+    spaceBetween: 12,
+    breakpoints: top10Breakpoints,
+  };
+
+  const handleCardKeyDown = (e, movie) => {
+    if (movie?._fb || movie?._sk) return;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick(movie);
+    }
+  };
 
   return (
-    <Container id={id}>
-      <Title>{title}</Title>
+    <Container id={id} $isTop10={isTop10}>
+      {title ? <Title $isTop10={isTop10}>{title}</Title> : null}
 
-      <RowShell
-        className="rowShell"
-        data-left={showLeft ? "1" : "0"}
-        data-touch={isPhoneLayout ? "1" : "0"}
-      >
-        {useArrows && (
+      {showDefaultErrorState ? (
+        <DefaultRowErrorState />
+      ) : showDefaultEmptyState ? (
+        <DefaultRowEmptyState />
+      ) : (
+        <RowShell
+          className="rowShell"
+          data-left={showLeft ? "1" : "0"}
+          data-touch={isPhoneLayout ? "1" : "0"}
+          data-variant={isTop10 ? "top10" : "default"}
+          $isTop10={isTop10}
+        >
+        {useInternalArrows && (
           <ArrowZone
             className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
             type="button"
@@ -285,7 +682,7 @@ const Row = ({
           </ArrowZone>
         )}
 
-        {useArrows && (
+        {useInternalArrows && (
           <ArrowZone
             className="arrowZone right"
             type="button"
@@ -303,89 +700,111 @@ const Row = ({
           </ArrowZone>
         )}
 
-        <SwiperArea className="swiperArea">
+        <SwiperArea
+          className="swiperArea"
+          $isTop10={isTop10}
+          data-variant={isTop10 ? "top10" : "default"}
+        >
           <Swiper
             modules={[A11y]}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
               syncNav(swiper);
+              onSwiperReady?.(swiper);
             }}
             onSlideChange={syncNav}
             onResize={syncNav}
-            watchOverflow
-            loop={false}
-            speed={900}
-            spaceBetween={10}
-            slidesPerView="auto"
-            slidesPerGroupAuto={true}
-            threshold={10}
+            {...(isTop10 ? top10SwiperProps : defaultSwiperProps)}
           >
             {renderList.map((movie, index) => {
-              // ✅ 스켈레톤 슬라이드
               if (movie?._sk) {
                 return (
                   <SwiperSlide key={movie.id}>
-                    <Wrap className="skWrap" aria-hidden="true">
+                    <Wrap className="skWrap" aria-hidden="true" $isTop10={isTop10}>
                       <div className="skCard" />
+                      <div className="skMeta">
+                        <div className="skTitle" />
+                        <div className="skYear" />
+                      </div>
                     </Wrap>
                   </SwiperSlide>
                 );
               }
 
-              const titleText =
-                movie?.title ||
-                movie?.name ||
-                movie?.original_title ||
-                movie?.original_name ||
-                "제목 없음";
+              if (movie?._fb) {
+                return (
+                  <SwiperSlide key={movie.id}>
+                    <Wrap className="fbWrap" aria-hidden="true" $isTop10={isTop10}>
+                      {showBadge && <RankBadge $isTop10={isTop10}>{index + 1}</RankBadge>}
+                      <FallbackMedia $isTop10={isTop10}>
+                        <FallbackInner>
+                          {!debugState && <FallbackBadge>불러오지 못함</FallbackBadge>}
+                          <FallbackTitle>{movie._titleText}</FallbackTitle>
+                        </FallbackInner>
+                      </FallbackMedia>
+                    </Wrap>
+                  </SwiperSlide>
+                );
+              }
 
-              const dateText = movie?.release_date || movie?.first_air_date || "";
-              const yearText = dateText ? dateText.slice(0, 4) : "";
-
-              const imgPath = movie.backdrop_path || movie.poster_path;
-              const altText = movie.title || movie.name || "movie";
+              const titleText = movie._titleText;
+              const yearText = movie._yearText;
+              const imgPath = movie._imgPath;
+              const altText = movie._altText;
               const rank = index + 1;
 
               return (
                 <SwiperSlide key={movie.id}>
-                  <Wrap onClick={() => handleClick(movie)} role="button" tabIndex={0}>
-                    {/* ✅ Top Rated 등에서만 랭킹 표시 */}
-                    {showRank && (
-                      <span className="rank--outline rank--tl rank--main">{rank}</span>
-                    )}
+                  <Wrap
+                    onClick={() => handleClick(movie)}
+                    onKeyDown={(e) => handleCardKeyDown(e, movie)}
+                    role="button"
+                    tabIndex={0}
+                    data-testid="row-card"
+                    $isTop10={isTop10}
+                  >
+                    {showBadge && <RankBadge $isTop10={isTop10}>{rank}</RankBadge>}
 
-                    <img
-                      src={`https://image.tmdb.org/t/p/original${imgPath}`}
-                      alt={altText}
-                      loading="lazy"
+                    <CardMedia
+                      imgPath={imgPath}
+                      altText={altText}
+                      titleText={titleText}
+                      yearText={yearText}
+                      isTop10={isTop10}
+                      showOverlay={showOverlay}
+                      forceFailImage={isForcedCdnFail}
+                      debugState={debugState}
                     />
-
-                    {/* ✅ Hover Overlay (텍스트만) */}
-                    <div className="row__hoverOverlay" aria-hidden="true">
-                      <div className="row__hoverOverlayInner">
-                        <div className="row__hoverTitle">{titleText}</div>
-                        {!!yearText && <div className="row__hoverMeta">{yearText}</div>}
-                      </div>
-                    </div>
                   </Wrap>
                 </SwiperSlide>
               );
             })}
           </Swiper>
 
-          {/* ✅ 에러 메시지 */}
-          {!isLoading && hasError && <RowHint role="status">Failed to load</RowHint>}
+          {!isLoading && hasError && (
+            <RowHint role="status" $isTop10={isTop10}>
+              {errorMessage}
+            </RowHint>
+          )}
 
-          {/* ✅ 데이터 로딩 끝났는데 비어있으면 */}
-          {!isLoading && !hasError && validMovies.length === 0 && (
-            <RowHint role="status">No items</RowHint>
+          {!isLoading && !hasError && limitedMovies.length === 0 && (
+            <RowHint role="status" $isTop10={isTop10}>
+              {emptyMessage}
+            </RowHint>
           )}
         </SwiperArea>
-      </RowShell>
+        </RowShell>
+      )}
 
-      {/* ✅ Modal */}
       {mode !== "navigate" && modalOpen && (
-        <MovieModal {...movieSelected} setModalOpen={setModalOpen} />
+        <MovieModal
+          {...movieSelected}
+          setModalOpen={setModalOpen}
+          isLoggedIn={isLoggedIn}
+          sourcePath={sourcePath}
+          sourceTag={sourceTag}
+          debugState={debugState}
+        />
       )}
     </Container>
   );
@@ -394,47 +813,47 @@ const Row = ({
 export default Row;
 
 /* ===========================
-   styled-components (기존 유지)
+   styled-components
 =========================== */
 
 const Container = styled.section`
-  padding: 0 0 26px;
+  padding: ${({ $isTop10 }) => ($isTop10 ? "0" : "0 0 26px")};
 `;
 
 const Title = styled.h2`
   margin: 0 0 12px;
-  font-size: 22px;
+  font-size: ${({ $isTop10 }) => ($isTop10 ? "0" : "22px")};
   font-weight: 600;
+  display: ${({ $isTop10 }) => ($isTop10 ? "none" : "block")};
 
   @media (max-width: 1024px) {
-    font-size: 20px;
+    font-size: ${({ $isTop10 }) => ($isTop10 ? "0" : "20px")};
   }
 
   @media (max-width: 768px) {
-    font-size: 18px;
+    font-size: ${({ $isTop10 }) => ($isTop10 ? "0" : "18px")};
     margin-bottom: 10px;
   }
 
   @media (max-width: 375px) {
-    font-size: 17px;
+    font-size: ${({ $isTop10 }) => ($isTop10 ? "0" : "17px")};
   }
 
   @media (max-width: 340px) {
-    font-size: 16px;
+    font-size: ${({ $isTop10 }) => ($isTop10 ? "0" : "16px")};
   }
 `;
 
 const Wrap = styled.div`
-  width: 95%;
+  width: ${({ $isTop10 }) => ($isTop10 ? "100%" : "95%")};
   padding-top: 56.25%;
+  border-radius: ${({ $isTop10 }) => ($isTop10 ? "10px" : "8px")};
 
-  border-radius: 8px;
-  box-shadow: rgb(0 0 0/69%) 0px 26px 30px -10px,
-    rgb(0 0 0/73%) 0px 16px 10px -10px;
+  box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
+    rgb(0 0 0 / 73%) 0px 16px 10px -10px;
 
   cursor: pointer;
   overflow: hidden;
-
   position: relative;
   transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s;
 
@@ -450,22 +869,147 @@ const Wrap = styled.div`
     width: 100%;
   }
 
-  &:hover {
-    box-shadow: rgb(0 0 0 / 80%) 0px 40px 58px -16px,
-      rgb(0 0 0 / 72%) 0px 30px 22px -10px;
-    transform: scale(0.98);
-    border-color: rgba(249, 249, 249, 0.8);
+  ${({ $isTop10 }) =>
+    $isTop10
+      ? css`
+          &:hover {
+            border-color: rgba(249, 249, 249, 0.16);
+            transform: none;
+          }
+        `
+      : css`
+          &:hover {
+            box-shadow: rgb(0 0 0 / 80%) 0px 40px 58px -16px,
+              rgb(0 0 0 / 72%) 0px 30px 22px -10px;
+            transform: scale(0.98);
+            border-color: rgba(249, 249, 249, 0.8);
+          }
+        `}
+
+  &.skWrap,
+  &.fbWrap {
+    cursor: default;
   }
 
   &.skWrap {
-    cursor: default;
     border-color: rgba(249, 249, 249, 0.08);
+
     &:hover {
       transform: none;
-      box-shadow: rgb(0 0 0/69%) 0px 26px 30px -10px,
-        rgb(0 0 0/73%) 0px 16px 10px -10px;
+      box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
+        rgb(0 0 0 / 73%) 0px 16px 10px -10px;
       border-color: rgba(249, 249, 249, 0.08);
     }
+  }
+
+  &.fbWrap {
+    border-color: rgba(249, 249, 249, 0.08);
+
+    &:hover {
+      transform: none;
+      border-color: rgba(249, 249, 249, 0.08);
+      box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
+        rgb(0 0 0 / 73%) 0px 16px 10px -10px;
+    }
+  }
+`;
+
+const FallbackMedia = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03)),
+    #0b0f1a;
+`;
+
+const CenteredFallbackLabel = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(2px);
+`;
+
+const FallbackInner = styled.div`
+  width: 100%;
+  padding: 14px;
+`;
+
+const FallbackBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 10px;
+`;
+
+const FallbackTitle = styled.div`
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+`;
+
+const FallbackMeta = styled.div`
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.68);
+`;
+
+const RankBadge = styled.span`
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+
+  left: ${({ $isTop10 }) => ($isTop10 ? "12px" : "10px")};
+  top: ${({ $isTop10 }) => ($isTop10 ? "auto" : "10px")};
+  bottom: ${({ $isTop10 }) => ($isTop10 ? "10px" : "auto")};
+
+  font-size: ${({ $isTop10 }) =>
+    $isTop10 ? "clamp(44px, 5vw, 64px)" : "clamp(34px, 3vw, 48px)"};
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.96);
+
+  text-shadow:
+    -1px -1px 0 rgba(7, 11, 20, 0.72),
+    1px -1px 0 rgba(7, 11, 20, 0.72),
+    -1px 1px 0 rgba(7, 11, 20, 0.72),
+    1px 1px 0 rgba(7, 11, 20, 0.72),
+    0 8px 22px rgba(0, 0, 0, 0.45);
+
+  @media (max-width: 768px) {
+    left: ${({ $isTop10 }) => ($isTop10 ? "10px" : "8px")};
+    top: ${({ $isTop10 }) => ($isTop10 ? "auto" : "8px")};
+    bottom: ${({ $isTop10 }) => ($isTop10 ? "8px" : "auto")};
+
+    font-size: ${({ $isTop10 }) =>
+      $isTop10 ? "clamp(34px, 8vw, 48px)" : "clamp(28px, 7vw, 40px)"};
   }
 `;
 
@@ -481,7 +1025,27 @@ const SwiperArea = styled.div`
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+
+  .swiper-slide {
+    ${({ $isTop10 }) =>
+      !$isTop10 &&
+      css`
+        width: min(320px, 24vw);
+        max-width: 320px;
+
+        @media (max-width: 1024px) {
+          width: min(280px, 34vw);
+          max-width: 280px;
+        }
+
+        @media (max-width: 768px) {
+          width: min(240px, 68vw);
+          max-width: 240px;
+        }
+      `}
+  }
 `;
+
 const ArrowButton = styled.span`
   width: 44px;
   height: 44px;
@@ -601,12 +1165,99 @@ const ArrowIconRight = styled(FiChevronRight)`
   flex-shrink: 0;
 `;
 
-// ✅ 에러/빈상태 힌트 (아주 작게)
 const RowHint = styled.div`
   position: absolute;
-  left: 12px;
+  left: ${({ $isTop10 }) => ($isTop10 ? "0" : "12px")};
+  right: ${({ $isTop10 }) => ($isTop10 ? "0" : "auto")};
   bottom: 10px;
   font-size: 12px;
-  opacity: 0.75;
+  opacity: 0.8;
   pointer-events: none;
+  text-align: ${({ $isTop10 }) => ($isTop10 ? "center" : "left")};
+`;
+
+const DefaultStateWrap = styled.div`
+  width: 100%;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+
+  @media (max-width: 480px) {
+    border-radius: 8px;
+    padding: 12px;
+  }
+`;
+
+const DefaultStateBox = styled.div`
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    min-height: 72px;
+    gap: 10px;
+  }
+`;
+
+const DefaultStateIcon = styled.div`
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.92);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  @media (max-width: 480px) {
+    width: 32px;
+    height: 32px;
+  }
+`;
+
+const DefaultStateText = styled.div`
+  display: grid;
+  gap: 4px;
+`;
+
+const DefaultStateTitle = styled.strong`
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.94);
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+  }
+`;
+
+const DefaultStateDesc = styled.p`
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.68);
+
+  @media (max-width: 480px) {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+`;
+
+const DefaultStateRetry = styled.button`
+  margin-left: auto;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.94);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+
+  @media (max-width: 480px) {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
 `;

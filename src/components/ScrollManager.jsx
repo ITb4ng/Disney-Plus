@@ -1,20 +1,34 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
-const STORAGE_KEY = "scroll:positions:v4";
+const SCROLL_MAP_KEY = "scroll:positions:v6";
+const RELOAD_TOKEN_KEY = "scroll:reload:token:v1";
 
 function loadMap() {
   try {
-    return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
+    return JSON.parse(sessionStorage.getItem(SCROLL_MAP_KEY) || "{}");
   } catch {
     return {};
   }
 }
+
 function saveMap(map) {
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  sessionStorage.setItem(SCROLL_MAP_KEY, JSON.stringify(map));
 }
 
-// ✅ 실제 스크롤 엘리먼트 찾기 (layout이 스크롤이면 그걸 쓰고, 아니면 문서)
+function readReloadToken() {
+  try {
+    const raw = sessionStorage.getItem(RELOAD_TOKEN_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeReloadToken(token) {
+  sessionStorage.setItem(RELOAD_TOKEN_KEY, JSON.stringify(token));
+}
+
 function getScrollEl() {
   const layout = document.querySelector(".layout");
   if (layout) {
@@ -38,59 +52,150 @@ function setY(el, y) {
   else el.scrollTop = y;
 }
 
-export default function ScrollManager() {
+export default function ScrollManager({ onRestoreComplete }) {
   const location = useLocation();
-  const navType = useNavigationType(); // PUSH | POP | REPLACE
+  const navType = useNavigationType(); // POP | PUSH | REPLACE
 
-  // ✅ "페이지 단위"로 스크롤을 기억하려면 routeKey로 통일해야 함
+  const scrollElRef = useRef(null);
+  const isRestoringRef = useRef(true);
+  const handledEntryRef = useRef("");
+  const firstEntryRef = useRef(true);
+
   const routeKey = useMemo(
     () => location.pathname + location.search,
     [location.pathname, location.search]
   );
 
-  const scrollElRef = useRef(null);
+  const isReload = useMemo(() => {
+    try {
+      const nav = performance.getEntriesByType("navigation")?.[0];
+      return nav?.type === "reload";
+    } catch {
+      return false;
+    }
+  }, []);
 
-  // ✅ 스크롤 이벤트로 계속 저장 (routeKey로 저장!)
+  // 새로고침 직전에는 항상 현재 스크롤을 저장한다.
+  // 무스크롤 새로고침에서도 동일 위치를 유지하는 방향이다.
+  useEffect(() => {
+    const saveForReload = () => {
+      const el = scrollElRef.current || getScrollEl();
+      writeReloadToken({
+        key: routeKey,
+        y: getY(el),
+        t: Date.now(),
+      });
+    };
+
+    window.addEventListener("beforeunload", saveForReload);
+    window.addEventListener("pagehide", saveForReload);
+    return () => {
+      window.removeEventListener("beforeunload", saveForReload);
+      window.removeEventListener("pagehide", saveForReload);
+    };
+  }, [routeKey]);
+
+  // 라우트별 현재 스크롤을 계속 저장한다.
   useEffect(() => {
     const el = getScrollEl();
     scrollElRef.current = el;
 
     const onScroll = () => {
+      const y = getY(el);
       const map = loadMap();
-      map[routeKey] = getY(el);
+      map[routeKey] = y;
       saveMap(map);
+      // 새로고침 이벤트(beforeunload/pagehide)가 누락되더라도
+      // 마지막 스크롤 값을 사용할 수 있도록 reload 토큰도 동기화한다.
+      writeReloadToken({
+        key: routeKey,
+        y,
+        t: Date.now(),
+      });
     };
 
     const target = isDocEl(el) ? window : el;
-
     target.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // 초기 저장
-
     return () => target.removeEventListener("scroll", onScroll);
   }, [routeKey]);
 
-  // ✅ 라우트 변경 시 복구 (POP 또는 restoreScroll 플래그)
   useLayoutEffect(() => {
+    const entryToken = `${location.key || "nokey"}|${routeKey}`;
+    if (handledEntryRef.current === entryToken) {
+      onRestoreComplete?.();
+      return;
+    }
+
+    handledEntryRef.current = entryToken;
+    isRestoringRef.current = true;
+
     const el = scrollElRef.current || getScrollEl();
     scrollElRef.current = el;
 
     const map = loadMap();
     const savedY = Number(map[routeKey] ?? 0);
+    const reloadToken = readReloadToken();
 
-    const apply = (y) => {
+    const explicitRestore =
+      location.state?.restoreScroll === true &&
+      typeof location.state?.restoreScrollY === "number";
+
+    const allowReloadRestore = firstEntryRef.current && isReload;
+    firstEntryRef.current = false;
+
+    let targetY = 0;
+
+    if (explicitRestore) {
+      targetY = location.state.restoreScrollY;
+    } else if (allowReloadRestore) {
+      if (reloadToken?.key === routeKey && typeof reloadToken?.y === "number") {
+        targetY = reloadToken.y;
+      } else {
+        targetY = savedY;
+      }
+    } else if (navType === "POP") {
+      targetY = savedY;
+    } else {
+      targetY = 0;
+    }
+
+    const nextMap = loadMap();
+    nextMap[routeKey] = targetY;
+    saveMap(nextMap);
+
+    setY(el, targetY);
+
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTimeout(() => setY(el, y), 80);
-        });
+        let tries = 0;
+        const maxTries = 12;
+
+        const settle = () => {
+          setY(el, targetY);
+          const ok = Math.abs(getY(el) - targetY) <= 2;
+
+          if (ok || tries >= maxTries) {
+            isRestoringRef.current = false;
+            onRestoreComplete?.();
+            return;
+          }
+
+          tries += 1;
+          setTimeout(settle, 40);
+        };
+
+        settle();
       });
-    };
-
-    const shouldRestore =
-      navType === "POP" || location.state?.restoreScroll === true;
-
-    if (shouldRestore) apply(savedY);
-    else apply(0);
-  }, [routeKey, navType, location.state?.restoreScroll]);
+    });
+  }, [
+    location.key,
+    routeKey,
+    navType,
+    isReload,
+    location.state?.restoreScroll,
+    location.state?.restoreScrollY,
+    onRestoreComplete,
+  ]);
 
   return null;
 }

@@ -1,23 +1,28 @@
-import React, { useMemo, useState,useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
-import { setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
 import {
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { FcGoogle } from "react-icons/fc";
+import { FaApple } from "react-icons/fa";
 import { auth } from "../../firebase";
 import { useAuth } from "../../contexts/AuthContext";
 
 function EyeIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+      <path
+        d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
 }
@@ -25,17 +30,29 @@ function EyeIcon() {
 function EyeOffIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2"/>
-      <path d="M2 12s3.5-7 10-7c2.2 0 4.1.7 5.7 1.7M22 12s-3.5 7-10 7c-2.2 0-4.1-.7-5.7-1.7" stroke="currentColor" strokeWidth="2"/>
-      <path d="M9.9 9.9A3 3 0 0 0 12 15a3 3 0 0 0 2.1-.9" stroke="currentColor" strokeWidth="2"/>
+      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M2 12s3.5-7 10-7c2.2 0 4.1.7 5.7 1.7M22 12s-3.5 7-10 7c-2.2 0-4.1-.7-5.7-1.7"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M9.9 9.9A3 3 0 0 0 12 15a3 3 0 0 0 2.1-.9"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
     </svg>
   );
 }
 
 export default function Login() {
+  const location = useLocation();
+  const loginState = location.state;
   const navigate = useNavigate();
   const { userData, authLoading } = useAuth();
+
   const provider = useMemo(() => new GoogleAuthProvider(), []);
+
   const [fadeOut, setFadeOut] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,13 +61,37 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(false);
 
+  const handleLoginSuccess = useCallback(() => {
+    // Top10Row 모달에서 "콘텐츠 보러가기" 누르고 온 경우
+    if (
+      loginState?.intent === "detail" &&
+      loginState?.detailId &&
+      loginState?.detailType
+    ) {
+      navigate(`/detail/${loginState.detailType}/${loginState.detailId}`, {
+        replace: true,
+        state: {
+          from: loginState.from || "/",
+          teaserSource: loginState.teaserSource,
+          preloadedTitle: loginState.detailTitle,
+          preloadedBackdrop: loginState.detailBackdrop,
+          preloadedPoster: loginState.detailPoster,
+          scrollY:
+            typeof loginState.scrollY === "number" ? loginState.scrollY : 0,
+        },
+      });
+      return;
+    }
 
-  
+    navigate("/main", { replace: true });
+  }, [loginState, navigate]);
+
   const onEmailLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     const eMail = email.trim();
+
     if (!eMail || !password) {
       setError("아이디와 비밀번호를 입력해주세요.");
       return;
@@ -61,75 +102,86 @@ export default function Login() {
       localStorage.removeItem("isGuest");
       sessionStorage.removeItem("demo_banner");
 
-      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+      await setPersistence(
+        auth,
+        remember ? browserLocalPersistence : browserSessionPersistence
+      );
+
       await signInWithEmailAndPassword(auth, eMail, password);
 
       setFadeOut(true);
       setTimeout(() => {
-        navigate("/main", { replace: true });
+        handleLoginSuccess();
       }, 250);
-    } 
-    catch (err) {
+    } catch (err) {
       console.log(err);
       setError("로그인에 실패했습니다. 계정 정보를 확인해주세요.");
-    } 
-    finally {
+    } finally {
       setPending(false);
     }
   };
 
   const onGoogleLogin = async () => {
     setError("");
+
     try {
       setPending(true);
       localStorage.removeItem("isGuest");
       sessionStorage.removeItem("demo_banner");
+
+      await setPersistence(
+        auth,
+        remember ? browserLocalPersistence : browserSessionPersistence
+      );
+
       await signInWithPopup(auth, provider);
-      navigate("/main", { replace: true });
-    } 
-    catch (err) {
+
+      setFadeOut(true);
+      setTimeout(() => {
+        handleLoginSuccess();
+      }, 250);
+    } catch (err) {
       console.log(err);
       setError("구글 로그인에 실패했습니다.");
-    } 
-    finally {
+    } finally {
       setPending(false);
     }
   };
 
   const onDemoLogin = async () => {
     setError("");
+
     try {
       setPending(true);
       localStorage.setItem("isGuest", "1");
       sessionStorage.setItem("demo_banner", "1");
-      
+
       await setPersistence(
-      auth,
-      remember ? browserLocalPersistence : browserSessionPersistence
+        auth,
+        remember ? browserLocalPersistence : browserSessionPersistence
       );
 
       await signInWithEmailAndPassword(auth, "demo@disney.dev", "12345678");
+
       setFadeOut(true);
       setTimeout(() => {
-        navigate("/main", { replace: true });
+        handleLoginSuccess();
       }, 250);
-    } 
-      catch (err) {
+    } catch (err) {
       console.log(err);
-      // 실패하면 플래그 롤백
       localStorage.removeItem("isGuest");
       sessionStorage.removeItem("demo_banner");
       setError("체험 계정 로그인에 실패했습니다.");
-    } 
-    finally {
+    } finally {
       setPending(false);
     }
   };
-useEffect(() => {
-  if (!authLoading && userData) {
-    navigate("/main", { replace: true });
-  }
-}, [authLoading, userData, navigate]);
+
+  useEffect(() => {
+    if (!authLoading && userData) {
+      handleLoginSuccess();
+    }
+  }, [authLoading, userData, handleLoginSuccess]);
 
   return (
     <Wrap $fade={fadeOut}>
@@ -139,9 +191,8 @@ useEffect(() => {
             <img src="/images/logo.svg" alt="Disney+ Logo" />
           </Brand>
         </BrandLink>
-      
-      <Divider />
 
+        <Divider />
 
         <Title>로그인</Title>
 
@@ -185,6 +236,7 @@ useEffect(() => {
           </Field>
 
           {error && <ErrorText role="alert">{error}</ErrorText>}
+
           <SubActions>
             <Remember>
               <input
@@ -196,6 +248,7 @@ useEffect(() => {
               />
               <label htmlFor="remember">로그인 상태 유지</label>
             </Remember>
+
             <TextLink to="/reset-password">비밀번호 찾기</TextLink>
           </SubActions>
 
@@ -226,7 +279,8 @@ useEffect(() => {
               Continue with Google
             </SocialInner>
           </GoogleBtn>
-          <AppleBtn type="button">
+
+          <AppleBtn type="button" disabled>
             <SocialInner>
               <IconWrap>
                 <FaApple size={18} />
@@ -252,13 +306,15 @@ const Wrap = styled.div`
   position: relative;
   overflow-x: clip;
 
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-size: 16px;
   }
 
   background:
-    radial-gradient(1100px 520px at 50% 12%, rgba(2,214,232,0.12), transparent 60%),
-    radial-gradient(900px 520px at 20% 88%, rgba(120,72,255,0.10), transparent 62%),
+    radial-gradient(1100px 520px at 50% 12%, rgba(2, 214, 232, 0.12), transparent 60%),
+    radial-gradient(900px 520px at 20% 88%, rgba(120, 72, 255, 0.10), transparent 62%),
     #040714;
 
   &::before {
@@ -272,8 +328,8 @@ const Wrap = styled.div`
   }
 
   transition: opacity 200ms ease, transform 200ms ease;
-  opacity: ${props => props.$fade ? 0 : 1};
-  transform: ${props => props.$fade ? "translateY(8px)" : "translateY(0)"};
+  opacity: ${(props) => (props.$fade ? 0 : 1)};
+  transform: ${(props) => (props.$fade ? "translateY(8px)" : "translateY(0)")};
 `;
 
 const Card = styled.div`
@@ -326,7 +382,7 @@ const Brand = styled.div`
     width: 170px;
     height: 70px;
     border-radius: 999px;
-    background: radial-gradient(circle at 50% 50%, rgba(2,214,232,0.18), transparent 62%);
+    background: radial-gradient(circle at 50% 50%, rgba(2, 214, 232, 0.18), transparent 62%);
     filter: blur(7px);
     opacity: 0.9;
     pointer-events: none;
@@ -352,7 +408,7 @@ const Title = styled.h1`
   font-weight: 800;
   letter-spacing: -0.2px;
   color: rgba(255, 255, 255, 0.95);
-  text-align:center;
+  text-align: center;
 `;
 
 const Form = styled.form`
@@ -406,11 +462,10 @@ const IconBtn = styled.button`
   }
 `;
 
-/* Input 오른쪽 패딩 확보(아이콘 공간) */
 const Input = styled.input`
   height: 46px;
   border-radius: 12px;
-  padding: 0 44px 0 12px; /* ✅ 오른쪽 44px로 변경 */
+  padding: 0 44px 0 12px;
 
   font-size: 16px;
   line-height: 1.2;
@@ -438,6 +493,7 @@ const Input = styled.input`
     cursor: not-allowed;
   }
 `;
+
 const PrimaryBtn = styled.button`
   height: 46px;
   border-radius: 12px;
@@ -471,9 +527,9 @@ const PrimaryBtn = styled.button`
 const GoogleBtn = styled.button`
   height: 48px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
 
   font-weight: 600;
   cursor: pointer;
@@ -481,8 +537,8 @@ const GoogleBtn = styled.button`
   transition: background 160ms ease, border-color 160ms ease;
 
   &:hover {
-    background: rgba(255,255,255,0.10);
-    border-color: rgba(255,255,255,0.25);
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
   &:active {
@@ -494,8 +550,9 @@ const GoogleBtn = styled.button`
     cursor: not-allowed;
   }
 `;
+
 const AppleBtn = styled(GoogleBtn)`
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
 `;
 
 const Divider = styled.div`
@@ -519,7 +576,7 @@ const Divider = styled.div`
     right: 0;
     top: 50%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
     transform: translateY(-50%);
   }
 `;
@@ -529,7 +586,6 @@ const ErrorText = styled.p`
   font-size: 12px;
   color: rgba(255, 120, 120, 0.95);
 `;
-
 
 const SubActions = styled.div`
   display: flex;
@@ -549,38 +605,36 @@ const Remember = styled.label`
     width: 14px;
     height: 14px;
     cursor: pointer;
-    /* 기본 브라우저 체크 유지 */
     accent-color: #02d6e8;
-
-    /* 체크 전 배경을 어둡게 */
     background-color: #0b0f1a;
     border-radius: 4px;
   }
+
   label {
     font-size: 13px;
     font-weight: 400;
-    color: rgba(255,255,255,0.65);
+    color: rgba(255, 255, 255, 0.65);
     cursor: pointer;
   }
-  /* 체크 안 된 상태에서만 검정 배경 유지 */
+
   input:not(:checked) {
     background-color: #0b0f1a;
   }
 
   span {
-    font-size: 11px;          
-    font-weight: 400;       
-    color: rgba(255,255,255,0.55); 
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.55);
   }
 `;
 
 const TextLink = styled(Link)`
   font-size: 12px;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
 
   &:hover {
-    color: rgba(2,214,232,0.90);
+    color: rgba(2, 214, 232, 0.90);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -592,12 +646,12 @@ const DemoBtn = styled.button`
   background: transparent;
   padding: 0;
   font-size: 12px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255, 255, 255, 0.55);
   cursor: pointer;
   justify-self: center;
 
   &:hover {
-    color: rgba(2,214,232,0.90);
+    color: rgba(2, 214, 232, 0.90);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -630,6 +684,8 @@ const Spinner = styled.div`
   margin-right: 6px;
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;

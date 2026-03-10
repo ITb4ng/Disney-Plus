@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useState, useEffect } from "react"
 import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSearchTransition } from "../contexts/SearchTransitionContext";
+import { getAppScrollY } from "../utils/scrollPosition";
 
 const ROUTES = {
   search: "/search",
@@ -48,6 +49,7 @@ export default function DemoActionSection() {
     nav(`${ROUTES.search}?${qs.toString()}`, {
       state: {
         from: location.pathname + location.search,
+        scrollY: getAppScrollY(),
       },
     });
   }, [location.pathname, location.search, nav, triggerSearchTransition]);
@@ -140,6 +142,7 @@ export default function DemoActionSection() {
         {cards.map((c) => (
           <JellyCard
             key={c.key}
+            testId={`demo-action-${c.key}`}
             icon={c.icon}
             title={c.title}
             desc={c.desc}
@@ -162,7 +165,17 @@ export default function DemoActionSection() {
    ✅ 최적화: rAF 루프를 hover 중에만 실행
 ========================= */
 
-function JellyCard({ icon, title, desc, badge, hint, onAction, disabled, loading }) {
+function JellyCard({
+  testId,
+  icon,
+  title,
+  desc,
+  badge,
+  hint,
+  onAction,
+  disabled,
+  loading,
+}) {
   const ref = useRef(null);
 
   const rafRef = useRef(0);
@@ -295,6 +308,7 @@ function JellyCard({ icon, title, desc, badge, hint, onAction, disabled, loading
     <CardButton
       ref={ref}
       type="button"
+      data-testid={testId}
       disabled={disabled}
       onPointerEnter={onPointerEnter} // ✅ 루프 시작
       onPointerMove={onPointerMove}

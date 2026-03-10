@@ -13,25 +13,6 @@ const DEV_BANNER_DEBUG_STATE = null;
 
 
 /* =========================
-   개발용 테스트 배너 데이터
-   ========================= */
-const MOCK_BANNER_MOVIE = {
-  id: 999999,
-  media_type: "movie",
-  title: "테스트 배너 콘텐츠",
-  name: "테스트 배너 콘텐츠",
-  original_name: "테스트 배너 콘텐츠",
-  backdrop_path: "/invalid-test-image-path.jpg",
-  vote_average: 8.4,
-  release_date: "2026-03-10",
-  runtime: 142,
-  genres: [
-    { id: 1, name: "SF" },
-    { id: 2, name: "Adventure" },
-  ],
-};
-
-/* =========================
    메타 정보 가공 함수
    ========================= */
 const getYear = (movie) => {
@@ -212,7 +193,7 @@ const BannerContentView = ({
 /* =========================
    메인 배너
    ========================= */
-const Banner = () => {
+const Banner = ({ debugState: debugStateProp = null }) => {
   const {
     data: movie,
     isLoading,
@@ -233,23 +214,23 @@ const Banner = () => {
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const [overlayStrength, setOverlayStrength] = useState(0);
 
-  const isDevelopment = process.env.NODE_ENV !== "development";
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   /* =========================
      development 전용 강제 상태
      ========================= */
-  const debugState = isDevelopment ? DEV_BANNER_DEBUG_STATE : null;
+  const debugState =
+    debugStateProp ?? (isDevelopment ? DEV_BANNER_DEBUG_STATE : null);
 
-  const resolvedMovie =
-    debugState === "success" || debugState === "image-error"
-      ? MOCK_BANNER_MOVIE
-      : movie;
+  // success/기본 렌더는 실제 API 배너 데이터를 그대로 사용한다.
+  // image-error 디버그는 데이터는 유지하고 이미지 실패만 강제한다.
+  const resolvedMovie = movie;
 
   const bannerStatus = useMemo(() => {
     if (debugState === "loading") return "loading";
     if (debugState === "error") return "error";
     if (debugState === "empty") return "empty";
-    if (debugState === "success" || debugState === "image-error") return "success";
+    if (debugState === "image-error") return "success";
 
     if (isLoading) return "loading";
     if (isError) return "error";

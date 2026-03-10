@@ -12,7 +12,10 @@ const SearchEmptyState = ({ mode, term, onRetry }) => {
   if (mode === "loading") {
     return (
       <div className="search-state">
-        <p>검색 중...</p>
+        <div className="search-state__loading" role="status" aria-live="polite">
+          <span className="search-header__spinner" aria-hidden="true" />
+          <span>검색 중...</span>
+        </div>
       </div>
     );
   }

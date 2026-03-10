@@ -15,10 +15,11 @@ import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/Common/ProtectedRoute";
 import PublicOnlyRoute from "./components/Common/PublicOnlyRoute";
 import "./styles/badges.css";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const Layout = () => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const [footerReady, setFooterReady] = useState(false);
 
   const isLoginRoute = pathname.startsWith("/login");
   const isSearchRoute = pathname.startsWith("/search");
@@ -29,22 +30,34 @@ const Layout = () => {
   const hideFooter =
     isLoginRoute || isSearchRoute || isFeedbackRoute || isUpdatesRoute;
 
+  useEffect(() => {
+    setFooterReady(false);
+
+    // 안전장치: 복원 콜백이 늦어져도 footer가 영구 미표시되지 않도록 보장
+    const t = setTimeout(() => setFooterReady(true), 900);
+    return () => clearTimeout(t);
+  }, [pathname, search]);
+
+  const handleRestoreComplete = useCallback(() => {
+    setFooterReady(true);
+  }, []);
+
   return (
     <div className="layout">
       {!hideNav && <Nav />}
-      <ScrollManager />
+      <ScrollManager onRestoreComplete={handleRestoreComplete} />
       <Outlet />
-      {!hideFooter && <Footer />}
+      {!hideFooter && footerReady && <Footer />}
     </div>
   );
 };
 
 function App() {
-  useEffect(() => {
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
+  if ("scrollRestoration" in window.history) {
+    window.history.scrollRestoration = "manual";
+  }
 
+  useEffect(() => {
     const nav = document.querySelector(".app-nav");
 
     const apply = () => {

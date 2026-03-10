@@ -7,6 +7,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { FiSearch } from "react-icons/fi";
 import { useSearchTransition } from "../contexts/SearchTransitionContext";
+import { getAppScrollY } from "../utils/scrollPosition";
 
 const Nav = () => {
   const [navOpacity, setNavOpacity] = useState(0);
@@ -169,6 +170,7 @@ window.addEventListener("scroll", handleScroll, { passive: true });
                 navigate("/search", {
                   state: {
                     from: location.pathname + location.search,
+                    scrollY: getAppScrollY(),
                   },
                 });
               }}

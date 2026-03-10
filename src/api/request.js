@@ -1,6 +1,6 @@
 const requests = {
   fetchTop10KR: {
-    path: "discover/movie",
+    path: "trending/all/day",
     region: "KR",
     sort_by: "popularity.desc",
     include_adult: false,
