@@ -1,0 +1,752 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]:
+      - link "Disney Plus Logo" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img "Disney Plus Logo" [ref=e9]
+      - generic [ref=e10]:
+        - button "검색 페이지로 이동" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+        - button "로그인" [ref=e15]
+  - main [ref=e16]:
+    - generic [ref=e20]:
+      - heading "Escape the Night" [level=1] [ref=e21]
+      - generic "콘텐츠 메타 정보" [ref=e22]:
+        - generic [ref=e23]: ⭐ 7.7
+        - generic [ref=e24]: "2016"
+        - generic [ref=e25]: 미스터리 · Reality
+        - generic [ref=e26]: 시즌 5
+      - button "상세 페이지로 이동" [ref=e28] [cursor=pointer]: 자세히 보기
+    - generic [ref=e30]:
+      - img "disney" [ref=e32] [cursor=pointer]
+      - img "marvel" [ref=e35] [cursor=pointer]
+      - img "pixar" [ref=e38] [cursor=pointer]
+      - img "starwars" [ref=e41] [cursor=pointer]
+      - img "national" [ref=e44] [cursor=pointer]
+      - img "hulu" [ref=e47] [cursor=pointer]
+    - generic [ref=e50]:
+      - heading "Top Rated" [level=2] [ref=e51]
+      - generic [ref=e52]:
+        - button:
+          - generic:
+            - img
+        - button "다음 콘텐츠" [ref=e53] [cursor=pointer]:
+          - img [ref=e55]
+        - generic [ref=e59]:
+          - group "1 / 20" [ref=e60]:
+            - button "1 쇼생크 탈출" [ref=e61] [cursor=pointer]:
+              - generic: "1"
+              - img "쇼생크 탈출" [ref=e62]
+              - generic:
+                - generic:
+                  - generic: 쇼생크 탈출
+                  - generic: "1994"
+          - group "2 / 20" [ref=e63]:
+            - button "2 대부" [ref=e64] [cursor=pointer]:
+              - generic: "2"
+              - img "대부" [ref=e65]
+              - generic:
+                - generic:
+                  - generic: 대부
+                  - generic: "1972"
+          - group "3 / 20" [ref=e66]:
+            - button "3 대부 2" [ref=e67] [cursor=pointer]:
+              - generic: "3"
+              - img "대부 2" [ref=e68]
+              - generic:
+                - generic:
+                  - generic: 대부 2
+                  - generic: "1974"
+          - group "4 / 20" [ref=e69]:
+            - button "4 쉰들러 리스트" [ref=e70] [cursor=pointer]:
+              - generic: "4"
+              - img "쉰들러 리스트" [ref=e71]
+              - generic:
+                - generic:
+                  - generic: 쉰들러 리스트
+                  - generic: "1993"
+          - group "5 / 20" [ref=e72]:
+            - button "5 12명의 성난 사람들" [ref=e73] [cursor=pointer]:
+              - generic: "5"
+              - img "12명의 성난 사람들" [ref=e74]
+              - generic:
+                - generic:
+                  - generic: 12명의 성난 사람들
+                  - generic: "1957"
+          - group "6 / 20" [ref=e75]:
+            - button "6 ¿Quieres ser mi hijo?" [ref=e76] [cursor=pointer]:
+              - generic: "6"
+              - img "¿Quieres ser mi hijo?" [ref=e77]
+              - generic:
+                - generic:
+                  - generic: ¿Quieres ser mi hijo?
+                  - generic: "2023"
+          - group "7 / 20" [ref=e78]:
+            - button "7 센과 치히로의 행방불명" [ref=e79] [cursor=pointer]:
+              - generic: "7"
+              - img "센과 치히로의 행방불명" [ref=e80]
+              - generic:
+                - generic:
+                  - generic: 센과 치히로의 행방불명
+                  - generic: "2001"
+          - group "8 / 20" [ref=e81]:
+            - button "8 다크 나이트" [ref=e82] [cursor=pointer]:
+              - generic: "8"
+              - img "다크 나이트" [ref=e83]
+              - generic:
+                - generic:
+                  - generic: 다크 나이트
+                  - generic: "2008"
+          - group "9 / 20" [ref=e84]:
+            - button "9 용감한 자가 신부를 데려가리" [ref=e85] [cursor=pointer]:
+              - generic: "9"
+              - img "용감한 자가 신부를 데려가리" [ref=e86]
+              - generic:
+                - generic:
+                  - generic: 용감한 자가 신부를 데려가리
+                  - generic: "1995"
+          - group "10 / 20" [ref=e87]:
+            - button "10 그린 마일" [ref=e88] [cursor=pointer]:
+              - generic: "10"
+              - img "그린 마일" [ref=e89]
+              - generic:
+                - generic:
+                  - generic: 그린 마일
+                  - generic: "1999"
+          - group "11 / 20" [ref=e90]:
+            - 'button "11 반지의 제왕: 왕의 귀환" [ref=e91] [cursor=pointer]':
+              - generic: "11"
+              - 'img "반지의 제왕: 왕의 귀환" [ref=e92]'
+              - generic:
+                - generic:
+                  - generic: "반지의 제왕: 왕의 귀환"
+                  - generic: "2003"
+          - group "12 / 20" [ref=e93]:
+            - button "12 기생충" [ref=e94] [cursor=pointer]:
+              - generic: "12"
+              - img "기생충" [ref=e95]
+              - generic:
+                - generic:
+                  - generic: 기생충
+                  - generic: "2019"
+          - group "13 / 20" [ref=e96]:
+            - button "13 펄프 픽션" [ref=e97] [cursor=pointer]:
+              - generic: "13"
+              - img "펄프 픽션" [ref=e98]
+              - generic:
+                - generic:
+                  - generic: 펄프 픽션
+                  - generic: "1994"
+          - group "14 / 20" [ref=e99]:
+            - button "14 너의 이름은." [ref=e100] [cursor=pointer]:
+              - generic: "14"
+              - img "너의 이름은." [ref=e101]
+              - generic:
+                - generic:
+                  - generic: 너의 이름은.
+                  - generic: "2016"
+          - group "15 / 20" [ref=e102]:
+            - button "15 인터스텔라" [ref=e103] [cursor=pointer]:
+              - generic: "15"
+              - img "인터스텔라" [ref=e104]
+              - generic:
+                - generic:
+                  - generic: 인터스텔라
+                  - generic: "2014"
+          - group "16 / 20" [ref=e105]:
+            - button "16 석양의 무법자" [ref=e106] [cursor=pointer]:
+              - generic: "16"
+              - img "석양의 무법자" [ref=e107]
+              - generic:
+                - generic:
+                  - generic: 석양의 무법자
+                  - generic: "1966"
+          - group "17 / 20" [ref=e108]:
+            - button "17 포레스트 검프" [ref=e109] [cursor=pointer]:
+              - generic: "17"
+              - img "포레스트 검프" [ref=e110]
+              - generic:
+                - generic:
+                  - generic: 포레스트 검프
+                  - generic: "1994"
+          - group "18 / 20" [ref=e111]:
+            - button "18 좋은 친구들" [ref=e112] [cursor=pointer]:
+              - generic: "18"
+              - img "좋은 친구들" [ref=e113]
+              - generic:
+                - generic:
+                  - generic: 좋은 친구들
+                  - generic: "1990"
+          - group "19 / 20" [ref=e114]:
+            - button "19 7인의 사무라이" [ref=e115] [cursor=pointer]:
+              - generic: "19"
+              - img "7인의 사무라이" [ref=e116]
+              - generic:
+                - generic:
+                  - generic: 7인의 사무라이
+                  - generic: "1954"
+          - group "20 / 20" [ref=e117]:
+            - button "20 반딧불의 묘" [ref=e118] [cursor=pointer]:
+              - generic: "20"
+              - img "반딧불의 묘" [ref=e119]
+              - generic:
+                - generic:
+                  - generic: 반딧불의 묘
+                  - generic: "1988"
+    - generic [ref=e121]:
+      - heading "Trending Now" [level=2] [ref=e122]
+      - generic [ref=e123]:
+        - button:
+          - generic:
+            - img
+        - button "다음 콘텐츠" [ref=e124] [cursor=pointer]:
+          - img [ref=e126]
+        - generic [ref=e130]:
+          - group "1 / 20" [ref=e131]:
+            - button "원피스" [ref=e132] [cursor=pointer]:
+              - img "원피스" [ref=e133]
+              - generic:
+                - generic:
+                  - generic: 원피스
+                  - generic: "2023"
+          - group "2 / 20" [ref=e134]:
+            - 'button "워 머신: 전쟁 기계" [ref=e135] [cursor=pointer]':
+              - 'img "워 머신: 전쟁 기계" [ref=e136]'
+              - generic:
+                - generic:
+                  - generic: "워 머신: 전쟁 기계"
+                  - generic: "2026"
+          - group "3 / 20" [ref=e137]:
+            - button "주토피아 2" [ref=e138] [cursor=pointer]:
+              - img "주토피아 2" [ref=e139]
+              - generic:
+                - generic:
+                  - generic: 주토피아 2
+                  - generic: "2025"
+          - group "4 / 20" [ref=e140]:
+            - button "스카페타" [ref=e141] [cursor=pointer]:
+              - img "스카페타" [ref=e142]
+              - generic:
+                - generic:
+                  - generic: 스카페타
+                  - generic: "2026"
+          - group "5 / 20" [ref=e143]:
+            - button "굿 럭, 해브 펀, 돈 다이" [ref=e144] [cursor=pointer]:
+              - img "굿 럭, 해브 펀, 돈 다이" [ref=e145]
+              - generic:
+                - generic:
+                  - generic: 굿 럭, 해브 펀, 돈 다이
+                  - generic: "2026"
+          - group "6 / 20" [ref=e146]:
+            - button "햄넷" [ref=e147] [cursor=pointer]:
+              - img "햄넷" [ref=e148]
+              - generic:
+                - generic:
+                  - generic: 햄넷
+                  - generic: "2025"
+          - group "7 / 20" [ref=e149]:
+            - button "마티 슈프림" [ref=e150] [cursor=pointer]:
+              - img "마티 슈프림" [ref=e151]
+              - generic:
+                - generic:
+                  - generic: 마티 슈프림
+                  - generic: "2025"
+          - group "8 / 20" [ref=e152]:
+            - button "호퍼스" [ref=e153] [cursor=pointer]:
+              - img "호퍼스" [ref=e154]
+              - generic:
+                - generic:
+                  - generic: 호퍼스
+                  - generic: "2026"
+          - group "9 / 20" [ref=e155]:
+            - button "프로젝트 헤일메리" [ref=e156] [cursor=pointer]:
+              - img "프로젝트 헤일메리" [ref=e157]
+              - generic:
+                - generic:
+                  - generic: 프로젝트 헤일메리
+                  - generic: "2026"
+          - group "10 / 20" [ref=e158]:
+            - button "스크림 7" [ref=e159] [cursor=pointer]:
+              - img "스크림 7" [ref=e160]
+              - generic:
+                - generic:
+                  - generic: 스크림 7
+                  - generic: "2026"
+          - group "11 / 20" [ref=e161]:
+            - 'button "씨너스: 죄인들" [ref=e162] [cursor=pointer]':
+              - 'img "씨너스: 죄인들" [ref=e163]'
+              - generic:
+                - generic:
+                  - generic: "씨너스: 죄인들"
+                  - generic: "2025"
+          - group "12 / 20" [ref=e164]:
+            - button "원피스" [ref=e165] [cursor=pointer]:
+              - img "원피스" [ref=e166]
+              - generic:
+                - generic:
+                  - generic: 원피스
+                  - generic: "1999"
+          - group "13 / 20" [ref=e167]:
+            - button "콜드 스토리지" [ref=e168] [cursor=pointer]:
+              - img "콜드 스토리지" [ref=e169]
+              - generic:
+                - generic:
+                  - generic: 콜드 스토리지
+                  - generic: "2026"
+          - group "14 / 20" [ref=e170]:
+            - button "크라임 101" [ref=e171] [cursor=pointer]:
+              - img "크라임 101" [ref=e172]
+              - generic:
+                - generic:
+                  - generic: 크라임 101
+                  - generic: "2026"
+          - group "15 / 20" [ref=e173]:
+            - button "원 배틀 애프터 어나더" [ref=e174] [cursor=pointer]:
+              - img "원 배틀 애프터 어나더" [ref=e175]
+              - generic:
+                - generic:
+                  - generic: 원 배틀 애프터 어나더
+                  - generic: "2025"
+          - group "16 / 20" [ref=e176]:
+            - button "영 셜록" [ref=e177] [cursor=pointer]:
+              - img "영 셜록" [ref=e178]
+              - generic:
+                - generic:
+                  - generic: 영 셜록
+                  - generic: "2026"
+          - group "17 / 20" [ref=e179]:
+            - button "주술회전" [ref=e180] [cursor=pointer]:
+              - img "주술회전" [ref=e181]
+              - generic:
+                - generic:
+                  - generic: 주술회전
+                  - generic: "2020"
+          - group "18 / 20" [ref=e182]:
+            - button "시크릿 에이전트" [ref=e183] [cursor=pointer]:
+              - img "시크릿 에이전트" [ref=e184]
+              - generic:
+                - generic:
+                  - generic: 시크릿 에이전트
+                  - generic: "2025"
+          - group "19 / 20" [ref=e185]:
+            - button "폭풍의 언덕" [ref=e186] [cursor=pointer]:
+              - img "폭풍의 언덕" [ref=e187]
+              - generic:
+                - generic:
+                  - generic: 폭풍의 언덕
+                  - generic: "2026"
+          - group "20 / 20" [ref=e188]:
+            - button "더 매디슨" [ref=e189] [cursor=pointer]:
+              - img "더 매디슨" [ref=e190]
+              - generic:
+                - generic:
+                  - generic: 더 매디슨
+                  - generic: "2026"
+    - generic [ref=e192]:
+      - heading "Action Movies" [level=2] [ref=e193]
+      - generic [ref=e194]:
+        - button:
+          - generic:
+            - img
+        - button "다음 콘텐츠" [ref=e195] [cursor=pointer]:
+          - img [ref=e197]
+        - generic [ref=e201]:
+          - group "1 / 20" [ref=e202]:
+            - 'button "워 머신: 전쟁 기계" [ref=e203] [cursor=pointer]':
+              - 'img "워 머신: 전쟁 기계" [ref=e204]'
+              - generic:
+                - generic:
+                  - generic: "워 머신: 전쟁 기계"
+                  - generic: "2026"
+          - group "2 / 20" [ref=e205]:
+            - button "쉘터" [ref=e206] [cursor=pointer]:
+              - img "쉘터" [ref=e207]
+              - generic:
+                - generic:
+                  - generic: 쉘터
+                  - generic: "2026"
+          - group "3 / 20" [ref=e208]:
+            - button "더 블러프" [ref=e209] [cursor=pointer]:
+              - img "더 블러프" [ref=e210]
+              - generic:
+                - generic:
+                  - generic: 더 블러프
+                  - generic: "2026"
+          - group "4 / 20" [ref=e211]:
+            - 'button "노 머시: 90분" [ref=e212] [cursor=pointer]':
+              - 'img "노 머시: 90분" [ref=e213]'
+              - generic:
+                - generic:
+                  - generic: "노 머시: 90분"
+                  - generic: "2026"
+          - group "5 / 20" [ref=e214]:
+            - button "Hellfire" [ref=e215] [cursor=pointer]:
+              - img "Hellfire" [ref=e216]
+              - generic:
+                - generic:
+                  - generic: Hellfire
+                  - generic: "2026"
+          - group "6 / 20" [ref=e217]:
+            - button "더 레킹 크루" [ref=e218] [cursor=pointer]:
+              - img "더 레킹 크루" [ref=e219]
+              - generic:
+                - generic:
+                  - generic: 더 레킹 크루
+                  - generic: "2026"
+          - group "7 / 20" [ref=e220]:
+            - button "굿 럭, 해브 펀, 돈 다이" [ref=e221] [cursor=pointer]:
+              - img "굿 럭, 해브 펀, 돈 다이" [ref=e222]
+              - generic:
+                - generic:
+                  - generic: 굿 럭, 해브 펀, 돈 다이
+                  - generic: "2026"
+          - group "8 / 20" [ref=e223]:
+            - button "Vanaveera" [ref=e224] [cursor=pointer]:
+              - img "Vanaveera" [ref=e225]
+              - generic:
+                - generic:
+                  - generic: Vanaveera
+                  - generic: "2026"
+          - group "9 / 20" [ref=e226]:
+            - 'button "극장판 귀멸의 칼날: 무한성편" [ref=e227] [cursor=pointer]':
+              - 'img "극장판 귀멸의 칼날: 무한성편" [ref=e228]'
+              - generic:
+                - generic:
+                  - generic: "극장판 귀멸의 칼날: 무한성편"
+                  - generic: "2025"
+          - group "10 / 20" [ref=e229]:
+            - button "포풍추영" [ref=e230] [cursor=pointer]:
+              - img "포풍추영" [ref=e231]
+              - generic:
+                - generic:
+                  - generic: 포풍추영
+                  - generic: "2025"
+          - group "11 / 20" [ref=e232]:
+            - 'button "프레데터: 죽음의 땅" [ref=e233] [cursor=pointer]':
+              - 'img "프레데터: 죽음의 땅" [ref=e234]'
+              - generic:
+                - generic:
+                  - generic: "프레데터: 죽음의 땅"
+                  - generic: "2025"
+          - group "12 / 20" [ref=e235]:
+            - button "헌팅시즌" [ref=e236] [cursor=pointer]:
+              - img "헌팅시즌" [ref=e237]
+              - generic:
+                - generic:
+                  - generic: 헌팅시즌
+                  - generic: "2025"
+          - group "13 / 20" [ref=e238]:
+            - button "인턴십" [ref=e239] [cursor=pointer]:
+              - img "인턴십" [ref=e240]
+              - generic:
+                - generic:
+                  - generic: 인턴십
+                  - generic: "2026"
+          - group "14 / 20" [ref=e241]:
+            - button "더 립" [ref=e242] [cursor=pointer]:
+              - img "더 립" [ref=e243]
+              - generic:
+                - generic:
+                  - generic: 더 립
+                  - generic: "2026"
+          - group "15 / 20" [ref=e244]:
+            - 'button "브라더후드: 총공세" [ref=e245] [cursor=pointer]':
+              - 'img "브라더후드: 총공세" [ref=e246]'
+              - generic:
+                - generic:
+                  - generic: "브라더후드: 총공세"
+                  - generic: "2026"
+          - group "16 / 20" [ref=e247]:
+            - button "트리플 엑스" [ref=e248] [cursor=pointer]:
+              - img "트리플 엑스" [ref=e249]
+              - generic:
+                - generic:
+                  - generic: 트리플 엑스
+                  - generic: "2002"
+          - group "17 / 20" [ref=e250]:
+            - button "Wildcat" [ref=e251] [cursor=pointer]:
+              - img "Wildcat" [ref=e252]
+              - generic:
+                - generic:
+                  - generic: Wildcat
+                  - generic: "2025"
+          - group "18 / 20" [ref=e253]:
+            - button "스내푸" [ref=e254] [cursor=pointer]:
+              - img "스내푸" [ref=e255]
+              - generic:
+                - generic:
+                  - generic: 스내푸
+                  - generic: "2023"
+          - group "19 / 20" [ref=e256]:
+            - button "원 배틀 애프터 어나더" [ref=e257] [cursor=pointer]:
+              - img "원 배틀 애프터 어나더" [ref=e258]
+              - generic:
+                - generic:
+                  - generic: 원 배틀 애프터 어나더
+                  - generic: "2025"
+          - group "20 / 20" [ref=e259]:
+            - button "Oscar Shaw" [ref=e260] [cursor=pointer]:
+              - img "Oscar Shaw" [ref=e261]
+              - generic:
+                - generic:
+                  - generic: Oscar Shaw
+                  - generic: "2026"
+    - generic [ref=e263]:
+      - heading "Comedy Movies" [level=2] [ref=e264]
+      - generic [ref=e265]:
+        - button:
+          - generic:
+            - img
+        - button "다음 콘텐츠" [ref=e266] [cursor=pointer]:
+          - img [ref=e268]
+        - generic [ref=e272]:
+          - group "1 / 20" [ref=e273]:
+            - button "주토피아 2" [ref=e274] [cursor=pointer]:
+              - img "주토피아 2" [ref=e275]
+              - generic:
+                - generic:
+                  - generic: 주토피아 2
+                  - generic: "2025"
+          - group "2 / 20" [ref=e276]:
+            - button "호퍼스" [ref=e277] [cursor=pointer]:
+              - img "호퍼스" [ref=e278]
+              - generic:
+                - generic:
+                  - generic: 호퍼스
+                  - generic: "2026"
+          - group "3 / 20" [ref=e279]:
+            - button "더 레킹 크루" [ref=e280] [cursor=pointer]:
+              - img "더 레킹 크루" [ref=e281]
+              - generic:
+                - generic:
+                  - generic: 더 레킹 크루
+                  - generic: "2026"
+          - group "4 / 20" [ref=e282]:
+            - button "굿 럭, 해브 펀, 돈 다이" [ref=e283] [cursor=pointer]:
+              - img "굿 럭, 해브 펀, 돈 다이" [ref=e284]
+              - generic:
+                - generic:
+                  - generic: 굿 럭, 해브 펀, 돈 다이
+                  - generic: "2026"
+          - group "5 / 20" [ref=e285]:
+            - button "콜드 스토리지" [ref=e286] [cursor=pointer]:
+              - img "콜드 스토리지" [ref=e287]
+              - generic:
+                - generic:
+                  - generic: 콜드 스토리지
+                  - generic: "2026"
+          - group "6 / 20" [ref=e288]:
+            - button "아나콘다" [ref=e289] [cursor=pointer]:
+              - img "아나콘다" [ref=e290]
+              - generic:
+                - generic:
+                  - generic: 아나콘다
+                  - generic: "2025"
+          - group "7 / 20" [ref=e291]:
+            - button "스내푸" [ref=e292] [cursor=pointer]:
+              - img "스내푸" [ref=e293]
+              - generic:
+                - generic:
+                  - generic: 스내푸
+                  - generic: "2023"
+          - group "8 / 20" [ref=e294]:
+            - button "Petmalu" [ref=e295] [cursor=pointer]:
+              - img "Petmalu" [ref=e296]
+              - generic:
+                - generic:
+                  - generic: Petmalu
+                  - generic: "2018"
+          - group "9 / 20" [ref=e297]:
+            - button "케이팝 데몬 헌터스" [ref=e298] [cursor=pointer]:
+              - img "케이팝 데몬 헌터스" [ref=e299]
+              - generic:
+                - generic:
+                  - generic: 케이팝 데몬 헌터스
+                  - generic: "2025"
+          - group "10 / 20" [ref=e300]:
+            - button "고트" [ref=e301] [cursor=pointer]:
+              - img "고트" [ref=e302]
+              - generic:
+                - generic:
+                  - generic: 고트
+                  - generic: "2026"
+          - group "11 / 20" [ref=e303]:
+            - button "Solo Mio" [ref=e304] [cursor=pointer]:
+              - img "Solo Mio" [ref=e305]
+              - generic:
+                - generic:
+                  - generic: Solo Mio
+                  - generic: "2026"
+          - group "12 / 20" [ref=e306]:
+            - button "エヴァンゲリオン放送30周年記念特別興行" [ref=e307] [cursor=pointer]:
+              - img "エヴァンゲリオン放送30周年記念特別興行" [ref=e308]
+              - generic:
+                - generic:
+                  - generic: エヴァンゲリオン放送30周年記念特別興行
+                  - generic: "2026"
+          - group "13 / 20" [ref=e309]:
+            - button "슈퍼 마리오 갤럭시" [ref=e310] [cursor=pointer]:
+              - img "슈퍼 마리오 갤럭시" [ref=e311]
+              - generic:
+                - generic:
+                  - generic: 슈퍼 마리오 갤럭시
+                  - generic: "2026"
+          - group "14 / 20" [ref=e312]:
+            - button "Torrente Presidente" [ref=e313] [cursor=pointer]:
+              - img "Torrente Presidente" [ref=e314]
+              - generic:
+                - generic:
+                  - generic: Torrente Presidente
+                  - generic: "2026"
+          - group "15 / 20" [ref=e315]:
+            - button "'패밀리 플랜 2' - The Family Plan 2" [ref=e316] [cursor=pointer]:
+              - img "'패밀리 플랜 2' - The Family Plan 2" [ref=e317]
+              - generic:
+                - generic:
+                  - generic: "'패밀리 플랜 2' - The Family Plan 2"
+                  - generic: "2025"
+          - group "16 / 20" [ref=e318]:
+            - button "플레이데이트" [ref=e319] [cursor=pointer]:
+              - img "플레이데이트" [ref=e320]
+              - generic:
+                - generic:
+                  - generic: 플레이데이트
+                  - generic: "2025"
+          - group "17 / 20" [ref=e321]:
+            - 'button "스폰지밥 무비: 네모바지를 찾아서" [ref=e322] [cursor=pointer]':
+              - 'img "스폰지밥 무비: 네모바지를 찾아서" [ref=e323]'
+              - generic:
+                - generic:
+                  - generic: "스폰지밥 무비: 네모바지를 찾아서"
+                  - generic: "2025"
+          - group "18 / 20" [ref=e324]:
+            - button "주토피아" [ref=e325] [cursor=pointer]:
+              - img "주토피아" [ref=e326]
+              - generic:
+                - generic:
+                  - generic: 주토피아
+                  - generic: "2016"
+          - group "19 / 20" [ref=e327]:
+            - button "직장상사 길들이기" [ref=e328] [cursor=pointer]:
+              - img "직장상사 길들이기" [ref=e329]
+              - generic:
+                - generic:
+                  - generic: 직장상사 길들이기
+                  - generic: "2026"
+          - group "20 / 20" [ref=e330]:
+            - button "무서운 영화" [ref=e331] [cursor=pointer]:
+              - img "무서운 영화" [ref=e332]
+              - generic:
+                - generic:
+                  - generic: 무서운 영화
+                  - generic: "2000"
+    - generic [ref=e335]:
+      - generic [ref=e336]:
+        - generic [ref=e337]: 불편한 점 / 개선 아이디어
+        - generic [ref=e338]: 한 줄만 남겨도 다음 업데이트에 반영할 명분이 생깁니다.
+      - button "피드백 남기기" [ref=e339] [cursor=pointer]
+  - contentinfo [ref=e341]:
+    - generic [ref=e343]:
+      - generic [ref=e345]:
+        - generic [ref=e346]: 언어
+        - combobox "언어" [ref=e347] [cursor=pointer]:
+          - option "한국어" [selected]
+          - option "English"
+        - generic:
+          - img
+        - generic:
+          - img
+      - generic [ref=e349]:
+        - generic [ref=e351]:
+          - heading "더 알아보기" [level=6] [ref=e352]
+          - list [ref=e353]:
+            - listitem [ref=e354]: 디즈니+ 이용약관
+            - listitem [ref=e355]: 개인정보 처리방침
+            - listitem [ref=e356]: 개인정보 처리방침 부속서
+            - listitem [ref=e357]: 관심 기반 광고
+        - generic [ref=e359]:
+          - heading "고객지원" [level=6] [ref=e360]
+          - list [ref=e361]:
+            - listitem [ref=e362]:
+              - button "고객센터" [ref=e363] [cursor=pointer]
+            - listitem [ref=e364]:
+              - button "다양한 시청 방법" [ref=e365] [cursor=pointer]
+            - listitem [ref=e366]:
+              - button "디즈니+ 소개" [ref=e367] [cursor=pointer]
+            - listitem [ref=e368]:
+              - button "통신판매업 사업자정보확인" [ref=e369] [cursor=pointer]
+        - generic [ref=e371]:
+          - heading "브랜드" [level=6] [ref=e372]
+          - list [ref=e373]:
+            - listitem [ref=e374]:
+              - button "디즈니" [ref=e375] [cursor=pointer]
+            - listitem [ref=e376]:
+              - button "픽사" [ref=e377] [cursor=pointer]
+            - listitem [ref=e378]:
+              - button "마블" [ref=e379] [cursor=pointer]
+            - listitem [ref=e380]:
+              - button "스타워즈" [ref=e381] [cursor=pointer]
+            - listitem [ref=e382]:
+              - button "내셔널지오그래픽" [ref=e383] [cursor=pointer]
+            - listitem [ref=e384]:
+              - button "훌루(Hulu)" [ref=e385] [cursor=pointer]
+        - generic [ref=e387]:
+          - heading "컬렉션" [level=6] [ref=e388]
+          - list [ref=e389]:
+            - listitem [ref=e390]:
+              - button "모든 컬렉션" [ref=e391] [cursor=pointer]
+            - listitem [ref=e392]:
+              - button "Made in Korea" [ref=e393] [cursor=pointer]
+            - listitem [ref=e394]:
+              - button "액션 & 어드벤처" [ref=e395] [cursor=pointer]
+            - listitem [ref=e396]:
+              - button "코미디" [ref=e397] [cursor=pointer]
+            - listitem [ref=e398]:
+              - button "드라마" [ref=e399] [cursor=pointer]
+            - listitem [ref=e400]:
+              - button "주목할 만한 아시아 콘텐츠" [ref=e401] [cursor=pointer]
+            - listitem [ref=e402]:
+              - button "호러" [ref=e403] [cursor=pointer]
+            - listitem [ref=e404]:
+              - button "Shorts" [ref=e405] [cursor=pointer]
+      - list [ref=e407]:
+        - listitem [ref=e408]:
+          - link "Twitter/X" [ref=e409] [cursor=pointer]:
+            - /url: https://twitter.com/disneypluskr
+            - img [ref=e410]
+        - listitem [ref=e412]:
+          - link "Facebook" [ref=e413] [cursor=pointer]:
+            - /url: https://www.facebook.com/DisneyPlusKR/
+            - img [ref=e414]
+        - listitem [ref=e416]:
+          - link "Instagram" [ref=e417] [cursor=pointer]:
+            - /url: https://www.instagram.com/disneypluskr
+            - img [ref=e418]
+        - listitem [ref=e420]:
+          - link "TikTok" [ref=e421] [cursor=pointer]:
+            - /url: https://www.tiktok.com/@disneyplus
+            - img [ref=e422]
+        - listitem [ref=e424]:
+          - link "YouTube" [ref=e425] [cursor=pointer]:
+            - /url: https://www.youtube.com/@DisneyPlusKR
+            - img [ref=e426]
+      - link "홈으로 이동" [ref=e430] [cursor=pointer]:
+        - /url: /
+        - img "Disney+" [ref=e431]
+      - list [ref=e433]:
+        - listitem [ref=e434]: 이 웹사이트는 개인 포트폴리오 목적의 UI/UX 리뉴얼 프로젝트입니다. (비상업적)
+        - listitem [ref=e435]: Disney+ 및 관련 로고/상표/콘텐츠에 대한 모든 권리는 해당 권리자에게 있으며, 본 사이트는 공식 서비스가 아닙니다.
+        - listitem [ref=e436]:
+          - link "GitHub" [ref=e437] [cursor=pointer]:
+            - /url: https://github.com/itb4ng
+            - img [ref=e438]
+          - link "Email" [ref=e440] [cursor=pointer]:
+            - /url: mailto:bsh801099@gmail.com
+            - img [ref=e441]
+          - generic "Portfolio" [ref=e443]:
+            - img [ref=e444]
+        - listitem [ref=e446]: © 2026 방Siri. All Rights Reserved.
+```

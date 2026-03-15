@@ -40,7 +40,6 @@ const Feedback = ({ variant = "teaser", isGuest = false, onSubmit }) => {
         await onSubmit(payload);
       } else {
         // 아직 Firebase 안 붙였으니까 콘솔로만
-        console.log("[feedback submit]", payload);
       }
 
       setTitle("");

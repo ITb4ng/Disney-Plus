@@ -4,7 +4,7 @@ import FAQitem from "./FAQitem";
 
 export default function FAQSection() {
   return (
-    <section className="faq-section">
+    <section className="faq-section" data-restore-anchor="landing-faq">
       <h2 className="faq-title">자주 묻는 질문</h2>
       <div className="faq-list">
         {faqList.map((item) => (

@@ -190,8 +190,11 @@ const Row = ({
     isBeginning: true,
     isEnd: false,
   });
+  const navStateRef = useRef({
+    isBeginning: true,
+    isEnd: false,
+  });
 
-  const didInitRef = useRef(false);
   const isTop10 = variant === "top10";
   const isLoggedIn = Boolean(userData);
   const sourcePath = location.pathname || "/";
@@ -209,15 +212,24 @@ const Row = ({
       return false;
     }
   }, []);
-  const shouldRestoreSwipe =
-    location.state?.restoreScroll === true ||
-    navActionType === "POP" ||
-    isReloadEntry;
+  const isDetailRoute = location.pathname.startsWith("/detail/");
+  const hasRestoreEntry = isDetailRoute
+    ? isReloadEntry
+    : location.state?.restoreScroll === true ||
+      navActionType === "POP" ||
+      isReloadEntry;
   const restoreSwipeState = useMemo(() => {
-    if (!shouldRestoreSwipe) return normalizeSwipeState(0);
+    if (!hasRestoreEntry) return normalizeSwipeState(0);
     const map = loadSwipeMap();
     return normalizeSwipeState(map[swipeStoreKey]);
-  }, [shouldRestoreSwipe, swipeStoreKey]);
+  }, [hasRestoreEntry, swipeStoreKey]);
+  const shouldRestoreSwipe =
+    hasRestoreEntry &&
+    (restoreSwipeState.activeIndex > 0 ||
+      (Number.isFinite(restoreSwipeState.translate) &&
+        Math.abs(Number(restoreSwipeState.translate)) > 2) ||
+      (Number.isFinite(restoreSwipeState.progress) &&
+        Number(restoreSwipeState.progress) > 0.01));
 
   /* -----------------------------
      레이아웃 감지
@@ -440,8 +452,13 @@ const Row = ({
       }
 
       const typeGuess = navType || movie?.media_type || "movie";
-      navigate(`/detail/${typeGuess}/${movie.id}`, { replace: true });
-      // window.scrollTo({ top: 0, behavior: "smooth" });
+        navigate(`/detail/${typeGuess}/${movie.id}`, {
+        replace: true,
+        state: {
+          from: location.pathname + location.search,
+          scrollY: window.scrollY || 0,
+        },
+      });
       return;
     }
 
@@ -458,28 +475,36 @@ const Row = ({
   };
 
   const syncNav = useCallback(
-    (swiper) => {
-      const nextState = {
-        isBeginning: swiper.isBeginning,
-        isEnd: swiper.isEnd,
-      };
+  (swiper) => {
+    const nextState = {
+      isBeginning: swiper.isBeginning,
+      isEnd: swiper.isEnd,
+    };
+    const prevState = navStateRef.current;
 
+    if (
+      prevState.isBeginning !== nextState.isBeginning ||
+      prevState.isEnd !== nextState.isEnd
+    ) {
+      navStateRef.current = nextState;
       setNavState(nextState);
       onNavStateChange?.(nextState);
+    }
 
-      const activeIndex = Number(swiper?.activeIndex ?? 0);
-      if (Number.isFinite(activeIndex) && activeIndex >= 0) {
-        const map = loadSwipeMap();
-        map[swipeStoreKey] = {
-          activeIndex,
-          translate: Number(swiper?.translate ?? 0),
-          progress: Number(swiper?.progress ?? 0),
-        };
-        saveSwipeMap(map);
-      }
-    },
-    [onNavStateChange, swipeStoreKey]
-  );
+    const activeIndex = Number(swiper?.activeIndex ?? 0);
+
+    if (!isLoading && Number.isFinite(activeIndex) && activeIndex >= 0) {
+      const map = loadSwipeMap();
+      map[swipeStoreKey] = {
+        activeIndex,
+        translate: Number(swiper?.translate ?? 0),
+        progress: Number(swiper?.progress ?? 0),
+      };
+      saveSwipeMap(map);
+    }
+  },
+  [onNavStateChange, swipeStoreKey, isLoading]
+);
 
   const restoreSwipePosition = useCallback(
     (swiper, targetStateRaw) => {
@@ -555,37 +580,37 @@ const Row = ({
      Swiper 초기 동기화
   ----------------------------- */
   useEffect(() => {
-    const swiper = swiperRef.current;
-    if (!swiper) return;
+  const swiper = swiperRef.current;
+  if (!swiper) return;
+  if (isLoading) return;
+  if (hasError) return;
+  if (!limitedMovies.length) return;
 
-    const rafId = requestAnimationFrame(() => {
-      if (!swiper || swiper.destroyed) return;
+  const rafId = requestAnimationFrame(() => {
+    if (!swiper || swiper.destroyed) return;
 
-      swiper.update();
+    swiper.update();
+    if (shouldRestoreSwipe) {
+      restoreSwipePosition(swiper, restoreSwipeState);
+    }
+    syncNav(swiper);
+  });
 
-      if (!didInitRef.current) {
-        didInitRef.current = true;
-        restoreSwipePosition(swiper, restoreSwipeState);
-      }
-
-      syncNav(swiper);
-    });
-
-    return () => cancelAnimationFrame(rafId);
-  }, [
-    limitedMovies.length,
-    id,
-    isLoading,
-    hasError,
-    restoreSwipeState,
-    restoreSwipePosition,
-    syncNav,
-  ]);
+  return () => cancelAnimationFrame(rafId);
+}, [
+  isLoading,
+  hasError,
+  limitedMovies.length,
+  shouldRestoreSwipe,
+  restoreSwipeState,
+  restoreSwipePosition,
+  syncNav,
+]);
 
   /* -----------------------------
      화살표 사용 여부
   ----------------------------- */
-  const useInternalArrows = !isPhoneLayout && !useExternalNav && !isTop10;
+  const useInternalArrows = !isLoading && !isPhoneLayout && !useExternalNav && !isTop10;
   const showLeft = useInternalArrows && !navState.isBeginning;
   const disableRight = useInternalArrows && navState.isEnd;
 
@@ -631,6 +656,11 @@ const Row = ({
     slidesPerView: "auto",
     slidesPerGroupAuto: true,
     threshold: 10,
+    allowTouchMove: !isLoading,
+    simulateTouch: !isLoading,
+    touchStartPreventDefault: false,
+    touchStartForcePreventDefault: false,
+    touchReleaseOnEdges: true,
   };
 
   const top10SwiperProps = {
@@ -638,6 +668,11 @@ const Row = ({
     speed: 700,
     spaceBetween: 12,
     breakpoints: top10Breakpoints,
+    allowTouchMove: !isLoading,
+    simulateTouch: !isLoading,
+    touchStartPreventDefault: false,
+    touchStartForcePreventDefault: false,
+    touchReleaseOnEdges: true,
   };
 
   const handleCardKeyDown = (e, movie) => {
@@ -661,6 +696,7 @@ const Row = ({
         <RowShell
           className="rowShell"
           data-left={showLeft ? "1" : "0"}
+          data-loading={isLoading ? "1" : "0"}
           data-touch={isPhoneLayout ? "1" : "0"}
           data-variant={isTop10 ? "top10" : "default"}
           $isTop10={isTop10}
@@ -709,7 +745,9 @@ const Row = ({
             modules={[A11y]}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
-              syncNav(swiper);
+              if (!isLoading) {
+                syncNav(swiper);
+              }
               onSwiperReady?.(swiper);
             }}
             onSlideChange={syncNav}
@@ -1018,6 +1056,13 @@ const RowShell = styled.div`
   width: 100%;
   overflow: hidden;
   border-radius: 10px;
+
+  &[data-loading="1"] .swiper,
+  &[data-loading="1"] .swiper-wrapper,
+  &[data-loading="1"] .swiper-slide {
+    pointer-events: none;
+    touch-action: pan-y;
+  }
 `;
 
 const SwiperArea = styled.div`

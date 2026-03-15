@@ -246,6 +246,7 @@ export default function HeroSection({ debugState = "success" }) {
       className={`hero ${isDebugLoading ? "hero--debug-loading" : ""} ${
         active === 0 ? "hero--first-slide" : ""
       }`}
+      data-restore-anchor="landing-hero"
     >
       <div className="hero-bg" aria-hidden="true">
         {slides.map((slide, idx) => {
