@@ -1,61 +1,95 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Banner from "../../components/Banner/banner";
-import Row from "../../components/Row";
-import Category from "../../components/category";
 import styled from "styled-components";
 import requests from "../../api/request";
-// import Update from "../../components/Update";
-import Feedback from "../../components/Feedback";
+import Banner from "../../components/Banner/banner";
+import Category from "../../components/category";
 import DemoActionSection from "../../components/DemoAction";
-import { COMMON_DEBUG_STATES, pickDebugStateFromSearchParams } from "../../utils/debugState";
-
-
-const MainPage = () => {
+import Feedback from "../../components/Feedback";
+import Row from "../../components/Row";
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  COMMON_DEBUG_STATES,
+  pickDebugStateFromSearchParams,
+} from "../../utils/debugState";
+export default function MainPage() {
   const [searchParams] = useSearchParams();
   const [showDemoBanner, setShowDemoBanner] = useState(false);
   const shouldShowDemoBannerRef = useRef(false);
-  // 브라우저 sessionStorage/localStorage 접근은 렌더마다 읽지 말고 memo로 한번만
-  const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
+  const { userData } = useAuth();
+
+  const isGuest = useMemo(() => {
+    const guestFlag = localStorage.getItem("isGuest") === "1";
+    const isDemoUser = userData?.email === "demo@disney.dev";
+    return guestFlag && isDemoUser;
+  }, [userData?.email]);
+
+  useEffect(() => {
+    if (userData?.email && userData.email !== "demo@disney.dev") {
+      localStorage.removeItem("isGuest");
+    }
+  }, [userData?.email]);
+
   useEffect(() => {
     const flag = sessionStorage.getItem("demo_banner");
     if (flag === "1") {
       shouldShowDemoBannerRef.current = true;
-      sessionStorage.removeItem("demo_banner"); // 1회만
+      sessionStorage.removeItem("demo_banner");
     }
 
-    if (shouldShowDemoBannerRef.current) {
-      setShowDemoBanner(true);
-      const t = setTimeout(() => setShowDemoBanner(false), 2000);
-      return () => clearTimeout(t);
-    }
+    if (!shouldShowDemoBannerRef.current) return undefined;
+
+    setShowDemoBanner(true);
+    const timer = window.setTimeout(() => setShowDemoBanner(false), 2000);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  // 디테일에서 넘오는 기존 메타데이터 초기화
   useEffect(() => {
     document.title = "Disney+ Renewal";
   }, []);
 
-
-  // 체험용 게스트면 Row를 최소 구성으로 (2개 추천)
   const rows = useMemo(() => {
     if (isGuest) {
       return [
-        { title: "Top Rated", id: "TR", fetchUrl: requests.fetchTopRated, showRank: true },
-        { title: "Trending Now", id: "TN", fetchUrl: requests.fetchTrending },
+        {
+          title: "Top Rated",
+          id: "TR",
+          fetchUrl: requests.fetchTopRated,
+          showRank: true,
+        },
+        {
+          title: "Trending Now",
+          id: "TN",
+          fetchUrl: requests.fetchTrending,
+        },
       ];
     }
 
-  // 일반 로그인(또는 기본)일 때는 기존 그대로
     return [
-      { title: "Top Rated", id: "TR", fetchUrl: requests.fetchTopRated, showRank: true },
-      { title: "Trending Now", id: "TN", fetchUrl: requests.fetchTrending },
-      { title: "Action Movies", id: "AM", fetchUrl: requests.fetchActionMovies },
-      { title: "Comedy Movies", id: "CM", fetchUrl: requests.fetchComedyMovies },
+      {
+        title: "Top Rated",
+        id: "TR",
+        fetchUrl: requests.fetchTopRated,
+        showRank: true,
+      },
+      {
+        title: "Trending Now",
+        id: "TN",
+        fetchUrl: requests.fetchTrending,
+      },
+      {
+        title: "Action Movies",
+        id: "AM",
+        fetchUrl: requests.fetchActionMovies,
+      },
+      {
+        title: "Comedy Movies",
+        id: "CM",
+        fetchUrl: requests.fetchComedyMovies,
+      },
     ];
   }, [isGuest]);
 
-  // 기본 Row 디버그 상태 테스트용: "success" | "loading" | "error" | "empty" | "no-image" | "cdn-fail"
   const rowDebugState = pickDebugStateFromSearchParams(searchParams, "rowDebug", {
     fallback: "success",
     allowed: COMMON_DEBUG_STATES,
@@ -63,9 +97,9 @@ const MainPage = () => {
 
   const bannerDebugRaw = pickDebugStateFromSearchParams(searchParams, "bannerDebug", {
     fallback: "success",
-    // 배너는 URL에서 image-error를 직접 받아 이미지 실패 상태를 테스트할 수 있게 확장
     allowed: [...COMMON_DEBUG_STATES, "image-error"],
   });
+
   const bannerDebugState =
     bannerDebugRaw === "no-image" || bannerDebugRaw === "cdn-fail"
       ? "image-error"
@@ -75,35 +109,41 @@ const MainPage = () => {
     <>
       {showDemoBanner && <DemoBanner onClose={() => setShowDemoBanner(false)} />}
 
-      <Container>
-        <Banner debugState={bannerDebugState} />
+      <Container data-rows-loaded="1">
+        <SectionBlock data-restore-anchor="main-banner">
+          <Banner debugState={bannerDebugState} />
+        </SectionBlock>
 
-        {/* 게스트 전용: 섹션 */}
-        {isGuest && <DemoActionSection />}
+        {isGuest && (
+          <SectionBlock data-restore-anchor="main-demo-action">
+            <DemoActionSection />
+          </SectionBlock>
+        )}
+        {!isGuest && (
+          <SectionBlock data-restore-anchor="main-category">
+            <Category />
+          </SectionBlock>
+        )}
 
-        {/* 게스트는 카테고리 끔 */}
-        {!isGuest && <Category/>}
-
-        {rows.map((r) => (
-          <Row
-            key={r.id}
-            title={r.title}
-            id={r.id}
-            fetchUrl={r.fetchUrl}
-            showRank={r.showRank}
-            debugState={rowDebugState}
-          />
+        {rows.map((row) => (
+          <SectionBlock key={row.id} data-restore-anchor={`row-${row.id}`}>
+            <Row
+              title={row.title}
+              id={row.id}
+              fetchUrl={row.fetchUrl}
+              showRank={row.showRank}
+              debugState={rowDebugState}
+            />
+          </SectionBlock>
         ))}
 
-        {/* 피드백 유도(원하면 게스트는 내부에서 제한/로그인 유도) */}
-        <Feedback variant="teaser" isGuest={isGuest} />
-        
+        <SectionBlock data-restore-anchor="main-feedback">
+          <Feedback variant="teaser" isGuest={isGuest} />
+        </SectionBlock>
       </Container>
     </>
   );
-};
-
-export default MainPage;
+}
 
 const Container = styled.main`
   position: relative;
@@ -113,6 +153,8 @@ const Container = styled.main`
   padding: 72px calc(3.5vw + 5px) 0;
 `;
 
+const SectionBlock = styled.section``;
+
 const DemoBanner = ({ onClose }) => {
   return (
     <DemoWrap role="status" aria-live="polite">
@@ -120,11 +162,11 @@ const DemoBanner = ({ onClose }) => {
         <Dot />
         <TextBlock>
           <DemoTitle>체험 계정으로 로그인 중</DemoTitle>
-          <DemoDesc>일부 기능은 제한될 수 있어요.</DemoDesc>
+          <DemoDesc>일부 기능은 제한된 상태로 제공됩니다.</DemoDesc>
         </TextBlock>
 
         <CloseBtn type="button" onClick={onClose} aria-label="배너 닫기">
-          ✕
+          ×
         </CloseBtn>
       </DemoInner>
     </DemoWrap>
@@ -147,15 +189,12 @@ const DemoInner = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-
-  padding: 12px 12px;
+  padding: 12px;
   border-radius: 14px;
-
   background: rgba(12, 14, 22, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
 `;
 

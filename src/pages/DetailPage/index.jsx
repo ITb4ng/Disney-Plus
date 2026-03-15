@@ -1,16 +1,28 @@
-import React, { useEffect, useMemo, useState,useCallback } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState,useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import requests from "../../api/request";
 import Row from "../../components/Row";
 import { tmdbImg, pickHeroSize } from "../../utils/tmdbImage";
+import { getAppScrollY } from "../../utils/scrollPosition";
 
 import { useDetailPageData } from "./useDetailPageData";
 import DetailStateView from "./DetailStateView";
 import { normalizeDebugState } from "../../utils/debugState";
 
 import "./DetailPage.css";
+const INITIAL_PATHNAME =
+  typeof window !== "undefined" ? window.location.pathname : "";
+const INITIAL_NAVIGATION_TYPE = (() => {
+  if (typeof window === "undefined") return "navigate";
+
+  try {
+    return window.performance?.getEntriesByType?.("navigation")?.[0]?.type || "navigate";
+  } catch {
+    return "navigate";
+  }
+})();
 
 const FALLBACK = "정보 없음";
 
@@ -22,8 +34,17 @@ export default function DetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { type, movieId } = useParams();
+  const shouldPreserveInitialReloadScroll = useMemo(() => {
+    if (!location.pathname.startsWith("/detail/")) return false;
+    if (location.pathname !== INITIAL_PATHNAME) return false;
+
+    return INITIAL_NAVIGATION_TYPE === "reload" || INITIAL_NAVIGATION_TYPE === "navigate";
+  }, [location.pathname]);
   const from = location.state?.from;
-  const restoreScrollY = location.state?.scrollY;
+  const returnScrollY =
+    typeof location.state?.scrollY === "number"
+      ? location.state.scrollY
+      : location.state?.restoreScrollY;
   const detailDebugStateFromQuery = normalizeDebugState(
     searchParams.get("detailDebugState"),
     ["no-image", "cdn-fail"],
@@ -34,6 +55,28 @@ export default function DetailPage() {
     detailDebugState === "no-image" || detailDebugState === "cdn-fail";
 
   // 상태 처리
+  useLayoutEffect(() => {
+    if (shouldPreserveInitialReloadScroll) {
+      return undefined;
+    }
+
+    const layout = document.querySelector(".layout");
+    const scrollLayoutToTop = () => {
+      if (!layout) return;
+      const oy = window.getComputedStyle(layout).overflowY;
+      if (oy && oy !== "visible") {
+        layout.scrollTop = 0;
+      }
+    };
+
+    scrollLayoutToTop();
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => {
+      scrollLayoutToTop();
+      window.scrollTo(0, 0);
+    });
+  }, [movieId, shouldPreserveInitialReloadScroll, type]);
+
   const { pageStatus, data, errorMessage, retryKey, retry } = useDetailPageData(
     type,
     movieId
@@ -156,15 +199,17 @@ export default function DetailPage() {
   const [vignette, setVignette] = useState(0);
 
   useEffect(() => {
+    const scrollTarget = document.querySelector(".layout") || window;
+
     const onScroll = () => {
-      const y = window.scrollY || 0;
+      const y = getAppScrollY();
       const next = Math.min(1, y / 300);
       setVignette(next);
     };
 
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+    return () => scrollTarget.removeEventListener("scroll", onScroll);
   }, []);
 
   /* -------------------------
@@ -278,8 +323,8 @@ export default function DetailPage() {
   const handleBack = () => {
     if (from) {
       const nextState = { restoreScroll: true };
-      if (typeof restoreScrollY === "number") {
-        nextState.restoreScrollY = restoreScrollY;
+      if (typeof returnScrollY === "number") {
+        nextState.restoreScrollY = returnScrollY;
       }
       return navigate(from, { replace: true, state: nextState });
     }
@@ -300,8 +345,19 @@ export default function DetailPage() {
     navigate("/search", { replace: true });
   };
 
+  const scrollDetailViewportToTop = useCallback(() => {
+    const layout = document.querySelector(".layout");
+    if (layout) {
+      const overflowY = window.getComputedStyle(layout).overflowY;
+      if (overflowY && overflowY !== "visible") {
+        layout.scrollTop = 0;
+      }
+    }
+
+    window.scrollTo({ top: 0 });
+  }, []);
+
   const handleRelatedLoaded = useCallback((count) => {
-    console.log("[DetailPage] related loaded count:", count, Date.now());
     setRelatedState((prev) => {
       const nextStatus = count > 0 ? "ready" : "empty";
 
@@ -318,18 +374,18 @@ export default function DetailPage() {
 
   const handleRelatedNavigate = useCallback(
     (movie) => {
+      scrollDetailViewportToTop();
       navigate(`/detail/${type}/${movie.id}`, { replace: true });
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [navigate, type]
+    [navigate, scrollDetailViewportToTop, type]
   );
 
   const handleTopNavigate = useCallback(
     (movie) => {
+      scrollDetailViewportToTop();
       navigate(`/detail/movie/${movie.id}`, { replace: true });
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [navigate]
+    [navigate, scrollDetailViewportToTop]
   );
 
   // Detail 상태 분리 테스트 시 하단 Row도 함께 검증할 수 있도록 상태를 매핑한다.
@@ -407,6 +463,7 @@ export default function DetailPage() {
       <div className="detail">
         <section
           className="detail__hero"
+          data-restore-anchor="detail-hero"
           style={{
             backgroundImage: heroUrl ? `url(${heroUrl})` : "none",
             "--vig": vignette,
@@ -502,7 +559,7 @@ export default function DetailPage() {
         </section>
 
         {trailerKey && (
-          <section className="detail__trailer">
+          <section className="detail__trailer" data-restore-anchor="detail-trailer">
             <div className="detail__sectionInner">
               <h2 className="detail__sectionTitle">Trailer</h2>
               <div className="detail__trailerBox">
@@ -518,7 +575,10 @@ export default function DetailPage() {
           </section>
         )}
 
-        <section className="detail__below detail__below--padded">
+        <section
+          className="detail__below detail__below--padded"
+          data-restore-anchor="detail-row"
+        >
           {!trailerKey && (
             <Row
               title="자주 찾는 콘텐츠"
@@ -526,10 +586,7 @@ export default function DetailPage() {
               query={topQuery}
               mode="navigate"
               navType="movie"
-              onNavigate={(movie) => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                navigate(`/detail/movie/${movie.id}`, { replace: true });
-              }}
+              onNavigate={handleTopNavigate}
             />
           )}
 

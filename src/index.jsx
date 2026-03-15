@@ -10,6 +10,10 @@ import { SearchTransitionProvider } from "./contexts/SearchTransitionContext";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+if ("scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

@@ -1,0 +1,99 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSuper() {
+      return isSignedIn()
+        && request.auth.uid in [
+          "xAoBncJDaUfVvoRWuSzYocD9NiF2"
+        ];
+    }
+
+    function isTrialAccount() {
+      return isSignedIn()
+        && request.auth.token.email == "demo@disney.dev";
+    }
+
+    function isOwner() {
+      return isSignedIn()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    function validFeedbackBody() {
+      return request.resource.data.title is string
+        && request.resource.data.title.size() >= 2
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 5
+        && request.resource.data.message.size() <= 5000;
+    }
+
+    function validFeedbackCreate() {
+      return request.resource.data.keys().hasOnly([
+          "title",
+          "message",
+          "uid",
+          "displayName",
+          "createdAt"
+        ])
+        && request.resource.data.keys().hasAll([
+          "title",
+          "message",
+          "uid",
+          "displayName",
+          "createdAt"
+        ])
+        && validFeedbackBody()
+        && request.resource.data.uid is string
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() >= 1
+        && request.resource.data.displayName.size() <= 40
+        && request.resource.data.createdAt == request.time;
+    }
+
+    function validFeedbackUpdate() {
+      return request.resource.data.keys().hasOnly([
+          "title",
+          "message",
+          "uid",
+          "displayName",
+          "createdAt",
+          "updatedAt"
+        ])
+        && request.resource.data.keys().hasAll([
+          "title",
+          "message",
+          "uid",
+          "displayName",
+          "createdAt",
+          "updatedAt"
+        ])
+        && validFeedbackBody()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.displayName == resource.data.displayName
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /feedback/{docId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && validFeedbackCreate();
+
+      allow update: if
+        (isSuper() || (isOwner() && !isTrialAccount()))
+        && validFeedbackUpdate();
+
+      allow delete: if
+        isSuper()
+        || (isOwner() && !isTrialAccount());
+    }
+  }
+}

@@ -1,53 +1,94 @@
 import { Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import Nav from "./components/Nav";
-import LoginPage from "./pages/LoginPage";
-import MainPage from "./pages/MainPage";
-import DetailPage from "./pages/DetailPage";
-import SearchPage from "./pages/SearchPage";
-import Login from "./pages/Login";
-import Footer from "./pages/LoginPage/sections/Footer/FooterSection";
-import UpdatesPage from "./pages/DemoPage/UpdatePage";
-import FeedbackPage from "./pages/DemoPage/FeedbackPage";
-import FeedbackForm from "./pages/DemoPage/Form/FeedbackForm";
 import ScrollManager from "./components/ScrollManager";
-import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/Common/ProtectedRoute";
 import PublicOnlyRoute from "./components/Common/PublicOnlyRoute";
+import LoginPage from "./pages/LoginPage";
+import Login from "./pages/Login";
+import MainPage from "./pages/MainPage";
+import SearchPage from "./pages/SearchPage";
+import DetailPage from "./pages/DetailPage";
+import FeedbackPage from "./pages/DemoPage/FeedbackPage";
+import FeedbackForm from "./pages/DemoPage/Form/FeedbackForm";
+import Footer from "./pages/LoginPage/sections/Footer/FooterSection";
+import NotFoundPage from "./pages/NotFoundPage";
 import "./styles/badges.css";
-import { useCallback, useEffect, useState } from "react";
 
 const Layout = () => {
-  const { pathname, search } = useLocation();
-  const [footerReady, setFooterReady] = useState(false);
+  const { pathname } = useLocation();
+  const initialRestoreOverlay =
+    window.location.pathname === "/main" ||
+    window.location.pathname.startsWith("/detail/");
+  const [showRestoreOverlay, setShowRestoreOverlay] = useState(initialRestoreOverlay);
+  const overlayLockRef = useRef(initialRestoreOverlay);
+  const overlayPendingCompleteRef = useRef(false);
 
   const isLoginRoute = pathname.startsWith("/login");
   const isSearchRoute = pathname.startsWith("/search");
   const isFeedbackRoute = pathname.startsWith("/feedback");
-  const isUpdatesRoute = pathname.startsWith("/updates");
 
   const hideNav = isLoginRoute;
   const hideFooter =
-    isLoginRoute || isSearchRoute || isFeedbackRoute || isUpdatesRoute;
+    isLoginRoute || isSearchRoute || isFeedbackRoute;
+  const isMainRoute = pathname === "/main";
+  const isDetailRoute = pathname.startsWith("/detail/");
+  const usesRestoreOverlay = isMainRoute || isDetailRoute;
+  const handleRestoreComplete = useCallback(() => {
+    if (overlayLockRef.current) {
+      overlayPendingCompleteRef.current = true;
+      return;
+    }
+
+    setShowRestoreOverlay(false);
+  }, []);
 
   useEffect(() => {
-    setFooterReady(false);
+    if (hideFooter || !usesRestoreOverlay) {
+      overlayLockRef.current = false;
+      overlayPendingCompleteRef.current = false;
+      setShowRestoreOverlay(false);
+      return undefined;
+    }
 
-    // 안전장치: 복원 콜백이 늦어져도 footer가 영구 미표시되지 않도록 보장
-    const t = setTimeout(() => setFooterReady(true), 900);
-    return () => clearTimeout(t);
-  }, [pathname, search]);
+    if (!overlayLockRef.current) {
+      return undefined;
+    }
 
-  const handleRestoreComplete = useCallback(() => {
-    setFooterReady(true);
-  }, []);
+    const timer = window.setTimeout(() => {
+      overlayLockRef.current = false;
+      if (overlayPendingCompleteRef.current) {
+        overlayPendingCompleteRef.current = false;
+        setShowRestoreOverlay(false);
+      }
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [hideFooter, usesRestoreOverlay]);
 
   return (
     <div className="layout">
       {!hideNav && <Nav />}
       <ScrollManager onRestoreComplete={handleRestoreComplete} />
       <Outlet />
-      {!hideFooter && footerReady && <Footer />}
+      {!hideFooter && (
+        <div className="layout-footer">
+          <Footer />
+        </div>
+      )}
+      {usesRestoreOverlay && (
+        <div
+          className={
+            showRestoreOverlay
+              ? "layout-restore-overlay"
+              : "layout-restore-overlay layout-restore-overlay-hidden"
+          }
+          aria-hidden={showRestoreOverlay ? "true" : undefined}
+        >
+          <div className="layout-restore-spinner" />
+        </div>
+      )}
     </div>
   );
 };
@@ -62,15 +103,16 @@ function App() {
 
     const apply = () => {
       if (!nav) {
-        document.documentElement.style.setProperty("--nav-h", `0px`);
+        document.documentElement.style.setProperty("--nav-h", "0px");
         return;
       }
+
       const h = nav.getBoundingClientRect().height;
       document.documentElement.style.setProperty("--nav-h", `${Math.ceil(h)}px`);
     };
 
     apply();
-    if (!nav) return;
+    if (!nav) return undefined;
 
     const ro = new ResizeObserver(apply);
     ro.observe(nav);
@@ -88,35 +130,29 @@ function App() {
         className="app-bg"
         aria-hidden="true"
         style={{
-          backgroundImage: `url(${process.env.PUBLIC_URL}/images/home-background.png)`,
+          backgroundImage: "none",
         }}
       />
 
       <Routes>
         <Route element={<Layout />}>
-          {/* 공개 라우트 */}
           <Route path="/" element={<LoginPage />} />
 
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<Login />} />
           </Route>
 
-          {/* 보호 라우트 */}
           <Route element={<ProtectedRoute />}>
             <Route path="main" element={<MainPage />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="detail/:type/:movieId" element={<DetailPage />} />
-            <Route path="updates" element={<UpdatesPage />} />
             <Route path="feedback" element={<FeedbackPage />} />
             <Route path="feedback/new" element={<FeedbackForm />} />
             <Route path="feedback/:id/edit" element={<FeedbackForm mode="edit" />} />
           </Route>
 
-          {/* 잘못된 detail 접근 */}
           <Route path="/detail" element={<NotFoundPage />} />
           <Route path="/detail/*" element={<NotFoundPage />} />
-
-          {/* 전체 fallback */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

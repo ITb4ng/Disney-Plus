@@ -1,6 +1,6 @@
 import "./Footer.css";
 import { footerColumns, footerSns, footerLegal, languages } from "./FooterData";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TfiAngleDown } from "react-icons/tfi";
 import { AiOutlineGlobal } from "react-icons/ai";
 import {
@@ -13,46 +13,53 @@ import {
   FaEnvelope,
   FaBriefcase,
 } from "react-icons/fa6";
+import { getAppScrollY } from "../../../../utils/scrollPosition";
 
-function renderLinks(links) {
-  return links.map((l) => {
-    if (l.type === "disabled") {
-      return (
-        <li key={l.label}>
-          <span className="footer-link footer-link-disabled">{l.label}</span>
-        </li>
-      );
-    }
+function FooterNavLink({ link, location }) {
+  const navigate = useNavigate();
 
-    return (
-      <li key={l.label}>
-        <a
-          className="footer-link"
-          href={l.href}
-          target={l.type === "external" ? "_blank" : undefined}
-          rel={l.type === "external" ? "noreferrer" : undefined}
-        >
-          {l.label}
-        </a>
-      </li>
-    );
-  });
+  if (link.type === "disabled") {
+    return <span className="footer-link footer-link-disabled">{link.label}</span>;
+  }
+
+  return (
+    <button
+      type="button"
+      className="footer-link"
+      onClick={() =>
+        navigate(link.to || "/not-found", {
+          state: {
+            from: location.pathname + location.search,
+            scrollY: getAppScrollY(),
+          },
+        })
+      }
+    >
+      {link.label}
+    </button>
+  );
 }
 
-function FooterCol({ title, links, isFirst }) {
+function renderLinks(links, location) {
+  return links.map((link) => (
+    <li key={link.label}>
+      <FooterNavLink link={link} location={location} />
+    </li>
+  ));
+}
+
+function FooterCol({ title, links, isFirst, location }) {
   return (
     <div className="footer-col">
-      {/* 데스크탑 */}
       <div className="footer-col-desktop">
         <h6 className="footer-col-title">{title}</h6>
-        <ul className="footer-col-list">{renderLinks(links)}</ul>
+        <ul className="footer-col-list">{renderLinks(links, location)}</ul>
       </div>
 
-       {/* 모바일 */}
-       {isFirst ? (
+      {isFirst ? (
         <div className="footer-col-mobile footer-col-mobile-static">
           <h6 className="footer-col-title">{title}</h6>
-          <ul className="footer-col-list">{renderLinks(links)}</ul>
+          <ul className="footer-col-list">{renderLinks(links, location)}</ul>
         </div>
       ) : (
         <details className="footer-col-mobile footer-col-mobile-accordion">
@@ -62,8 +69,7 @@ function FooterCol({ title, links, isFirst }) {
               <TfiAngleDown />
             </span>
           </summary>
-
-          <ul className="footer-col-list">{renderLinks(links)}</ul>
+          <ul className="footer-col-list">{renderLinks(links, location)}</ul>
         </details>
       )}
     </div>
@@ -72,23 +78,31 @@ function FooterCol({ title, links, isFirst }) {
 
 export default function FooterSection() {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+
   const getLegalIcon = (label) => {
-  const key = label.toLowerCase();
+    const key = label.toLowerCase();
     if (key.includes("github")) return <FaGithub aria-hidden="true" />;
-    if (key.includes("email") || key.includes("mail")) return <FaEnvelope aria-hidden="true" />;
+    if (key.includes("email") || key.includes("mail")) {
+      return <FaEnvelope aria-hidden="true" />;
+    }
     if (key.includes("portfolio")) return <FaBriefcase aria-hidden="true" />;
     if (key.includes("x") || key.includes("twitter")) return <FaXTwitter />;
     if (key.includes("instagram")) return <FaInstagram />;
     if (key.includes("facebook")) return <FaFacebookF />;
     if (key.includes("youtube")) return <FaYoutube />;
     if (key.includes("tiktok")) return <FaTiktok />;
-  return null;
-};
+    return null;
+  };
+
   return (
-    <footer className="footer" data-testid="disneyplus-footer">
+    <footer
+      className="footer"
+      data-testid="disneyplus-footer"
+      data-restore-anchor="app-footer"
+    >
       <div className="footer-inner">
         <section className="footer-block">
-          {/* 1) language row */}
           <div className="footer-row footer-row-lang">
             <div className="footer-lang">
               <label className="footer-lang-label" htmlFor="language-selector">
@@ -96,9 +110,9 @@ export default function FooterSection() {
               </label>
 
               <select id="language-selector" className="footer-lang-select" defaultValue="ko-kr">
-                {languages.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
+                {languages.map((language) => (
+                  <option key={language.value} value={language.value}>
+                    {language.label}
                   </option>
                 ))}
               </select>
@@ -112,35 +126,38 @@ export default function FooterSection() {
             </div>
           </div>
 
-          {/* 2) menu row (4 columns) */}
           <div className="footer-row footer-row-menu">
             <div className="footer-cols">
-              {footerColumns.map((c, idx) => (
-                <FooterCol key={c.title} title={c.title} links={c.links} isFirst={idx === 0} />
+              {footerColumns.map((column, index) => (
+                <FooterCol
+                  key={column.title}
+                  title={column.title}
+                  links={column.links}
+                  isFirst={index === 0}
+                  location={location}
+                />
               ))}
             </div>
           </div>
 
-          {/* 3) sns row */}
-         <div className="footer-row footer-row-sns">
-          <ul className="footer-sns">
-            {footerSns.map((s) => (
-              <li key={s.label}>
-                <a
-                  className="footer-sns-link"
-                  href={s.href}
-                  target={s.external ? "_blank" : undefined}
-                  rel={s.external ? "noreferrer" : undefined}
-                  aria-label={s.label}
-                >
-                  {getLegalIcon(s.label)}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="footer-row footer-row-sns">
+            <ul className="footer-sns">
+              {footerSns.map((item) => (
+                <li key={item.label}>
+                  <a
+                    className="footer-sns-link"
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noreferrer" : undefined}
+                    aria-label={item.label}
+                  >
+                    {getLegalIcon(item.label)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          {/* 4) logo row */}
           <div className="footer-row footer-row-logo">
             <div className="footer-logo">
               <Link to="/" className="footer-logo-link" aria-label="홈으로 이동">
@@ -155,39 +172,36 @@ export default function FooterSection() {
             </div>
           </div>
 
-          {/* 5) legal row */}
           <div className="footer-row footer-row-legal">
             <ul className="footer-legal footer-legal-icons">
-              {footerLegal.map((item, idx) => {
+              {footerLegal.map((item, index) => {
                 if (item.type === "links") {
                   return (
-                    <li key={idx} className="footer-legal-icon-group">
-                      {item.value.map((l) => {
-                        const isDisabled = l.type === "disabled";
-
-                        if (isDisabled) {
+                    <li key={index} className="footer-legal-icon-group">
+                      {item.value.map((link) => {
+                        if (link.type === "disabled") {
                           return (
                             <span
-                              key={l.label}
+                              key={link.label}
                               className="footer-legal-icon-link is-disabled"
-                              aria-label={l.label}
+                              aria-label={link.label}
                               aria-disabled="true"
                             >
-                              {getLegalIcon(l.label)}
+                              {getLegalIcon(link.label)}
                             </span>
                           );
                         }
 
                         return (
                           <a
-                            key={l.label}
+                            key={link.label}
                             className="footer-legal-icon-link"
-                            href={l.href}
-                            target={l.external ? "_blank" : undefined}
-                            rel={l.external ? "noreferrer" : undefined}
-                            aria-label={l.label}
+                            href={link.href}
+                            target={link.external ? "_blank" : undefined}
+                            rel={link.external ? "noreferrer" : undefined}
+                            aria-label={link.label}
                           >
-                            {getLegalIcon(l.label)}
+                            {getLegalIcon(link.label)}
                           </a>
                         );
                       })}
@@ -196,7 +210,7 @@ export default function FooterSection() {
                 }
 
                 return (
-                  <li key={idx}>
+                  <li key={index}>
                     <span>{item.value.replace("{{year}}", String(currentYear))}</span>
                   </li>
                 );

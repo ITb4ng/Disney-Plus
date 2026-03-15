@@ -1,4 +1,10 @@
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
@@ -60,129 +66,127 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(false);
+  
+const redirectedRef = useRef(false);
 
-  const handleLoginSuccess = useCallback(() => {
-    // Top10Row 모달에서 "콘텐츠 보러가기" 누르고 온 경우
-    if (
-      loginState?.intent === "detail" &&
-      loginState?.detailId &&
-      loginState?.detailType
-    ) {
-      navigate(`/detail/${loginState.detailType}/${loginState.detailId}`, {
-        replace: true,
-        state: {
-          from: loginState.from || "/",
-          teaserSource: loginState.teaserSource,
-          preloadedTitle: loginState.detailTitle,
-          preloadedBackdrop: loginState.detailBackdrop,
-          preloadedPoster: loginState.detailPoster,
-          scrollY:
-            typeof loginState.scrollY === "number" ? loginState.scrollY : 0,
-        },
-      });
-      return;
-    }
+const handleLoginSuccess = useCallback(() => {
+  if (redirectedRef.current) return;
+  redirectedRef.current = true;
 
-    navigate("/main", { replace: true });
-  }, [loginState, navigate]);
+  if (
+    loginState?.intent === "detail" &&
+    loginState?.detailId &&
+    loginState?.detailType
+  ) {
+    navigate(`/detail/${loginState.detailType}/${loginState.detailId}`, {
+      replace: true,
+      state: {
+        from: loginState.from || "/",
+        teaserSource: loginState.teaserSource,
+        preloadedTitle: loginState.detailTitle,
+        preloadedBackdrop: loginState.detailBackdrop,
+        preloadedPoster: loginState.detailPoster,
+        scrollY:
+          typeof loginState.scrollY === "number" ? loginState.scrollY : 0,
+      },
+    });
+    return;
+  }
 
-  const onEmailLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+  navigate("/main", { replace: true });
+}, [loginState, navigate]);
 
-    const eMail = email.trim();
 
-    if (!eMail || !password) {
-      setError("아이디와 비밀번호를 입력해주세요.");
-      return;
-    }
 
-    try {
-      setPending(true);
-      localStorage.removeItem("isGuest");
-      sessionStorage.removeItem("demo_banner");
 
-      await setPersistence(
-        auth,
-        remember ? browserLocalPersistence : browserSessionPersistence
-      );
+  
+const onEmailLogin = async (e) => {
+  e.preventDefault();
+  setError("");
 
-      await signInWithEmailAndPassword(auth, eMail, password);
+  const eMail = email.trim();
 
-      setFadeOut(true);
-      setTimeout(() => {
-        handleLoginSuccess();
-      }, 250);
-    } catch (err) {
-      console.log(err);
-      setError("로그인에 실패했습니다. 계정 정보를 확인해주세요.");
-    } finally {
-      setPending(false);
-    }
-  };
+  if (!eMail || !password) {
+    setError("아이디와 비밀번호를 입력해주세요.");
+    return;
+  }
 
-  const onGoogleLogin = async () => {
-    setError("");
+  try {
+    setPending(true);
+    localStorage.removeItem("isGuest");
+    sessionStorage.removeItem("demo_banner");
 
-    try {
-      setPending(true);
-      localStorage.removeItem("isGuest");
-      sessionStorage.removeItem("demo_banner");
+    await setPersistence(
+      auth,
+      remember ? browserLocalPersistence : browserSessionPersistence
+    );
 
-      await setPersistence(
-        auth,
-        remember ? browserLocalPersistence : browserSessionPersistence
-      );
+    await signInWithEmailAndPassword(auth, eMail, password);
 
-      await signInWithPopup(auth, provider);
+    setFadeOut(true);
+  } catch (err) {
+    console.error(err);
+    setError("로그인에 실패했습니다. 계정 정보를 확인해주세요.");
+  } finally {
+    setPending(false);
+  }
+};
 
-      setFadeOut(true);
-      setTimeout(() => {
-        handleLoginSuccess();
-      }, 250);
-    } catch (err) {
-      console.log(err);
-      setError("구글 로그인에 실패했습니다.");
-    } finally {
-      setPending(false);
-    }
-  };
+const onGoogleLogin = async () => {
+  setError("");
 
-  const onDemoLogin = async () => {
-    setError("");
+  try {
+    setPending(true);
+    localStorage.removeItem("isGuest");
+    sessionStorage.removeItem("demo_banner");
 
-    try {
-      setPending(true);
-      localStorage.setItem("isGuest", "1");
-      sessionStorage.setItem("demo_banner", "1");
+    await setPersistence(
+      auth,
+      remember ? browserLocalPersistence : browserSessionPersistence
+    );
 
-      await setPersistence(
-        auth,
-        remember ? browserLocalPersistence : browserSessionPersistence
-      );
+    await signInWithPopup(auth, provider);
 
-      await signInWithEmailAndPassword(auth, "demo@disney.dev", "12345678");
+    setFadeOut(true);
+  } catch (err) {
+    console.error(err);
+    setError("구글 로그인에 실패했습니다.");
+  } finally {
+    setPending(false);
+  }
+};
 
-      setFadeOut(true);
-      setTimeout(() => {
-        handleLoginSuccess();
-      }, 250);
-    } catch (err) {
-      console.log(err);
-      localStorage.removeItem("isGuest");
-      sessionStorage.removeItem("demo_banner");
-      setError("체험 계정 로그인에 실패했습니다.");
-    } finally {
-      setPending(false);
-    }
-  };
+const onDemoLogin = async () => {
+  setError("");
 
-  useEffect(() => {
-    if (!authLoading && userData) {
-      handleLoginSuccess();
-    }
-  }, [authLoading, userData, handleLoginSuccess]);
+  try {
+    setPending(true);
+    localStorage.setItem("isGuest", "1");
+    sessionStorage.setItem("demo_banner", "1");
 
+    await setPersistence(
+      auth,
+      remember ? browserLocalPersistence : browserSessionPersistence
+    );
+
+    await signInWithEmailAndPassword(auth, "demo@disney.dev", "12345678");
+
+    setFadeOut(true);
+  } catch (err) {
+    console.error(err);
+    localStorage.removeItem("isGuest");
+    sessionStorage.removeItem("demo_banner");
+    setError("체험 계정 로그인에 실패했습니다.");
+  } finally {
+    setPending(false);
+  }
+};
+
+useEffect(() => {
+  if (!authLoading && userData) {
+    handleLoginSuccess();
+  }
+}, [authLoading, userData, handleLoginSuccess]);
   return (
     <Wrap $fade={fadeOut}>
       <Card>

@@ -95,6 +95,21 @@ window.addEventListener("scroll", handleScroll, { passive: true });
   }, []);
 
   useEffect(() => {
+    const scrollTarget = document.querySelector(".layout");
+    if (!scrollTarget) return undefined;
+
+    const syncLayoutScroll = () => {
+      const y = getAppScrollY();
+      const next = Math.min(1, y / 300);
+      setNavOpacity(next);
+    };
+
+    syncLayoutScroll();
+    scrollTarget.addEventListener("scroll", syncLayoutScroll, { passive: true });
+    return () => scrollTarget.removeEventListener("scroll", syncLayoutScroll);
+  }, []);
+
+  useEffect(() => {
     const isSearchRoute = pathname.startsWith("/search");
     const shouldDropIn =
       isSearchRoute &&
@@ -136,7 +151,7 @@ window.addEventListener("scroll", handleScroll, { passive: true });
       closeProfile();
       navigate("/", { replace: true });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

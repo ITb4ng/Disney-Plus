@@ -11,7 +11,6 @@ export default function ProtectedRoute() {
   }
 
   const isAuthenticated = !!userData;
-
   if (!isAuthenticated) {
     return (
       <Navigate

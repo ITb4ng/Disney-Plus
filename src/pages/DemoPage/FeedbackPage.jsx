@@ -20,8 +20,9 @@ const FeedbackPage = () => {
   const nav = useNavigate();
   const location = useLocation();
   const auth = useMemo(() => getAuth(), []);
-  const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
   const meUid = auth.currentUser?.uid ?? null;
+  const meEmail = auth.currentUser?.email ?? null;
+  const isGuest = useMemo(() => meEmail === "demo@disney.dev", [meEmail]);
   const from = location.state?.from || "/main";
   const fromScrollY = location.state?.scrollY;
 

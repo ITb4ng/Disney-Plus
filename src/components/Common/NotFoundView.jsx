@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./NotFoundView.css";
 
 export default function NotFoundView({
@@ -10,6 +10,25 @@ export default function NotFoundView({
   backLabel = "뒤로가기",
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBack = () => {
+    const from = location.state?.from;
+    const scrollY = location.state?.scrollY;
+
+    if (from) {
+      navigate(from, {
+        replace: true,
+        state:
+          typeof scrollY === "number"
+            ? { restoreScroll: true, restoreScrollY: scrollY }
+            : undefined,
+      });
+      return;
+    }
+
+    navigate(-1);
+  };
 
   return (
     <section className="notfound">
@@ -31,7 +50,7 @@ export default function NotFoundView({
             <button
               type="button"
               className="notfound__btn notfound__btn--ghost"
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
             >
               {backLabel}
             </button>

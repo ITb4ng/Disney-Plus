@@ -87,6 +87,7 @@ export default function Top10Section({ id, userData, debugState }) {
     <section
       id={id}
       className={`top10Section ${isStateLayout ? "top10Section--state" : ""}`}
+      data-restore-anchor="landing-top10"
     >
       <div className="top10TitleWrap">
         <h2>오늘의 추천 TOP 10</h2>

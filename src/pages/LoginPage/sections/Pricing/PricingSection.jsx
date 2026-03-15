@@ -185,7 +185,12 @@ export default function PricingSection() {
   };
 
   return (
-    <section ref={sectionRef} className="pricing-section" id="pricing">
+    <section
+      ref={sectionRef}
+      className="pricing-section"
+      id="pricing"
+      data-restore-anchor="landing-pricing"
+    >
       <div className="pricing-inner">
         <header className="pricing-header">
           <h2 className="pricing-title">원하는 멤버십을 선택하세요.</h2>

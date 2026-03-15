@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { fetchBannerNowPlaying } from "../../api/bannerQueries";
+import { getAppScrollY } from "../../utils/scrollPosition";
 import "./Banner.css";
 
 /* =========================
@@ -208,6 +209,7 @@ const Banner = ({ debugState: debugStateProp = null }) => {
 
   const bannerRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isDimmed, setIsDimmed] = useState(false);
   const [isImageError, setIsImageError] = useState(false);
@@ -255,7 +257,12 @@ const Banner = ({ debugState: debugStateProp = null }) => {
   const goDetail = () => {
     if (!resolvedMovie?.id) return;
     const type = resolvedMovie?.media_type || "movie";
-    navigate(`/detail/${type}/${resolvedMovie.id}`);
+    navigate(`/detail/${type}/${resolvedMovie.id}`, {
+      state: {
+        from: location.pathname + location.search,
+        scrollY: getAppScrollY(),
+      },
+    });
   };
 
   /* =========================
@@ -270,12 +277,15 @@ const Banner = ({ debugState: debugStateProp = null }) => {
     }
 
     const navEl = document.querySelector(".app-nav");
+    const scrollTarget = document.querySelector(".layout") || window;
+    let rafId = 0;
 
-    const handleScroll = () => {
+    const updateBannerState = () => {
+      rafId = 0;
       if (!bannerRef.current) return;
 
       const rect = bannerRef.current.getBoundingClientRect();
-      const pageScroll = window.scrollY || 0;
+      const pageScroll = getAppScrollY();
       const isMobile = window.innerWidth <= 767;
 
       const nextParallaxOffset = isMobile
@@ -283,24 +293,36 @@ const Banner = ({ debugState: debugStateProp = null }) => {
         : Math.min(Math.max(-rect.top / 10, 0), 28);
 
       const nextOverlayStrength = Math.min(pageScroll / 220, 1);
-
-      setParallaxOffset(nextParallaxOffset);
-      setOverlayStrength(nextOverlayStrength);
+      setParallaxOffset((prev) =>
+        Math.abs(prev - nextParallaxOffset) > 0.5 ? nextParallaxOffset : prev
+      );
+      setOverlayStrength((prev) =>
+        Math.abs(prev - nextOverlayStrength) > 0.02 ? nextOverlayStrength : prev
+      );
 
       if (navEl) {
         const navRect = navEl.getBoundingClientRect();
         const overlapPx = Math.max(0, navRect.bottom - rect.top);
-        setIsDimmed(overlapPx > navRect.height);
+        const nextIsDimmed = overlapPx > navRect.height;
+        setIsDimmed((prev) => (prev !== nextIsDimmed ? nextIsDimmed : prev));
       }
     };
 
-    handleScroll();
+    const handleScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(updateBannerState);
+    };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    updateBannerState();
+
+    scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+      scrollTarget.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
   }, [bannerStatus, resolvedMovie?.id]);

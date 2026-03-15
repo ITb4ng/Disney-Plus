@@ -22,7 +22,8 @@ const FeedbackForm = ({ mode = "create" }) => {
   const meUid = auth.currentUser?.uid ?? null;
 
   // ✅ localStorage는 1회 읽기(현재 동작 유지)
-  const isGuest = useMemo(() => localStorage.getItem("isGuest") === "1", []);
+  const meEmail = auth.currentUser?.email ?? null;
+  const isGuest = useMemo(() => meEmail === "demo@disney.dev", [meEmail]);
   const isSuper = useMemo(
     () => (meUid ? SUPER_UIDS.includes(meUid) : false),
     [meUid]
