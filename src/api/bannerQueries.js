@@ -2,7 +2,7 @@ import tmdbAxios from "./tmdbaxios";
 // import requests from "./request";
 
 export async function fetchBannerNowPlaying() {
-  const seedId = 93405; //66732, 71446, 93405, 94605 , 110316 , 214582, 194797 ,119769, 982843(movie)
+  const seedId = 194797; //66732, 71446, 93405, 94605 , 110316 , 214582, 194797 ,119769, 982843(movie)
 
   // 1️⃣ seed 기반 추천 목록
   const res = await tmdbAxios.get("", {

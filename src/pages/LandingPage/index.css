@@ -1,0 +1,68 @@
+/* LandingPage */
+
+.landing-page {
+  --landing-desktop-gutter: 24px;
+  --landing-laptop-gutter: 20px;
+  --landing-tablet-gutter: 18px;
+  --landing-mobile-gutter: 16px;
+
+  --landing-desktop-section-space: 72px;
+  --landing-laptop-section-space: 68px;
+  --landing-tablet-section-space: 64px;
+  --landing-mobile-section-space: 48px;
+
+  --landing-desktop-title-size: 44px;
+  --landing-tablet-title-size: 34px;
+  --landing-mobile-title-size: 28px;
+
+  --landing-desktop-title-line: 1.15;
+  --landing-tablet-title-line: 1.12;
+  --landing-mobile-title-line: 1.16;
+
+  --landing-desktop-title-gap: 28px;
+  --landing-laptop-title-gap: 24px;
+  --landing-tablet-title-gap: 22px;
+  --landing-mobile-title-gap: 16px;
+
+  --landing-desktop-body-size: 16px;
+  --landing-laptop-body-size: 15px;
+  --landing-tablet-body-size: 14px;
+  --landing-mobile-body-size: 13px;
+
+  --landing-desktop-body-line: 1.65;
+  --landing-laptop-body-line: 1.62;
+  --landing-tablet-body-line: 1.6;
+  --landing-mobile-body-line: 1.6;
+
+  --landing-desktop-sub-size: 14px;
+  --landing-tablet-sub-size: 13px;
+  --landing-mobile-sub-size: 12px;
+
+  --landing-desktop-sub-line: 1.6;
+  --landing-tablet-sub-line: 1.55;
+  --landing-mobile-sub-line: 1.55;
+
+  --landing-desktop-footnote-size: 12px;
+  --landing-tablet-footnote-size: 12px;
+  --landing-mobile-footnote-size: 11px;
+
+  --landing-desktop-footnote-line: 1.75;
+  --landing-laptop-footnote-line: 1.72;
+  --landing-tablet-footnote-line: 1.7;
+  --landing-mobile-footnote-line: 1.7;
+
+  --landing-section-title-desktop-size: 44px;
+  --landing-section-title-laptop-size: 40px;
+  --landing-section-title-tablet-size: 34px;
+  --landing-section-title-mobile-size: 28px;
+
+  --landing-section-title-desktop-line: 1.12;
+  --landing-section-title-laptop-line: 1.14;
+  --landing-section-title-tablet-line: 1.12;
+  --landing-section-title-mobile-line: 1.16;
+
+  --landing-section-title-desktop-gap: 28px;
+  --landing-section-title-laptop-gap: 24px;
+  --landing-section-title-tablet-gap: 20px;
+  --landing-section-title-mobile-gap: 16px;
+}

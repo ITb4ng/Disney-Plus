@@ -16,7 +16,7 @@ const SearchFilterBar = ({ type, sort, onTypeChange, onSortChange }) => {
   return (
     <section className="search-filter-bar" aria-label="검색 필터">
       <div className="search-filter-bar__group">
-        <span className="search-filter-bar__label">콘텐츠 타입</span>
+        <span className="search-filter-bar__label">콘텐츠 유형</span>
         <div className="search-filter-bar__chips">
           {TYPE_OPTIONS.map((option) => (
             <button
