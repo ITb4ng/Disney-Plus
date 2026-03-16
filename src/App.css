@@ -36,11 +36,11 @@
 .layout-restore-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9998;
+  z-index: var(--z-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #040714;
+  background: var(--color-bg);
 }
 
 .layout-restore-overlay-hidden {

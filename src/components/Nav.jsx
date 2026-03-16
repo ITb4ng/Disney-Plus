@@ -79,18 +79,18 @@ const Nav = () => {
   }, []);
 
   useEffect(() => {
-const handleScroll = () => {
-  const y = window.scrollY || 0;
+    const handleScroll = () => {
+      const y = window.scrollY || 0;
 
-  // 0 ~ 300px 구간에서 opacity 증가
-  const next = Math.min(1, y / 300);
+      // 0 ~ 300px 구간에서 opacity 증가
+      const next = Math.min(1, y / 300);
 
-  setNavOpacity(next);
-};
+      setNavOpacity(next);
+    };
 
-handleScroll();
+    handleScroll();
 
-window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -125,8 +125,8 @@ window.addEventListener("scroll", handleScroll, { passive: true });
   useEffect(() => {
     if (!isProfileOpen) return;
 
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") closeProfile();
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") closeProfile();
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -136,9 +136,9 @@ window.addEventListener("scroll", handleScroll, { passive: true });
   useEffect(() => {
     if (!isProfileOpen) return;
 
-    const onDown = (e) => {
+    const onDown = (event) => {
       if (!profileRef.current) return;
-      if (!profileRef.current.contains(e.target)) closeProfile();
+      if (!profileRef.current.contains(event.target)) closeProfile();
     };
 
     document.addEventListener("mousedown", onDown);
@@ -216,7 +216,7 @@ window.addEventListener("scroll", handleScroll, { passive: true });
               <SignOut ref={profileRef}>
                 <UserButton
                   type="button"
-                  onClick={() => setIsProfileOpen((v) => !v)}
+                  onClick={() => setIsProfileOpen((value) => !value)}
                   aria-haspopup="menu"
                   aria-expanded={isProfileOpen}
                 >
@@ -233,7 +233,7 @@ window.addEventListener("scroll", handleScroll, { passive: true });
                 <DropDown
                   role="menu"
                   $open={isProfileOpen}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(event) => event.stopPropagation()}
                 >
                   <MenuItem type="button" role="menuitem" onClick={closeProfile}>
                     프로필
@@ -264,7 +264,6 @@ window.addEventListener("scroll", handleScroll, { passive: true });
 };
 
 export default Nav;
-
 const NavWrapper = styled.nav`
   position: fixed;
   top: 0;
@@ -287,7 +286,7 @@ const NavInner = styled.div`
   position: relative;
   height: 100%;
   margin: 0 auto;
-  padding: 0 calc(3.5vw + 5px);
+  padding: 0 calc(3vw + 5px);
   display: flex;
   justify-content: space-between;
   align-items: center;
