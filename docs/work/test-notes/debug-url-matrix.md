@@ -1,8 +1,6 @@
-﻿# debug-url-matrix
+﻿# debug-url-matrix (최신)
 
 이 문서는 `tests/` 기준의 실행용 URL 매트릭스입니다.
-상세 설명은 `docs/0310/debug-url-matrix.md`를 기준으로 유지하고,
-여기서는 실제 테스트 입력값만 빠르게 확인합니다.
 
 기준 URL: `http://localhost:3000`
 
@@ -26,7 +24,8 @@
 - `no-image`
 - `cdn-fail`
 
-## `/` LoginPage 예외 처리
+## `/` LandingPage 예외 처리
+### 공통 주입 (`debugState`)
 - `/?debugState=success`
 - `/?debugState=loading`
 - `/?debugState=error`
@@ -35,6 +34,11 @@
 - `/?debugState=cdn-fail`
 - `/?heroDebug=loading&top10Debug=success`
 - `/?heroDebug=success&top10Debug=error`
+### 개별 주입 (`heroDebug`, `top10Debug`)
+- `/?heroDebug=loading&top10Debug=success`
+- `/?heroDebug=success&top10Debug=error`
+- `/?heroDebug=cdn-fail&top10Debug=no-image`
+
 
 ## `/main` MainPage 예외 처리
 - `/main?debugState=success`
@@ -43,6 +47,7 @@
 - `/main?debugState=empty`
 - `/main?debugState=no-image`
 - `/main?debugState=cdn-fail`
+### 개별 주입 (`rowDebug`, `bannerDebug`)
 - `/main?rowDebug=loading&bannerDebug=success`
 - `/main?rowDebug=error&bannerDebug=success`
 - `/main?rowDebug=no-image&bannerDebug=cdn-fail`
@@ -67,16 +72,24 @@
 - `/detail/tv/1399?debugState=loading&debugDelay=1500`
 - `/detail/tv/1399?debugState=error`
 
-참고:
-- `debugState`는 Detail 데이터 훅 상태(`loading|invalid|empty|error|success`)를 강제한다.
-- `no-image/cdn-fail`은 Detail 쿼리 파라미터가 아니라, 모달/네비게이션 state(`detailDebugState`) 경로에서 테스트한다.
-- `/detail`은 보호 라우트이므로 로그인 상태가 아니면 `/login`으로 이동된다.
-
 ### Detail 빠른 점검 세트 (샘플 디테일 보기에서 권장)
 - `/detail/movie/674?debugState=loading`
 - `/detail/movie/674?debugState=error`
 - `/detail/movie/674?debugState=empty`
 - `/detail/movie/674?debugState=invalid`
+
+- 참고: Detail은 데이터 상태와 이미지 상태를 분리해 테스트해야 정확합니다.
+- `debugState`는 Detail 데이터 훅 상태(`loading|invalid|empty|error|success`)를 강제한다.
+- `no-image/cdn-fail`은 Detail 쿼리 파라미터가 아니라, 모달/네비게이션 state(`detailDebugState`) 경로에서 테스트한다.
+- `/detail`은 보호 라우트이므로 로그인 상태가 아니면 `/login`으로 이동된다.
+
+## 빠른 스모크 세트 (1 ~ 5번 완료시 성공)
+1. `/?heroDebug=loading&top10Debug=success`
+2. `/main?rowDebug=no-image&bannerDebug=image-error`
+3. `/search?q=disney&searchDebug=loading`
+4. `/detail/movie/674?debugState=error`
+5. `/detail/movie/674?debugState=success&detailDebugState=cdn-fail`
+
 
 ## 스크롤 정책 빠른 점검
 - `/`
@@ -95,6 +108,8 @@
 
 ## tests-results
 - Failed라고 나오지만 의도된 환경입니다 모든 테스트 파일 중 2개는 PX단위로 Nav에 맞게 설정되게 해놓았는데 둘 다 근사값으로 수동 검증 후 의도되게 설정이 되었습니다.
+- App.test.js 파이어베이스 환경변수 설정 후 jest 실행
+- v1.0.0 기준 재설정 할 필요가 있음 (03.17 추가 )
 
 ## 실행 예시
 ```bash
