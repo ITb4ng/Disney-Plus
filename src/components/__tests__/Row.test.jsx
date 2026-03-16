@@ -245,6 +245,23 @@ function setNavigationEntryType(type = "navigate") {
   });
 }
 
+function setMatchMedia(matcher = () => false) {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    configurable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: matcher(query),
+      media: query,
+      onchange: null,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+}
+
 function readSwipeMap() {
   try {
     return JSON.parse(sessionStorage.getItem(ROW_SWIPE_KEY) || "{}");
@@ -286,19 +303,10 @@ describe("Row", () => {
       data: { results: mockResults },
     });
 
-    Object.defineProperty(window, "matchMedia", {
-      writable: true,
+    setMatchMedia(() => false);
+    Object.defineProperty(window.navigator, "maxTouchPoints", {
       configurable: true,
-      value: jest.fn().mockImplementation(() => ({
-        matches: false,
-        media: "",
-        onchange: null,
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
+      value: 0,
     });
 
     global.requestAnimationFrame = (cb) => setTimeout(cb, 0);
@@ -481,5 +489,24 @@ describe("Row", () => {
 
     expect(navigateMock).toHaveBeenCalled();
     expect(navigateMock.mock.calls[0][0]).toBe("/detail/movie/1");
+  });
+  test("터치 가능한 데스크톱에서는 터치 전용 swiper 모드로 전환한다", async () => {
+    setMatchMedia((query) => query === "(any-pointer: coarse)");
+    Object.defineProperty(window.navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 1,
+    });
+
+    render(
+      <Row title="Top Rated" id="TR" fetchUrl={{ path: "movie/top_rated" }} />
+    );
+
+    await flushAsync();
+
+    await waitFor(() => {
+      expect(document.querySelector(".rowShell")).toHaveAttribute("data-touch", "1");
+    });
+
+    expect(document.querySelector(".arrowZone")).toBeNull();
   });
 });

@@ -7,8 +7,8 @@ import Row from "../../components/Row";
 import { tmdbImg, pickHeroSize } from "../../utils/tmdbImage";
 import { getAppScrollY } from "../../utils/scrollPosition";
 
-import { useDetailPageData } from "./useDetailPageData";
-import DetailStateView from "./DetailStateView";
+import { useDetailPageData } from "./hooks/useDetailPageData";
+import DetailStateView from "./components/DetailStateView";
 import { normalizeDebugState } from "../../utils/debugState";
 
 import "./DetailPage.css";
@@ -627,3 +627,4 @@ export default function DetailPage() {
     </>
   );
 }
+

@@ -14,16 +14,15 @@ const getImageSources = (item, debugState) => {
   const fallback =
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='none'><rect width='1600' height='900' fill='%23111827'/></svg>";
   const src = forceFallbackImage ? fallback : backdrop || poster || fallback;
-  const showFallbackLabel =
-    forceFallbackImage || (!backdrop && !poster);
+  const showFallbackLabel = forceFallbackImage || (!backdrop && !poster);
 
   const srcSet = forceFallbackImage
     ? undefined
     : backdrop
-    ? `https://image.tmdb.org/t/p/w300${item.backdrop_path} 300w, https://image.tmdb.org/t/p/w780${item.backdrop_path} 780w`
-    : poster
-      ? `https://image.tmdb.org/t/p/w342${item.poster_path} 342w, https://image.tmdb.org/t/p/w500${item.poster_path} 500w`
-      : undefined;
+      ? `https://image.tmdb.org/t/p/w300${item.backdrop_path} 300w, https://image.tmdb.org/t/p/w780${item.backdrop_path} 780w`
+      : poster
+        ? `https://image.tmdb.org/t/p/w342${item.poster_path} 342w, https://image.tmdb.org/t/p/w500${item.poster_path} 500w`
+        : undefined;
 
   return { src, srcSet, showFallbackLabel };
 };

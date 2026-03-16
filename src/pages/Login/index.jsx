@@ -66,127 +66,121 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(false);
-  
-const redirectedRef = useRef(false);
 
-const handleLoginSuccess = useCallback(() => {
-  if (redirectedRef.current) return;
-  redirectedRef.current = true;
+  const redirectedRef = useRef(false);
 
-  if (
-    loginState?.intent === "detail" &&
-    loginState?.detailId &&
-    loginState?.detailType
-  ) {
-    navigate(`/detail/${loginState.detailType}/${loginState.detailId}`, {
-      replace: true,
-      state: {
-        from: loginState.from || "/",
-        teaserSource: loginState.teaserSource,
-        preloadedTitle: loginState.detailTitle,
-        preloadedBackdrop: loginState.detailBackdrop,
-        preloadedPoster: loginState.detailPoster,
-        scrollY:
-          typeof loginState.scrollY === "number" ? loginState.scrollY : 0,
-      },
-    });
-    return;
-  }
+  const handleLoginSuccess = useCallback(() => {
+    if (redirectedRef.current) return;
+    redirectedRef.current = true;
 
-  navigate("/main", { replace: true });
-}, [loginState, navigate]);
+    if (
+      loginState?.intent === "detail" &&
+      loginState?.detailId &&
+      loginState?.detailType
+    ) {
+      navigate(`/detail/${loginState.detailType}/${loginState.detailId}`, {
+        replace: true,
+        state: {
+          from: loginState.from || "/",
+          teaserSource: loginState.teaserSource,
+          preloadedTitle: loginState.detailTitle,
+          preloadedBackdrop: loginState.detailBackdrop,
+          preloadedPoster: loginState.detailPoster,
+          scrollY:
+            typeof loginState.scrollY === "number" ? loginState.scrollY : 0,
+        },
+      });
+      return;
+    }
 
+    navigate("/main", { replace: true });
+  }, [loginState, navigate]);
 
+  const onEmailLogin = async (event) => {
+    event.preventDefault();
+    setError("");
 
+    const trimmedEmail = email.trim();
 
-  
-const onEmailLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+    if (!trimmedEmail || !password) {
+      setError("이메일과 비밀번호를 입력해 주세요.");
+      return;
+    }
 
-  const eMail = email.trim();
+    try {
+      setPending(true);
+      localStorage.removeItem("isGuest");
+      sessionStorage.removeItem("demo_banner");
 
-  if (!eMail || !password) {
-    setError("아이디와 비밀번호를 입력해주세요.");
-    return;
-  }
+      await setPersistence(
+        auth,
+        remember ? browserLocalPersistence : browserSessionPersistence
+      );
 
-  try {
-    setPending(true);
-    localStorage.removeItem("isGuest");
-    sessionStorage.removeItem("demo_banner");
+      await signInWithEmailAndPassword(auth, trimmedEmail, password);
+      setFadeOut(true);
+    } catch (err) {
+      console.error(err);
+      setError("로그인에 실패했습니다. 계정 정보를 확인해 주세요.");
+    } finally {
+      setPending(false);
+    }
+  };
 
-    await setPersistence(
-      auth,
-      remember ? browserLocalPersistence : browserSessionPersistence
-    );
+  const onGoogleLogin = async () => {
+    setError("");
 
-    await signInWithEmailAndPassword(auth, eMail, password);
+    try {
+      setPending(true);
+      localStorage.removeItem("isGuest");
+      sessionStorage.removeItem("demo_banner");
 
-    setFadeOut(true);
-  } catch (err) {
-    console.error(err);
-    setError("로그인에 실패했습니다. 계정 정보를 확인해주세요.");
-  } finally {
-    setPending(false);
-  }
-};
+      await setPersistence(
+        auth,
+        remember ? browserLocalPersistence : browserSessionPersistence
+      );
 
-const onGoogleLogin = async () => {
-  setError("");
+      await signInWithPopup(auth, provider);
+      setFadeOut(true);
+    } catch (err) {
+      console.error(err);
+      setError("구글 로그인에 실패했습니다.");
+    } finally {
+      setPending(false);
+    }
+  };
 
-  try {
-    setPending(true);
-    localStorage.removeItem("isGuest");
-    sessionStorage.removeItem("demo_banner");
+  const onDemoLogin = async () => {
+    setError("");
 
-    await setPersistence(
-      auth,
-      remember ? browserLocalPersistence : browserSessionPersistence
-    );
+    try {
+      setPending(true);
+      localStorage.setItem("isGuest", "1");
+      sessionStorage.setItem("demo_banner", "1");
 
-    await signInWithPopup(auth, provider);
+      await setPersistence(
+        auth,
+        remember ? browserLocalPersistence : browserSessionPersistence
+      );
 
-    setFadeOut(true);
-  } catch (err) {
-    console.error(err);
-    setError("구글 로그인에 실패했습니다.");
-  } finally {
-    setPending(false);
-  }
-};
+      await signInWithEmailAndPassword(auth, "demo@disney.dev", "12345678");
+      setFadeOut(true);
+    } catch (err) {
+      console.error(err);
+      localStorage.removeItem("isGuest");
+      sessionStorage.removeItem("demo_banner");
+      setError("체험 계정 로그인에 실패했습니다.");
+    } finally {
+      setPending(false);
+    }
+  };
 
-const onDemoLogin = async () => {
-  setError("");
+  useEffect(() => {
+    if (!authLoading && userData) {
+      handleLoginSuccess();
+    }
+  }, [authLoading, userData, handleLoginSuccess]);
 
-  try {
-    setPending(true);
-    localStorage.setItem("isGuest", "1");
-    sessionStorage.setItem("demo_banner", "1");
-
-    await setPersistence(
-      auth,
-      remember ? browserLocalPersistence : browserSessionPersistence
-    );
-
-    await signInWithEmailAndPassword(auth, "demo@disney.dev", "12345678");
-
-    setFadeOut(true);
-  } catch (err) {
-    console.error(err);
-    localStorage.removeItem("isGuest");
-    sessionStorage.removeItem("demo_banner");
-    setError("체험 계정 로그인에 실패했습니다.");
-  } finally {
-    setPending(false);
-  }
-};
-
-useEffect(() => {
-  if (!authLoading && userData) {
-    handleLoginSuccess();
-  }
-}, [authLoading, userData, handleLoginSuccess]);
   return (
     <Wrap $fade={fadeOut}>
       <Card>
@@ -202,14 +196,14 @@ useEffect(() => {
 
         <Form onSubmit={onEmailLogin}>
           <Field>
-            <Label htmlFor="email">아이디</Label>
+            <Label htmlFor="email">이메일</Label>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="이메일을 입력해주세요"
+              placeholder="이메일을 입력해 주세요"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
               disabled={pending}
             />
           </Field>
@@ -222,15 +216,15 @@ useEffect(() => {
                 id="password"
                 type={showPw ? "text" : "password"}
                 autoComplete="current-password"
-                placeholder="비밀번호를 입력해주세요"
+                placeholder="비밀번호를 입력해 주세요"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 disabled={pending}
               />
 
               <IconBtn
                 type="button"
-                onClick={() => setShowPw((v) => !v)}
+                onClick={() => setShowPw((value) => !value)}
                 aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"}
                 disabled={pending}
               >
@@ -247,7 +241,7 @@ useEffect(() => {
                 type="checkbox"
                 id="remember"
                 checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
+                onChange={(event) => setRemember(event.target.checked)}
                 disabled={pending}
               />
               <label htmlFor="remember">로그인 상태 유지</label>
@@ -268,7 +262,7 @@ useEffect(() => {
           </PrimaryBtn>
 
           <DemoBtn type="button" onClick={onDemoLogin} disabled={pending}>
-            체험계정으로 둘러보기 →
+            체험계정으로 둘러보기
           </DemoBtn>
 
           <Divider>
@@ -297,7 +291,6 @@ useEffect(() => {
     </Wrap>
   );
 }
-
 /* ===== styled-components ===== */
 
 const Wrap = styled.div`

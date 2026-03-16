@@ -17,13 +17,12 @@ import "./Row.css";
 import "swiper/css";
 
 const ARROW_ZONE = 72;
-const PHONE_MAX = 960;
 const SKELETON_COUNT = 10;
 const ERROR_FALLBACK_COUNT = 6;
 const IMG_BASE = "https://image.tmdb.org/t/p/original";
 const ROW_SWIPE_KEY = "row:swipe:v1";
 
-// Row 결과 캐시
+// Row ?ㅼ??댄봽 ?곹깭 罹먯떆
 const ROW_CACHE = new Map();
 
 function loadSwipeMap() {
@@ -57,8 +56,9 @@ function normalizeSwipeState(raw) {
 }
 
 /* =========================================================
-   카드 미디어
-   - 이미지가 없거나 CDN 로드 실패여도 fallback 카드를 유지
+   移대뱶 誘몃뵒???뚮뜑留?
+   - ?대?吏媛 ?녾굅??濡쒕뱶???ㅽ뙣?섎㈃ fallback UI瑜??쒖떆?⑸땲??
+   - Top10 ?붾쾭洹??곹깭?먯꽌??以묒븰 ?덈궡 臾멸뎄瑜??④퍡 ?몄텧?⑸땲??
 ========================================================= */
 function CardMedia({
   imgPath,
@@ -91,11 +91,11 @@ function CardMedia({
       ) : (
         <FallbackMedia $isTop10={isTop10}>
           {showCenteredReadyLabel && (
-            <CenteredFallbackLabel>콘텐츠 이미지 준비중</CenteredFallbackLabel>
+            <CenteredFallbackLabel>{"\uC774\uBBF8\uC9C0\uB97C \uC900\uBE44 \uC911\uC785\uB2C8\uB2E4"}</CenteredFallbackLabel>
           )}
           <FallbackInner>
-            {showFallbackBadge && <FallbackBadge>콘텐츠 이미지 준비중</FallbackBadge>}
-            <FallbackTitle>{titleText || "제목 없음"}</FallbackTitle>
+            {showFallbackBadge && <FallbackBadge>{"\uC774\uBBF8\uC9C0 \uC900\uBE44 \uC911"}</FallbackBadge>}
+            <FallbackTitle>{titleText || "\uC81C\uBAA9\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4"}</FallbackTitle>
             {!!yearText && <FallbackMeta>{yearText}</FallbackMeta>}
           </FallbackInner>
         </FallbackMedia>
@@ -121,12 +121,14 @@ function DefaultRowErrorState() {
           <FiAlertCircle />
         </DefaultStateIcon>
         <DefaultStateText>
-          <DefaultStateTitle>콘텐츠를 불러오지 못했습니다</DefaultStateTitle>
-          <DefaultStateDesc>잠시 후 다시 시도해 주세요.</DefaultStateDesc>
+          <DefaultStateTitle>{"\uCF58\uD150\uCE20\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4."}</DefaultStateTitle>
+          <DefaultStateDesc>
+            {"\uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574 \uC8FC\uC138\uC694. \uBB38\uC81C\uAC00 \uACC4\uC18D\uB418\uBA74 \uD398\uC774\uC9C0\uB97C \uC0C8\uB85C\uACE0\uCE68\uD574 \uC8FC\uC138\uC694."}
+          </DefaultStateDesc>
         </DefaultStateText>
         <DefaultStateRetry type="button" onClick={() => window.location.reload()}>
           <FiRefreshCw />
-          <span>다시 시도</span>
+          <span>{"\uC0C8\uB85C\uACE0\uCE68"}</span>
         </DefaultStateRetry>
       </DefaultStateBox>
     </DefaultStateWrap>
@@ -141,8 +143,10 @@ function DefaultRowEmptyState() {
           <FiInbox />
         </DefaultStateIcon>
         <DefaultStateText>
-          <DefaultStateTitle>표시할 콘텐츠가 없습니다</DefaultStateTitle>
-          <DefaultStateDesc>조건을 변경하거나 잠시 후 다시 확인해 주세요.</DefaultStateDesc>
+          <DefaultStateTitle>{"\uD45C\uC2DC\uD560 \uCF58\uD150\uCE20\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."}</DefaultStateTitle>
+          <DefaultStateDesc>
+            {"\uB2E4\uB978 \uCE74\uD14C\uACE0\uB9AC\uB97C \uC120\uD0DD\uD558\uAC70\uB098 \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574 \uC8FC\uC138\uC694."}
+          </DefaultStateDesc>
         </DefaultStateText>
       </DefaultStateBox>
     </DefaultStateWrap>
@@ -160,17 +164,17 @@ const Row = ({
   onLoaded,
   query: queryProp,
 
-  // 확장 props
+  // 湲곕낯 Row / Top10 怨듯넻 props
   variant = "default", // "default" | "top10"
   limit,
   disableOverlay = false,
   useExternalNav = false,
   onSwiperReady,
   onNavStateChange,
-  emptyMessage = "표시할 콘텐츠가 없습니다.",
-  errorMessage = "콘텐츠를 불러오지 못했습니다.",
+  emptyMessage = "\uD45C\uC2DC\uD560 \uCF58\uD150\uCE20\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.",
+  errorMessage = "\uCF58\uD150\uCE20\uB97C \uBD88\uB7EC\uC624\uB294 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.",
 
-  // 상태 분리 테스트용
+  // ?붾쾭洹몄슜 媛뺤젣 ?곹깭
   // "loading" | "error" | "empty" | "no-image" | "cdn-fail"
   debugState,
 }) => {
@@ -232,31 +236,36 @@ const Row = ({
         Number(restoreSwipeState.progress) > 0.01));
 
   /* -----------------------------
-     레이아웃 감지
+     터치 기기 여부를 감지해 인터랙션 방식을 분기
   ----------------------------- */
-  const [isPhoneLayout, setIsPhoneLayout] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mqWidth = window.matchMedia(`(max-width: ${PHONE_MAX}px)`);
     const mqTouch = window.matchMedia("(hover: none) and (pointer: coarse)");
+    const mqAnyCoarse = window.matchMedia("(any-pointer: coarse)");
 
-    const sync = () => setIsPhoneLayout(mqWidth.matches && mqTouch.matches);
+    const sync = () => {
+      const hasTouchPoints =
+        Number(window.navigator?.maxTouchPoints || window.navigator?.msMaxTouchPoints || 0) >
+        0;
+      const touchCapable = hasTouchPoints || mqTouch.matches || mqAnyCoarse.matches;
+
+      setIsTouchDevice(touchCapable);
+    };
 
     sync();
-    mqWidth.addEventListener?.("change", sync);
     mqTouch.addEventListener?.("change", sync);
+    mqAnyCoarse.addEventListener?.("change", sync);
 
     return () => {
-      mqWidth.removeEventListener?.("change", sync);
       mqTouch.removeEventListener?.("change", sync);
+      mqAnyCoarse.removeEventListener?.("change", sync);
     };
   }, []);
 
-  /* -----------------------------
-     query 규격 통일
-  ----------------------------- */
+  /* -----------------------------`r`n     API ??汝뷴젆?琉????????ろ떀癲?UI ?????????饔낅떽??????蹂Β??????????r`n  ----------------------------- */
   const queryObj = useMemo(() => {
     const src = queryProp ?? fetchUrl;
     if (!src) return null;
@@ -290,9 +299,7 @@ const Row = ({
     return typeof src === "string" ? src : JSON.stringify(src ?? {});
   }, [queryProp, fetchUrl]);
 
-  /* -----------------------------
-     데이터 로드
-  ----------------------------- */
+  /* -----------------------------`r`n     API ??汝뷴젆?琉????????ろ떀癲?UI ?????????饔낅떽??????蹂Β??????????r`n  ----------------------------- */
   useEffect(() => {
     if (debugState === "loading") {
       setIsLoading(true);
@@ -379,7 +386,7 @@ const Row = ({
   }, [queryObj, queryKey, id, onLoaded, debugState]);
 
   /* -----------------------------
-     렌더 데이터 정규화
+     API ??棺堉?뤃???????リ틖濾?UI ????癲????轅붽틓????볥??????????
   ----------------------------- */
   const normalizedMovies = useMemo(() => {
     const sourceMovies = movies.map((movie) => ({
@@ -389,7 +396,7 @@ const Row = ({
         movie?.name ||
         movie?.original_title ||
         movie?.original_name ||
-        "제목 없음",
+        "\uC81C\uBAA9 \uC5C6\uB294 \uCF58\uD150\uCE20",
       _dateText: movie?.release_date || movie?.first_air_date || "",
       _yearText: (movie?.release_date || movie?.first_air_date || "").slice(0, 4),
       _imgPath: movie?.backdrop_path || movie?.poster_path || "",
@@ -404,7 +411,7 @@ const Row = ({
           }))
         : Array.from({ length: isTop10 ? 10 : 6 }, (_, idx) => ({
             id: `no-image-${id}-${idx}`,
-            _titleText: `테스트 콘텐츠 ${idx + 1}`,
+            _titleText: `\uC774\uBBF8\uC9C0 \uC5C6\uC74C \uCF58\uD150\uCE20 ${idx + 1}`,
             _yearText: "2025",
             _imgPath: "",
             _altText: "fallback movie",
@@ -429,7 +436,7 @@ const Row = ({
         (_, i) => ({
           id: `fb-${id}-${i}`,
           _fb: true,
-          _titleText: "불러오지 못한 콘텐츠",
+          _titleText: "\uC774\uBBF8\uC9C0\uB97C \uBD88\uB7EC\uC62C \uC218 \uC5C6\uB294 \uCF58\uD150\uCE20",
           _yearText: "",
         })
       ),
@@ -439,8 +446,8 @@ const Row = ({
   const handleClick = (movie) => {
     if (movie?._fb || movie?._sk) return;
 
-    // 카드 클릭 직전 최신 스와이프 위치를 저장해서
-    // 전환 타이밍 중 클릭해도 복원 정확도를 높인다.
+    // 移대뱶 ?대┃ 吏곸쟾???꾩옱 ?ㅼ??댄띁 ?ㅻ퉬寃뚯씠???곹깭瑜???踰????숆린?뷀빀?덈떎.
+    // ?곗튂/?ㅻ낫??留덉슦???대뒓 ?낅젰?대뱺 ?숈씪???곸꽭 ?대룞 ?먮쫫???좎??섍린 ?꾪븳 泥섎━?낅땲??
     if (swiperRef.current && !swiperRef.current.destroyed) {
       syncNav(swiperRef.current);
     }
@@ -468,7 +475,7 @@ const Row = ({
     setModalOpen(true);
     setMovieSelection({
       ...movie,
-      // 디버그 상태에서는 카드/모달 이미지 정책을 동일하게 맞춤
+      // no-image / cdn-fail ?붾쾭洹??곹깭?먯꽌??紐⑤떖 ?대?吏???④꺼??fallback ?곹깭瑜??쇨??섍쾶 ?뺤씤?⑸땲??
       backdrop_path: shouldHideModalImage ? null : movie?.backdrop_path,
       poster_path: shouldHideModalImage ? null : movie?.poster_path,
     });
@@ -577,7 +584,7 @@ const Row = ({
   );
 
   /* -----------------------------
-     Swiper 초기 동기화
+     로딩이 끝난 뒤 스와이퍼 치수와 저장된 위치를 다시 동기화
   ----------------------------- */
   useEffect(() => {
   const swiper = swiperRef.current;
@@ -607,15 +614,30 @@ const Row = ({
   syncNav,
 ]);
 
+  useEffect(() => {
+    const swiper = swiperRef.current;
+    if (!swiper || swiper.destroyed) return;
+
+    const canSwipe = !isLoading;
+    swiper.allowTouchMove = canSwipe;
+
+    if (swiper.params) {
+      swiper.params.allowTouchMove = canSwipe;
+      swiper.params.simulateTouch = canSwipe;
+    }
+
+    swiper.update?.();
+  }, [isLoading]);
+
   /* -----------------------------
-     화살표 사용 여부
+     내부 화살표 사용 여부와 좌우 상태 계산
   ----------------------------- */
-  const useInternalArrows = !isLoading && !isPhoneLayout && !useExternalNav && !isTop10;
+  const useInternalArrows = !isLoading && !isTouchDevice && !useExternalNav && !isTop10;
   const showLeft = useInternalArrows && !navState.isBeginning;
   const disableRight = useInternalArrows && navState.isEnd;
 
   /* -----------------------------
-     스켈레톤
+     로딩 중 표시할 스켈레톤 카드 준비
   ----------------------------- */
   const skeletonSlides = useMemo(
     () =>
@@ -655,12 +677,9 @@ const Row = ({
     spaceBetween: 10,
     slidesPerView: "auto",
     slidesPerGroupAuto: true,
-    threshold: 10,
+    touchEventsTarget: "container",
     allowTouchMove: !isLoading,
     simulateTouch: !isLoading,
-    touchStartPreventDefault: false,
-    touchStartForcePreventDefault: false,
-    touchReleaseOnEdges: true,
   };
 
   const top10SwiperProps = {
@@ -668,11 +687,9 @@ const Row = ({
     speed: 700,
     spaceBetween: 12,
     breakpoints: top10Breakpoints,
+    touchEventsTarget: "container",
     allowTouchMove: !isLoading,
     simulateTouch: !isLoading,
-    touchStartPreventDefault: false,
-    touchStartForcePreventDefault: false,
-    touchReleaseOnEdges: true,
   };
 
   const handleCardKeyDown = (e, movie) => {
@@ -697,7 +714,7 @@ const Row = ({
           className="rowShell"
           data-left={showLeft ? "1" : "0"}
           data-loading={isLoading ? "1" : "0"}
-          data-touch={isPhoneLayout ? "1" : "0"}
+          data-touch={isTouchDevice ? "1" : "0"}
           data-variant={isTop10 ? "top10" : "default"}
           $isTop10={isTop10}
         >
@@ -705,7 +722,7 @@ const Row = ({
           <ArrowZone
             className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
             type="button"
-            aria-label="이전 콘텐츠"
+            aria-label={"\uC774\uC804 \uCF58\uD150\uCE20"}
             aria-hidden={!showLeft}
             onClick={() => {
               if (!showLeft) return;
@@ -722,7 +739,7 @@ const Row = ({
           <ArrowZone
             className="arrowZone right"
             type="button"
-            aria-label="다음 콘텐츠"
+            aria-label={"\uB2E4\uC74C \uCF58\uD150\uCE20"}
             disabled={disableRight}
             aria-disabled={disableRight}
             onClick={() => {
@@ -776,7 +793,7 @@ const Row = ({
                       {showBadge && <RankBadge $isTop10={isTop10}>{index + 1}</RankBadge>}
                       <FallbackMedia $isTop10={isTop10}>
                         <FallbackInner>
-                          {!debugState && <FallbackBadge>불러오지 못함</FallbackBadge>}
+                          {!debugState && <FallbackBadge>{"\uC774\uBBF8\uC9C0 \uC5C6\uC74C"}</FallbackBadge>}
                           <FallbackTitle>{movie._titleText}</FallbackTitle>
                         </FallbackInner>
                       </FallbackMedia>
@@ -893,6 +910,8 @@ const Wrap = styled.div`
   cursor: pointer;
   overflow: hidden;
   position: relative;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
   transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s;
 
   border: 3px solid rgba(249, 249, 249, 0.1);
@@ -904,23 +923,39 @@ const Wrap = styled.div`
     height: 100%;
     object-fit: cover;
     position: absolute;
+    user-select: none;
+    -webkit-user-drag: none;
     width: 100%;
   }
 
   ${({ $isTop10 }) =>
     $isTop10
       ? css`
-          &:hover {
-            border-color: rgba(249, 249, 249, 0.16);
+          @media (hover: hover) and (pointer: fine) {
+            &:hover {
+              border-color: rgba(249, 249, 249, 0.5);
+              transform: none;
+            }
+          }
+
+          &:active {
+            border-color: rgba(249, 249, 249, 0.38);
             transform: none;
           }
         `
       : css`
-          &:hover {
-            box-shadow: rgb(0 0 0 / 80%) 0px 40px 58px -16px,
-              rgb(0 0 0 / 72%) 0px 30px 22px -10px;
-            transform: scale(0.98);
-            border-color: rgba(249, 249, 249, 0.8);
+          @media (hover: hover) and (pointer: fine) {
+            &:hover {
+              box-shadow: rgb(0 0 0 / 80%) 0px 40px 58px -16px,
+                rgb(0 0 0 / 72%) 0px 30px 22px -10px;
+              transform: scale(0.98);
+              border-color: rgba(249, 249, 249, 0.8);
+            }
+          }
+
+          &:active {
+            transform: scale(0.99);
+            border-color: rgba(249, 249, 249, 0.62);
           }
         `}
 
@@ -932,22 +967,26 @@ const Wrap = styled.div`
   &.skWrap {
     border-color: rgba(249, 249, 249, 0.08);
 
-    &:hover {
-      transform: none;
-      box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
-        rgb(0 0 0 / 73%) 0px 16px 10px -10px;
-      border-color: rgba(249, 249, 249, 0.08);
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        transform: none;
+        box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
+          rgb(0 0 0 / 73%) 0px 16px 10px -10px;
+        border-color: rgba(249, 249, 249, 0.08);
+      }
     }
   }
 
   &.fbWrap {
     border-color: rgba(249, 249, 249, 0.08);
 
-    &:hover {
-      transform: none;
-      border-color: rgba(249, 249, 249, 0.08);
-      box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
-        rgb(0 0 0 / 73%) 0px 16px 10px -10px;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        transform: none;
+        border-color: rgba(249, 249, 249, 0.08);
+        box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px,
+          rgb(0 0 0 / 73%) 0px 16px 10px -10px;
+      }
     }
   }
 `;

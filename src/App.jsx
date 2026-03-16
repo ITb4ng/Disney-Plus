@@ -5,15 +5,15 @@ import Nav from "./components/Nav";
 import ScrollManager from "./components/ScrollManager";
 import ProtectedRoute from "./components/Common/ProtectedRoute";
 import PublicOnlyRoute from "./components/Common/PublicOnlyRoute";
-import LoginPage from "./pages/LoginPage";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import MainPage from "./pages/MainPage";
 import SearchPage from "./pages/SearchPage";
 import DetailPage from "./pages/DetailPage";
-import FeedbackPage from "./pages/DemoPage/FeedbackPage";
-import FeedbackForm from "./pages/DemoPage/Form/FeedbackForm";
-import Footer from "./pages/LoginPage/sections/Footer/FooterSection";
-import NotFoundPage from "./pages/NotFoundPage";
+import FeedbackPage from "./pages/FeedbackPage";
+import FeedbackForm from "./pages/FeedbackPage/FeedbackForm";
+import Footer from "./pages/LandingPage/components/Footer/FooterSection";
+import NotFoundPage from "./pages/NotFound";
 import "./styles/badges.css";
 
 const Layout = () => {
@@ -136,7 +136,7 @@ function App() {
 
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<LandingPage />} />
 
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<Login />} />

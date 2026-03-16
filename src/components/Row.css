@@ -60,6 +60,13 @@
   overflow: hidden;
   pointer-events: auto;
   touch-action: pan-y; /* 모바일에서 세로 스크롤 우선 */
+  -ms-touch-action: pan-y;
+}
+
+.rowShell .swiper-wrapper,
+.rowShell .swiper-slide {
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
 }
 
 /* 공통 트랙 정렬 */
@@ -368,7 +375,7 @@
 ================================= */
 
 /* Desktop hover + keyboard focus */
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .rowShell[data-variant="default"] .swiper-slide:hover,
   .rowShell[data-variant="default"] .swiper-slide:focus-within {
     border-color: var(--row-border-color-hover);
@@ -387,8 +394,10 @@
 }
 
 /* 기본 Row hover scale */
-.rowShell[data-variant="default"] .swiper-slide:hover {
-  transform: scale(var(--row-hover-scale-default));
+@media (hover: hover) and (pointer: fine) {
+  .rowShell[data-variant="default"] .swiper-slide:hover {
+    transform: scale(var(--row-hover-scale-default));
+  }
 }
 
 /* ===============================
@@ -456,8 +465,9 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* 모바일 기본 overlay 표시 */
+  /* 모바일 기본 overlay 상시 노출 */
   .row__hoverOverlay {
+    display: flex;
     opacity: 1;
     transform: translateY(0);
   }
@@ -482,7 +492,12 @@
   padding-left: env(safe-area-inset-left);
 }
 
-/* 모바일(터치)에서는 오버레이 조건 콘텐츠 숨김 */
+/* 터치 환경에서는 오버레이 정보를 항상 노출 */
+.rowShell[data-touch="1"] .row__hoverOverlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (max-width: 960px) {
   .rowShell[data-touch="1"] {
     padding-left: 0 !important;

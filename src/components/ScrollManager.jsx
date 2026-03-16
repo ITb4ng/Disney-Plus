@@ -287,6 +287,22 @@ function findSectionTargetFromY(scrollEl, savedY, snapshot) {
   };
 }
 
+function isNotFoundRoutePath(pathname = "") {
+  if (pathname === "/" || pathname === "/login" || pathname === "/main" || pathname === "/search") {
+    return false;
+  }
+
+  if (pathname.startsWith("/detail/")) {
+    return false;
+  }
+
+  if (pathname === "/feedback" || pathname === "/feedback/new" || pathname.startsWith("/feedback/")) {
+    return false;
+  }
+
+  return true;
+}
+
 export default function ScrollManager({ onRestoreComplete }) {
   const location = useLocation();
   const navType = useNavigationType();
@@ -304,6 +320,7 @@ export default function ScrollManager({ onRestoreComplete }) {
   const isMainRoute = location.pathname === "/main";
   const isLandingRoute = location.pathname === "/";
   const isDetailRoute = location.pathname.startsWith("/detail/");
+  const isNotFoundRoute = isNotFoundRoutePath(location.pathname);
   const consumedRestoreStateRef = useRef("");
   const initialAppLoadRef = useRef(true);
 
@@ -404,9 +421,13 @@ export default function ScrollManager({ onRestoreComplete }) {
       !explicitRestore &&
       navType !== "POP";
     const canRestore =
-      !hardLoadEntry && !isDetailRoute && (explicitRestore || navType === "POP");
+      !hardLoadEntry && !isDetailRoute && !isNotFoundRoute && (explicitRestore || navType === "POP");
     if (!canRestore) {
       const resolveNonRestoreTarget = () => {
+        if (isNotFoundRoute) {
+          return { y: 0, pinUntilStable: true };
+        }
+
         if (isMainRoute) {
           return { y: 0, pinUntilStable: true };
         }
@@ -636,6 +657,7 @@ export default function ScrollManager({ onRestoreComplete }) {
     isMainRoute,
     isLandingRoute,
     isDetailRoute,
+    isNotFoundRoute,
     location.key,
     location.pathname,
     location.state?.restoreScroll,

@@ -71,13 +71,11 @@ const SearchInput = ({
   const hasValue = value.trim().length > 0;
   const [isMobileKeywordOpen, setIsMobileKeywordOpen] = useState(false);
 
-
   const hasAnyKeywords =
     recentKeywords.length > 0 || recommendedKeywords.length > 0;
 
   return (
     <section className="search-input-wrap">
-      
       <form
         className="search-top-input"
         onSubmit={(e) => {
@@ -106,7 +104,6 @@ const SearchInput = ({
         )}
       </form>
 
-      {/* desktop / tablet */}
       <div className="keyword-section">
         <KeywordBlock
           title="최근 검색어"
@@ -126,8 +123,7 @@ const SearchInput = ({
           onClearKeywords={onClearKeywords}
         />
       </div>
-        
-      {/* mobile */}
+
       {hasAnyKeywords && (
         <div className="mobile-keyword-panel">
           <button
@@ -137,8 +133,8 @@ const SearchInput = ({
             aria-expanded={isMobileKeywordOpen}
             aria-label={
               isMobileKeywordOpen
-                ? "검색어 패널 접기"
-                : "검색어 패널 펼치기"
+                ? "검색어 목록 접기"
+                : "검색어 목록 펼치기"
             }
           >
             <span>최근 / 추천 검색어</span>
