@@ -7,11 +7,12 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 
 ## 📦 Stable Release
 
-현재 안정화 버전: **v0.2.4**
-- 🌐 Live Demo (current dev deployment): https://b4ng-disney-plus.vercel.app/
+현재 안정화 버전: **v0.3.0**
+- 🌐 Live Demo : https://b4ng-disney-plus.vercel.app/
 
 
 ### 🔖 Release History
+- **v0.3.0  라우트별 스크롤 복원 정책 정리 및 Firebase 설정 정비**
 - **v0.2.4  UI State 안정화 및 테스트 환경 개선**
 - **v0.2.3  SearchPage | Nav | banner UX 개선**
   - Nav UX 개선
@@ -39,13 +40,13 @@ TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니
 - v0.1.0
   - DetailPage 구조 개편 및 Hero 전환 UX 개선
 
-- 👉 GitHub - [v0.2.4 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.2.4)에서 v0.2.4 스냅샷(zip) 다운로드 가능
+- 👉 GitHub - [v0.3.0 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.3.0)에서 v0.3.0 스냅샷(zip) 다운로드 가능
 - 👉 또는 git clone 후 해당 태그로 체크아웃:
 
 ```bash
 git clone https://github.com/ITb4ng/Disney-Plus.git
 cd Disney-Plus
-git checkout v0.2.4
+git checkout v0.3.0
 ```
 ## 🧪 Local 개발 실행 방법 
 ```bash
@@ -110,19 +111,33 @@ LERP 기반 부드러운 마우스 추적
 현재 `dev` 브랜치는 Disney+ 리뉴얼 작업의 **메인 브랜치**입니다.  
 UI/UX 개선과 구조 정리를 중심으로 지속적으로 업데이트 중입니다.
 
+## 📚 Documentation
+- `docs/release`
+  - 버전별 릴리즈 노트 보관
+  - 최신 문서: [v0.3.0 Release Notes](docs/release/2026-03-16-v0.3.0.md)
+- `docs/work`
+  - 작업 기록, 테스트 계획, 수동 점검 메모 보관
+  - 최신 작업 문서: [2026-03-16 Work](docs/work/0315/2026-03-16-work.md)
+- `docs/logs`
+  - 브랜치 개발 로그와 회고 기록 보관
+  - 최신 로그: [2026-03-16 Release v0.3.0 Log](docs/logs/2026-03-16-release-0.3.0.md)
+
 ## 📚 Development Log
-- [2026-02-23 Dev 브랜치 기본 브랜치로 승격](docs/2026-02-23-work.md)
-- [2026-02-26 LoginPage(root) 반응형 코어 안정화](docs/2026-02-26-login-ui.md)
-- [2026-02-27 Login 체험용 계정 생성](docs/2026-02-27-LoginPage-Fix.md)
-- [2026-02-28 DetailPage개선](docs/2026-02-28-DetailPage.md)
-- [2026-03-01 release v0.1.0 작업](docs/2026-03-01-work.md)
-- [2026-03-02 release v0.1.0 수정](docs/2026-03-02-work.md)
-- [2026-03-03 release v0.2.0 작업](docs/2026-03-03-work.md)
-- [2026-03-04 release v0.2.0 수정](docs/2026-03-04-work.md)
-- [2026-03-05 release v0.2.1 개선](docs/2026-03-05-work.md)
-- [2026-03-06 release v0.2.2 개선](docs/2026-03-06-work.md)
-- [2026-03-07 release v0.2.3 개선](docs/2026-03-07-work.md)
-- [2026-03-09 ~ 2026-03-11 release v0.2.4 개선](docs/0310/2026-03-10-work.md)
+- [2026-02-23 Dev 브랜치 기본 브랜치로 승격](docs/work/2026-02-23-work.md)
+- [2026-02-26 LoginPage(root) 반응형 코어 안정화](docs/work/2026-02-26-LoginPage.md)
+- [2026-02-27 Login 체험용 계정 생성](docs/work/2026-02-27-LoginPage-Fix.md)
+- [2026-02-28 DetailPage 개선](docs/work/2026-02-28-DetailPage.md)
+- [2026-03-01 release v0.1.0 작업](docs/work/2026-03-01-work.md)
+- [2026-03-02 release v0.1.0 수정](docs/work/2026-03-02-work.md)
+- [2026-03-03 release v0.2.0 작업](docs/work/2026-03-03-work.md)
+- [2026-03-04 release v0.2.0 수정](docs/work/2026-03-04-work.md)
+- [2026-03-05 release v0.2.1 개선](docs/work/2026-03-05-work.md)
+- [2026-03-06 release v0.2.2 개선](docs/work/2026-03-06-work.md)
+- [2026-03-07 release v0.2.3 개선](docs/work/2026-03-07-work.md)
+- [2026-03-10 프로젝트 테스트 로드맵](docs/work/0310/2026-03-10-project-testing-roadmap.md)
+- [2026-03-10 스크롤 복원 수동 점검 메모](docs/work/0310/scroll-restoration-manual-test.md)
+- [2026-03-16 release v0.3.0 작업 기록](docs/work/0315/2026-03-16-work.md)
+- [2026-03-16 release v0.3.0 개발 로그](docs/logs/2026-03-16-release-0.3.0.md)
 
   
 ### 🧭 다음 작업 예정
