@@ -1,57 +1,94 @@
-# Disney+ Renewal
+# 🎬 Disney+ Renewal
 
-Disney+ UI/UX를 React 기반으로 재해석한 SPA 프로젝트입니다.  
-TMDB 데이터를 프록시 서버를 통해 조회하고, 상세 페이지 전환 UX, 스크롤 복원 정책, 피드백 페이지, 상태 UI 및 fallback UI까지 함께 다루고 있습니다.
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react" alt="React 18" />
+  <img src="https://img.shields.io/badge/Vercel-Production-black?logo=vercel" alt="Vercel Production" />
+  <img src="https://img.shields.io/badge/Firebase-Auth-FFCA28?logo=firebase" alt="Firebase Auth" />
+  <img src="https://img.shields.io/badge/Release-v1.0.0-blue" alt="Release v1.0.0" />
+</p>
 
-## Release Status
+<p align="center">
+  Disney+ UI/UX를 React 기반으로 재해석한 SPA 프로젝트
+  <br />
+  <strong>상태 기반 UI · 라우팅 제어 · 배포 구조</strong>까지 고려한 실서비스 시뮬레이션
+</p>
 
-- 현재 기준선 문서: **v1.0.0**
-- 릴리즈 문서: [docs/release/2026-04-02-v1.0.0.md](docs/release/2026-04-02-v1.0.0.md)
-- 이번 릴리즈는 `v0.3.0`의 수정 사항과 이슈를 보완하고 개선한 뒤, 프로덕션 메인 브랜치 기준선으로 확정하는 버전입니다.
+---
 
-## Core Features
+## 🌐 Live
 
-- 랜딩, 메인, 검색, 상세 페이지 전반의 Disney+ 스타일 UI/UX
+👉 https://b4ng-disney-plus.vercel.app/
+
+---
+
+## 🖼 Preview
+
+<p align="center">
+  <img src="./public/images/main.png" width="300" alt="Main page preview" />
+  <img src="./public/images/detail.png" width="300" alt="Detail page preview" />
+  <img src="./public/images/search.png" width="300" alt="Search page preview" />
+</p>
+
+---
+
+## 🎯 Purpose
+
+이 프로젝트는 단순한 UI 클론을 넘어, 실제 서비스 환경에서 발생할 수 있는 문제를 기준으로 설계한 프론트엔드 프로젝트입니다.
+
+API 실패, CDN 오류, 빈 데이터, 이미지 로드 실패 같은 예외 상황까지 고려해 상태 기반 UI를 구성했고, 사용자 흐름이 끊기지 않도록 라우팅과 상태 전환 구조를 함께 설계했습니다.
+
+핵심 목표는 화면 구현에 그치지 않고, 배포와 운영까지 고려한 실서비스형 구조를 만드는 것이었습니다.
+
+---
+
+## ✨ Key Features
+
+- Hero Banner / Top10 / Row 기반 콘텐츠 탐색 구조
+- 모바일 / 데스크탑 인터랙션 분기
+- Skeleton UI 기반 비동기 상태 처리
+- 추천어 / 최근 검색 흐름을 반영한 Search UX
+- Trailer 유무에 따른 Detail UI 분기
+- 유사 콘텐츠 및 fallback 콘텐츠 처리
+- ProtectedRoute / PublicOnlyRoute 기반 접근 제어
 - `loading / error / empty` 상태 UI 분리
-- `no-image / image-error / cdn-fail` fallback UI 일관 적용
-- `main -> modal -> detail` 이동 시 debug 상태 전달
-- 라우트별 스크롤 복원 정책 분리
-- 피드백 목록/등록/수정 흐름과 공용 안내 박스 UI
-- 체험 계정, 일반 계정, 관리자 계정 기준 권한 분기
+- `no-image / image-error / cdn-fail` fallback 처리
+- 사용자 권한 기반 피드백 CRUD 시스템
 
-## Pages
+---
 
-- `LandingPage`
-- `MainPage`
-- `SearchPage`
-- `DetailPage`
-- `FeedbackPage`
-- `Login`
-- `NotFound`
+## 🧠 Tech Stack
 
-## Tech Stack
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=react,js,firebase,nodejs,express,vercel" alt="Tech stack" />
+</p>
 
-- React 18
-- React Router
-- Styled Components
-- Swiper
-- TanStack Query
-- Firebase
-- Express
-- Playwright
+<p align="center">
+  React Router · Styled Components · TanStack Query · Swiper · Playwright
+</p>
 
-## Local Development
+---
 
-### 1. Install
+## 🏗 Architecture & Flow
 
-```bash
-npm install
-npm --prefix server install
-```
+이 프로젝트는 클라이언트, 서버, 배포 환경을 분리해 구성했습니다.
 
-### 2. Environment
+- React SPA 기반 상태 중심 UI 구조
+- Express Proxy 서버를 통한 TMDB API Key 보호
+- Firebase Auth 및 Firestore를 통한 인증 / 데이터 관리
+- Vercel 배포 환경에서 `main` 브랜치를 기준으로 프로덕션 운영
 
-루트 `.env.local`은 아래 키를 기준으로 맞춥니다.
+브랜치 전략은 다음과 같이 운영합니다.
+
+- `main`: 실제 서비스가 배포되는 프로덕션 브랜치
+- `dev`: 기능 통합 및 다음 버전 개발 브랜치
+- `release/*`: 릴리즈 전 검증 및 QA 브랜치
+- `hotfix/*`: 배포 이후 긴급 수정 브랜치
+
+---
+
+## ⚙️ Environment
+
+로컬 환경 변수는 `.env.local` 파일을 기준으로 설정합니다.
 
 ```bash
 REACT_APP_FIREBASE_API_KEY=
@@ -60,21 +97,22 @@ REACT_APP_FIREBASE_PROJECT_ID=
 REACT_APP_FIREBASE_STORAGE_BUCKET=
 REACT_APP_FIREBASE_MESSAGING_SENDER_ID=
 REACT_APP_FIREBASE_APP_ID=
-REACT_APP_FIREBASE_MEASUREMENT_ID=
 TMDB_API_KEY=
 ```
 
-예시는 [.env.example](.env.example)에 있습니다.
+자세한 예시는 [.env.example](./.env.example) 파일을 참고하면 됩니다.
 
-### 3. Run
+---
 
-클라이언트:
+## 🚀 Run
+
+클라이언트 실행:
 
 ```bash
 npm run client
 ```
 
-TMDB 프록시 서버:
+TMDB 프록시 서버 실행:
 
 ```bash
 npm --prefix server run dev
@@ -86,15 +124,26 @@ npm --prefix server run dev
 npm run build
 ```
 
-## Test
+---
 
-Jest:
+## 📦 Release
 
-```bash
-npm test
-```
+현재 기준선은 `v1.0.0`이며, 프로덕션 메인 브랜치 기준으로 안정화된 첫 번째 릴리즈입니다.
 
-피드백 반응형/시각 테스트:
+- [v1.0.0 Release Notes](./docs/release/2026-04-02-v1.0.0.md)
+
+---
+
+## 🧪 Testing & Debug
+
+프로젝트 전반에 걸쳐 상태 기반 UI 테스트를 수행할 수 있도록 구성했습니다.
+
+- Jest 기반 컴포넌트 테스트
+- Playwright 기반 E2E 테스트
+- 스크롤 복원 및 상태 UI 테스트
+- 디버그 URL 기반 예외 상황 재현
+
+피드백 페이지 전용 테스트 스크립트:
 
 ```bash
 npm run test:feedback
@@ -103,53 +152,47 @@ npm run test:feedback:visual
 npm run test:feedback:visual:update
 ```
 
-Playwright는 [playwright.config.js](playwright.config.js) 기준으로 `http://localhost:3000`을 사용합니다.
+디버그 URL 매트릭스:
 
-## Debug / QA
+- [docs/work/test-notes/debug-url-matrix.md](./docs/work/test-notes/debug-url-matrix.md)
 
-상태 UI와 fallback UI를 확인하기 위한 디버그 URL 매트릭스는 아래 문서를 참고합니다.
+---
 
-- [docs/work/test-notes/debug-url-matrix.md](docs/work/test-notes/debug-url-matrix.md)
-- [docs/work/0310/debug-url-matrix.md](docs/work/0310/debug-url-matrix.md)
+## 💻 Local Development
 
-## Documentation
+설치:
 
-### Release
+```bash
+npm install
+npm --prefix server install
+```
 
-- [2026-03-16 v0.3.0](docs/release/2026-03-16-v0.3.0.md)
-- [2026-03-17 v0.3.0](docs/release/2026-03-17-v0.3.0.md)
-- [2026-04-02 v1.0.0](docs/release/2026-04-02-v1.0.0.md)
+기본 테스트:
 
-### Logs
+```bash
+npm test
+```
 
-- [2026-03-09 release log v0.2.4](docs/logs/2026-03-09-release-log-0.2.4.md)
-- [2026-03-10 retrospective](docs/logs/2026-03-10-retrospective.md)
-- [2026-03-16 release log v0.3.0](docs/logs/2026-03-16-release-log-0.3.0.md)
-- [2026-03-17 release log v0.3.0](docs/logs/2026-03-17-release-log-0.3.0.md)
-- [2026-04-02 release diff review](docs/logs/2026-04-02-release-0.3.0-diff-review.md)
+---
 
-### Work
+## 📝 Documentation
 
-- [2026-04-01 work](docs/work/2026-04-01-work.md)
-- [2026-04-02 work](docs/work/2026-04-02-work.md)
-- [2026-03-10 project testing roadmap](docs/work/0310/2026-03-10-project-testing-roadmap.md)
-- [2026-03-10 work](docs/work/0310/2026-03-10-work.md)
-- [2026-03-16 work](docs/work/0315/2026-03-16-work.md)
-- [2026-03-17 work](docs/work/0317/2026-03-17-work.md)
+릴리즈 문서:
 
-### Test Notes
+- [2026-04-02 v1.0.0](./docs/release/2026-04-02-v1.0.0.md)
+- [2026-03-17 v0.3.0](./docs/release/2026-03-17-v0.3.0.md)
 
-- [debug URL matrix](docs/work/test-notes/debug-url-matrix.md)
-- [scroll test](docs/work/test-notes/scroll-test.md)
+작업 로그:
 
-## Branch Strategy
+- [2026-04-02 work](./docs/work/2026-04-02-work.md)
+- [2026-04-01 work](./docs/work/2026-04-01-work.md)
 
-- `main`: 프로덕션 메인 브랜치
-- `dev`: 통합 개발 브랜치
-- `release/x.y.z`: 릴리즈 정리 및 검증 브랜치
-- `hotfix/x.y.z`: 배포 이후 긴급 수정 브랜치
+릴리즈 리뷰 / 로그:
 
-## Notes
+- [2026-04-02 release diff review](./docs/logs/2026-04-02-release-0.3.0-diff-review.md)
 
-- 프로덕션 배포 이후 이슈 대응은 `hotfix` 브랜치를 생성해 진행합니다.
-- 빌드 시 `Browserslist: caniuse-lite is outdated` 경고가 보일 수 있으며, 이는 배포 차단 이슈는 아닙니다.
+---
+
+## 🧠 Summary
+
+이 프로젝트는 단순한 UI 구현을 넘어, 실제 서비스 운영을 고려한 상태 처리, 라우팅 설계, 배포 구조까지 포함한 프론트엔드 아키텍처 경험을 목표로 진행되었습니다.
