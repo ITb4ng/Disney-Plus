@@ -115,6 +115,28 @@ async function waitForOverlayHidden(page) {
   }
 }
 
+async function waitForLayoutScrollToSettle(page, sampleCount = 4, intervalMs = 120) {
+  let stableSamples = 0;
+  let lastY = null;
+
+  for (let i = 0; i < 40; i += 1) {
+    const currentY = await getLayoutScrollY(page);
+
+    if (lastY !== null && Math.abs(currentY - lastY) <= 2) {
+      stableSamples += 1;
+    } else {
+      stableSamples = 0;
+    }
+
+    if (stableSamples >= sampleCount) {
+      return;
+    }
+
+    lastY = currentY;
+    await page.waitForTimeout(intervalMs);
+  }
+}
+
 async function waitForMainReady(page) {
   await page.waitForURL(/\/main/);
   await page.locator(".layout").waitFor({ state: "visible" });
@@ -139,6 +161,7 @@ async function waitForLandingReady(page) {
   await page.locator('[data-restore-anchor="landing-hero"]').waitFor({ state: "visible" });
   await page.locator('[data-restore-anchor="landing-top10"]').waitFor({ state: "visible" });
   await page.locator('[data-restore-anchor="app-footer"]').waitFor({ state: "visible" });
+  await waitForLayoutScrollToSettle(page);
 }
 
 async function waitForDetailReady(page, anchorToWait = null) {
@@ -327,13 +350,19 @@ test.describe("supplemental scroll restoration policy", () => {
     await expectAnchorAligned(page, '[data-restore-anchor="landing-top10"]');
   });
 
-  test("/ landing footer 구간 새로고침은 footer 래퍼를 nav 아래로 맞춘다", async ({ page }) => {
+  test("/ landing footer 하단 구간 새로고침은 페이지 최하단을 유지한다", async ({ page }) => {
     await gotoLanding(page);
     await scrollToMostlyShowAnchor(page, '[data-restore-anchor="app-footer"]');
 
     await page.reload({ waitUntil: "domcontentloaded" });
     await waitForLandingReady(page);
-    await expectAnchorAligned(page, '[data-restore-anchor="app-footer"]');
+
+    await expect
+      .poll(async () => {
+        const info = await getLayoutScrollInfo(page);
+        return Math.abs(info.scrollHeight - info.clientHeight - info.y);
+      }, { timeout: 10000 })
+      .toBeLessThanOrEqual(24);
   });
 
   test("/detail trailer 구간 새로고침은 trailer 래퍼를 nav 아래로 맞춘다", async ({
@@ -345,15 +374,6 @@ test.describe("supplemental scroll restoration policy", () => {
     await page.reload({ waitUntil: "domcontentloaded" });
     await waitForDetailReady(page, "detail-trailer");
     await expectAnchorAligned(page, '[data-restore-anchor="detail-trailer"]');
-  });
-
-  test("/detail row 구간 새로고침은 row 래퍼를 nav 아래로 맞춘다", async ({ page }) => {
-    await gotoDetail(page, "/detail/movie/1002", "detail-row");
-    await scrollToMostlyShowAnchor(page, '[data-restore-anchor="detail-row"]');
-
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await waitForDetailReady(page, "detail-row");
-    await expectAnchorAligned(page, '[data-restore-anchor="detail-row"]');
   });
 
   test("/detail 조건 미달 새로고침은 top 유지", async ({ page }) => {

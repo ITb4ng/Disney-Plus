@@ -1,8 +1,7 @@
-﻿# debug-url-matrix
+# debug-url-matrix
 
-이 문서는 `tests/` 기준의 실행용 URL 매트릭스입니다.
-상세 설명은 `docs/0310/debug-url-matrix.md`를 기준으로 유지하고,
-여기서는 실제 테스트 입력값만 빠르게 확인합니다.
+이 문서는 `tests/` 기준의 실행용 URL 매트릭스입니다.  
+상세 설명은 `docs/work/0310/debug-url-matrix.md`를 기준으로 유지하고, 여기서는 실제 테스트 입력값만 빠르게 확인합니다.
 
 기준 URL: `http://localhost:3000`
 
@@ -24,9 +23,19 @@
 - `error`
 - `empty`
 - `no-image`
+- `image-error`
 - `cdn-fail`
 
-## `/` LoginPage 예외 처리
+참고:
+- `image-error`는 이미지 `onError`를 강제로 발생시켜 fallback UI를 확인하는 상태다.
+- 이미지 기반 UI가 아닌 화면에서는 `image-error` 전용 분기가 없을 수 있다.
+
+## `/` LandingPage 예외 처리
+파라미터:
+- `debugState`: Landing 공통 상태를 hero/top10에 함께 주입
+- `heroDebug`: HeroSection 상태 UI를 개별 테스트
+- `top10Debug`: Top10Section 상태 UI를 개별 테스트
+
 - `/?debugState=success`
 - `/?debugState=loading`
 - `/?debugState=error`
@@ -35,8 +44,21 @@
 - `/?debugState=cdn-fail`
 - `/?heroDebug=loading&top10Debug=success`
 - `/?heroDebug=success&top10Debug=error`
+- `/?heroDebug=image-error&top10Debug=success`
+- `/?heroDebug=success&top10Debug=image-error`
+- `/?heroDebug=cdn-fail&top10Debug=no-image`
+
+참고:
+- 랜딩의 `image-error`는 공유 `debugState`보다 `heroDebug`, `top10Debug` 개별 주입으로 확인하는 편이 더 정확하다.
+- `heroDebug=image-error`는 hero fallback 배경과 안내 문구를 점검할 때 사용한다.
+- `top10Debug=image-error`는 Row 카드 이미지 fallback UI를 점검할 때 사용한다.
 
 ## `/main` MainPage 예외 처리
+파라미터:
+- `debugState`: Main 공통 상태를 row/banner에 함께 주입
+- `rowDebug`: Row 카드 상태 UI를 개별 테스트
+- `bannerDebug`: 배너 상태 UI와 이미지 fallback을 개별 테스트
+
 - `/main?debugState=success`
 - `/main?debugState=loading`
 - `/main?debugState=error`
@@ -46,17 +68,28 @@
 - `/main?rowDebug=loading&bannerDebug=success`
 - `/main?rowDebug=error&bannerDebug=success`
 - `/main?rowDebug=no-image&bannerDebug=cdn-fail`
+- `/main?rowDebug=image-error&bannerDebug=success`
 - `/main?bannerDebug=image-error`
 
 ## `/search` SearchPage 예외 처리
+파라미터:
+- `searchDebug`: 검색 결과 그리드와 상태 UI를 테스트
+
 - `/search?q=disney&searchDebug=success`
 - `/search?q=disney&searchDebug=loading`
 - `/search?q=disney&searchDebug=error`
 - `/search?q=disney&searchDebug=empty`
 - `/search?q=disney&searchDebug=no-image`
+- `/search?q=disney&searchDebug=image-error`
 - `/search?q=disney&searchDebug=cdn-fail`
+- `/search?q=disney&searchDebug=image-error`
 
 ## `/detail/:type/:movieId` DetailPage 예외 처리
+파라미터:
+- `debugState`: Detail 데이터 상태 UI를 테스트
+- `debugDelay`: loading 상태 체류 시간을 강제
+- `detailDebugState`: hero 이미지 fallback UI를 테스트
+
 - `/detail/movie/674?debugState=success`
 - `/detail/movie/674?debugState=loading`
 - `/detail/movie/674?debugState=error`
@@ -66,17 +99,37 @@
 - `/detail/movie/674?debugState=loading&debugDelay=1500`
 - `/detail/tv/1399?debugState=loading&debugDelay=1500`
 - `/detail/tv/1399?debugState=error`
+- `/detail/movie/674?debugState=success&detailDebugState=no-image`
+- `/detail/movie/674?debugState=success&detailDebugState=image-error`
+- `/detail/movie/674?debugState=success&detailDebugState=cdn-fail`
+- `/detail/tv/1399?debugState=success&detailDebugState=no-image`
+- `/detail/tv/1399?debugState=success&detailDebugState=image-error`
+- `/detail/tv/1399?debugState=success&detailDebugState=cdn-fail`
 
 참고:
 - `debugState`는 Detail 데이터 훅 상태(`loading|invalid|empty|error|success`)를 강제한다.
-- `no-image/cdn-fail`은 Detail 쿼리 파라미터가 아니라, 모달/네비게이션 state(`detailDebugState`) 경로에서 테스트한다.
+- `detailDebugState`는 hero 이미지 fallback 상태(`no-image|image-error|cdn-fail`)를 강제한다.
 - `/detail`은 보호 라우트이므로 로그인 상태가 아니면 `/login`으로 이동된다.
 
-### Detail 빠른 점검 세트 (샘플 디테일 보기에서 권장)
+### Detail 빠른 점검 세트
 - `/detail/movie/674?debugState=loading`
 - `/detail/movie/674?debugState=error`
 - `/detail/movie/674?debugState=empty`
 - `/detail/movie/674?debugState=invalid`
+- `/detail/movie/674?debugState=success&detailDebugState=image-error`
+
+## `/feedback` FeedbackPage 예외 처리
+파라미터:
+- `debug`: Feedback 목록 상태 UI와 안내 박스 디버그 상태를 테스트
+
+- `/feedback?debug=loading`
+- `/feedback?debug=empty`
+- `/feedback?debug=error`
+- `/feedback?debug=guest`
+- `/feedback?debug=refreshing`
+- `/feedback?debug=create-toast`
+- `/feedback?debug=delete-toast`
+- `/feedback/new`
 
 ## 스크롤 정책 빠른 점검
 - `/`
@@ -92,13 +145,11 @@
 - `tests/main-route-scroll-policy.spec.js`
 - `tests/cross-route-scroll-policy.spec.js`
 
-
-## tests-results
-- Failed라고 나오지만 의도된 환경입니다 모든 테스트 파일 중 2개는 PX단위로 Nav에 맞게 설정되게 해놓았는데 둘 다 근사값으로 수동 검증 후 의도되게 설정이 되었습니다.
+## test-results
+- Failed라고 보이는 항목이 있어도 의도된 환경일 수 있다. 일부 스크롤 정책 테스트는 `nav` 기준 px 근사값 검증이라 최종 판단은 수동 검증 결과와 함께 본다.
 
 ## 실행 예시
 ```bash
 npx playwright test tests/main-route-scroll-policy.spec.js --project=chromium
 npx playwright test tests/cross-route-scroll-policy.spec.js --project=chromium
 ```
-

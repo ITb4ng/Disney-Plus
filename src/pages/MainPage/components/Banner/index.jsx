@@ -6,6 +6,7 @@ import { getAppScrollY } from "../../../../utils/scrollPosition";
 import "./Banner.css";
 
 const DEV_BANNER_DEBUG_STATE = null;
+const FALLBACK_DEBUG_STATES = ["no-image", "image-error", "cdn-fail"];
 
 const getYear = (movie) => {
   const date = movie?.release_date || movie?.first_air_date || movie?.air_date || "";
@@ -70,7 +71,7 @@ const BannerContentView = ({
   bannerRef,
   movie,
   isDimmed,
-  isImageError,
+  isFallbackMode,
   goDetail,
   parallaxOffset,
   overlayStrength,
@@ -94,7 +95,7 @@ const BannerContentView = ({
   ].filter(Boolean);
 
   const backgroundImage =
-    !isImageError && movie?.backdrop_path
+    !isFallbackMode && movie?.backdrop_path
       ? `url("https://image.tmdb.org/t/p/original/${movie.backdrop_path}")`
       : "none";
 
@@ -102,7 +103,7 @@ const BannerContentView = ({
     <header
       ref={bannerRef}
       className={`banner ${isDimmed ? "is-dimmed" : ""} ${
-        isImageError ? "banner--image-fallback" : ""
+        isFallbackMode ? "banner--image-fallback" : ""
       }`}
       style={{ "--banner-overlay-progress": overlayStrength }}
     >
@@ -118,29 +119,56 @@ const BannerContentView = ({
 
       <div className="banner__overlay" />
 
-      <div className="banner__contents">
-        <h1 className="banner__title">{title}</h1>
-
-        {metaItems.length > 0 && (
-          <div className="banner__meta" aria-label="콘텐츠 메타 정보">
-            {metaItems.map((item, index) => (
-              <span className="banner__metaItem" key={`${item}-${index}`}>
-                {item}
-              </span>
-            ))}
+      <div
+        className={`banner__contents ${
+          isFallbackMode ? "banner__contents--fallback" : ""
+        }`}
+      >
+        {isFallbackMode ? (
+          <div className="banner__fallbackPanel" aria-live="polite">
+            <img className="banner__fallbackLogo" src="/images/logo.svg" alt="Disney+" />
+            <div className="banner__fallbackEyebrow">배너 이미지 준비 중</div>
+            <h1 className="banner__title banner__title--fallback">{title}</h1>
+            <p className="banner__fallbackText">
+              이미지를 불러오지 못해 기본 안내 화면으로 표시하고 있습니다.
+            </p>
+            <div className="banner__buttons banner__buttons--fallback">
+              <button
+                type="button"
+                className="banner__button banner__button--primary"
+                onClick={goDetail}
+                aria-label="상세 페이지로 이동"
+              >
+                자세히 보기
+              </button>
+            </div>
           </div>
-        )}
+        ) : (
+          <>
+            <h1 className="banner__title">{title}</h1>
 
-        <div className="banner__buttons">
-          <button
-            type="button"
-            className="banner__button banner__button--primary"
-            onClick={goDetail}
-            aria-label="상세 페이지로 이동"
-          >
-            자세히 보기
-          </button>
-        </div>
+            {metaItems.length > 0 && (
+              <div className="banner__meta" aria-label="콘텐츠 메타 정보">
+                {metaItems.map((item, index) => (
+                  <span className="banner__metaItem" key={`${item}-${index}`}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="banner__buttons">
+              <button
+                type="button"
+                className="banner__button banner__button--primary"
+                onClick={goDetail}
+                aria-label="상세 페이지로 이동"
+              >
+                자세히 보기
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </header>
   );
@@ -159,7 +187,7 @@ const Banner = ({ debugState: debugStateProp = null }) => {
   const location = useLocation();
 
   const [isDimmed, setIsDimmed] = useState(false);
-  const [isImageError, setIsImageError] = useState(false);
+  const [isFallbackMode, setIsFallbackMode] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const [overlayStrength, setOverlayStrength] = useState(0);
 
@@ -171,7 +199,7 @@ const Banner = ({ debugState: debugStateProp = null }) => {
     if (debugState === "loading") return "loading";
     if (debugState === "error") return "error";
     if (debugState === "empty") return "empty";
-    if (debugState === "image-error") return "success";
+    if (FALLBACK_DEBUG_STATES.includes(debugState)) return "success";
     if (isLoading) return "loading";
     if (isError) return "error";
     if (!movie) return "empty";
@@ -258,29 +286,29 @@ const Banner = ({ debugState: debugStateProp = null }) => {
   }, [bannerStatus, resolvedMovie?.id]);
 
   useEffect(() => {
-    setIsImageError(false);
+    setIsFallbackMode(false);
   }, [resolvedMovie?.backdrop_path, debugState]);
 
   useEffect(() => {
     if (bannerStatus !== "success") {
-      setIsImageError(false);
+      setIsFallbackMode(false);
       return;
     }
 
-    if (debugState === "image-error") {
-      setIsImageError(true);
+    if (FALLBACK_DEBUG_STATES.includes(debugState)) {
+      setIsFallbackMode(true);
       return;
     }
 
     if (!resolvedMovie?.backdrop_path) {
-      setIsImageError(true);
+      setIsFallbackMode(true);
       return;
     }
 
     const img = new Image();
     img.src = `https://image.tmdb.org/t/p/original/${resolvedMovie.backdrop_path}`;
-    img.onload = () => setIsImageError(false);
-    img.onerror = () => setIsImageError(true);
+    img.onload = () => setIsFallbackMode(false);
+    img.onerror = () => setIsFallbackMode(true);
   }, [bannerStatus, resolvedMovie?.backdrop_path, debugState]);
 
   if (bannerStatus === "loading") {
@@ -295,7 +323,7 @@ const Banner = ({ debugState: debugStateProp = null }) => {
         title="배너를 불러오지 못했습니다."
         description={
           debugState === "error"
-            ? "개발용 오류 상태입니다. 배너 에러 UI를 확인해 주세요."
+            ? "개발용 에러 상태입니다. 배너 에러 UI를 확인해 주세요."
             : error?.message || "네트워크 상태 또는 API 응답을 확인해 주세요."
         }
       />
@@ -318,7 +346,7 @@ const Banner = ({ debugState: debugStateProp = null }) => {
       bannerRef={bannerRef}
       movie={resolvedMovie}
       isDimmed={isDimmed}
-      isImageError={isImageError}
+      isFallbackMode={isFallbackMode}
       goDetail={goDetail}
       parallaxOffset={parallaxOffset}
       overlayStrength={overlayStrength}

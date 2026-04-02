@@ -1,6 +1,17 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState,useCallback } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import { Helmet } from "react-helmet-async";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
 import requests from "../../api/request";
 import Row from "../../components/Row";
@@ -12,13 +23,17 @@ import DetailStateView from "./components/DetailStateView";
 import { normalizeDebugState } from "../../utils/debugState";
 
 import "./DetailPage.css";
+
 const INITIAL_PATHNAME =
   typeof window !== "undefined" ? window.location.pathname : "";
+
 const INITIAL_NAVIGATION_TYPE = (() => {
   if (typeof window === "undefined") return "navigate";
 
   try {
-    return window.performance?.getEntriesByType?.("navigation")?.[0]?.type || "navigate";
+    return (
+      window.performance?.getEntriesByType?.("navigation")?.[0]?.type || "navigate"
+    );
   } catch {
     return "navigate";
   }
@@ -34,33 +49,51 @@ export default function DetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { type, movieId } = useParams();
+
   const shouldPreserveInitialReloadScroll = useMemo(() => {
     if (!location.pathname.startsWith("/detail/")) return false;
     if (location.pathname !== INITIAL_PATHNAME) return false;
 
-    return INITIAL_NAVIGATION_TYPE === "reload" || INITIAL_NAVIGATION_TYPE === "navigate";
+    return (
+      INITIAL_NAVIGATION_TYPE === "reload" ||
+      INITIAL_NAVIGATION_TYPE === "navigate"
+    );
   }, [location.pathname]);
+
   const from = location.state?.from;
   const returnScrollY =
     typeof location.state?.scrollY === "number"
       ? location.state.scrollY
       : location.state?.restoreScrollY;
+
+  /**
+   * Detail hero 전용 디버그 상태
+   * - 메인/모달에서 들어올 때는 location.state.detailDebugState 우선
+   * - 직접 진입 테스트용으로 query도 보조 허용
+   */
   const detailDebugStateFromQuery = normalizeDebugState(
     searchParams.get("detailDebugState"),
-    ["no-image", "cdn-fail"],
+    ["success", "no-image", "image-error", "cdn-fail"],
     ""
   );
-  const detailDebugState = location.state?.detailDebugState || detailDebugStateFromQuery;
-  const forceNoHeroImage =
-    detailDebugState === "no-image" || detailDebugState === "cdn-fail";
 
-  // 상태 처리
+  const detailDebugState =
+    location.state?.detailDebugState || detailDebugStateFromQuery || "success";
+
+  const isHeroNoImage = detailDebugState === "no-image";
+  const isHeroImageError = detailDebugState === "image-error";
+  const isHeroCdnFail = detailDebugState === "cdn-fail";
+
+  const shouldShowHeroFallback =
+    isHeroNoImage || isHeroImageError || isHeroCdnFail;
+
   useLayoutEffect(() => {
     if (shouldPreserveInitialReloadScroll) {
       return undefined;
     }
 
     const layout = document.querySelector(".layout");
+
     const scrollLayoutToTop = () => {
       if (!layout) return;
       const oy = window.getComputedStyle(layout).overflowY;
@@ -71,6 +104,7 @@ export default function DetailPage() {
 
     scrollLayoutToTop();
     window.scrollTo(0, 0);
+
     requestAnimationFrame(() => {
       scrollLayoutToTop();
       window.scrollTo(0, 0);
@@ -81,22 +115,6 @@ export default function DetailPage() {
     type,
     movieId
   );
-
-  // 디버깅 용
-  /*
-  const handleRetry = () => {
-    const params = new URLSearchParams(location.search);
-    params.delete("debugState");
-    params.delete("debugDelay");
-
-    navigate({
-      pathname: location.pathname,
-      search: params.toString() ? `?${params.toString()}` : "",
-    }, { replace: true });
-
-    retry();
-  };
-  */
 
   const [relatedState, setRelatedState] = useState({
     status: "idle", // idle | ready | empty
@@ -137,21 +155,27 @@ export default function DetailPage() {
   }, []);
 
   /* -------------------------
-     Hero preload
+     Hero image
+     success 일 때만 실제 이미지 사용
+     no-image / image-error / cdn-fail 은 fallback hero 사용
   ------------------------- */
+  const heroPath = useMemo(() => {
+    if (!data) return "";
+    return data?.backdrop_path || data?.poster_path || "";
+  }, [data]);
+
   const heroUrl = useMemo(() => {
     if (!data) return "";
-    if (forceNoHeroImage) return "";
+    if (shouldShowHeroFallback) return "";
 
-    const heroPath = data?.backdrop_path || data?.poster_path;
     if (!heroPath) return "";
 
-    if (window.innerWidth < 768) {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
       return `https://image.tmdb.org/t/p/original${heroPath}`;
     }
 
     return tmdbImg(heroPath, heroSize);
-  }, [data, heroSize, forceNoHeroImage]);
+  }, [data, heroPath, heroSize, shouldShowHeroFallback]);
 
   const [heroLoading, setHeroLoading] = useState(true);
 
@@ -161,8 +185,13 @@ export default function DetailPage() {
       return;
     }
 
+    if (shouldShowHeroFallback) {
+      setHeroLoading(false);
+      return;
+    }
+
     setHeroLoading(true);
-  }, [pageStatus, heroUrl]);
+  }, [pageStatus, heroUrl, shouldShowHeroFallback]);
 
   useEffect(() => {
     if (pageStatus !== "success") return;
@@ -330,12 +359,6 @@ export default function DetailPage() {
     }
     navigate(-1);
   };
-  
-  // const handleBack = () => {
-  //   navigate(from, {
-  //     state: { restoreScroll: scrollY },
-  //   });
-  // };
 
   const handleMoveHome = () => {
     navigate("/main", { replace: true });
@@ -388,7 +411,6 @@ export default function DetailPage() {
     [navigate, scrollDetailViewportToTop]
   );
 
-  // Detail 상태 분리 테스트 시 하단 Row도 함께 검증할 수 있도록 상태를 매핑한다.
   const stateRowDebugState =
     pageStatus === "loading" || pageStatus === "error" || pageStatus === "empty"
       ? pageStatus
@@ -422,7 +444,6 @@ export default function DetailPage() {
           onSearch={handleMoveSearch}
         />
 
-        {/* 상태 화면에서도 하단 Row를 유지해 상태+Row 동시 테스트가 가능하도록 처리 */}
         <section className="detail__below detail__below--padded">
           <Row
             title="자주 찾는 콘텐츠"
@@ -469,13 +490,25 @@ export default function DetailPage() {
             "--vig": vignette,
           }}
         >
-          {heroLoading && (
+          {heroLoading && !shouldShowHeroFallback && (
             <div className="detail__heroSk" aria-hidden="true">
               <div className="detail__heroSkShimmer" />
             </div>
           )}
 
           <div className="detail__vignette" />
+
+          {shouldShowHeroFallback && (
+            <div className="detail__heroFallback" aria-live="polite">
+              <div className="detail__heroFallbackInner">
+                <div className="detail__heroFallbackBadge">이미지 준비 중</div>
+                <h2 className="detail__heroFallbackTitle">{ui.title}</h2>
+                <p className="detail__heroFallbackDesc">
+                  콘텐츠 이미지를 불러올 수 없어 기본 화면으로 표시하고 있습니다.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="detail__heroInner">
             <div className="detail__left">
@@ -627,4 +660,3 @@ export default function DetailPage() {
     </>
   );
 }
-

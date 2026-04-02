@@ -346,8 +346,7 @@ describe("Row", () => {
 
     await waitFor(() => {
       const map = readSwipeMap();
-      expect(map["/main::TR"]).toBeDefined();
-      expect(map["/main::TR"].activeIndex).toBe(2);
+      expect(map["/main::TR"]?.activeIndex).toBe(2);
     });
 
     expect(screen.getByTestId("swiper")).toHaveAttribute("data-active-index", "2");
@@ -393,8 +392,9 @@ describe("Row", () => {
     await waitFor(() => {
       const map = readSwipeMap();
       expect(map["/main::TR"].activeIndex).toBe(2);
-      expect(map["/main::CM"].activeIndex).toBe(1);
     });
+
+    expect(readSwipeMap()["/main::CM"].activeIndex).toBe(1);
   });
 
   test("같은 query로 재마운트되면 데이터를 다시 요청하지 않는다", async () => {
@@ -504,9 +504,10 @@ describe("Row", () => {
     await flushAsync();
 
     await waitFor(() => {
-      expect(document.querySelector(".rowShell")).toHaveAttribute("data-touch", "1");
+      expect(screen.getByTestId("row-shell")).toHaveAttribute("data-touch", "1");
     });
 
-    expect(document.querySelector(".arrowZone")).toBeNull();
+    expect(screen.queryByTestId("row-prev-button")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("row-next-button")).not.toBeInTheDocument();
   });
 });

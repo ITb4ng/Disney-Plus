@@ -1,8 +1,10 @@
-import React, { useEffect, useCallback, useRef } from "react";
+import React, { useEffect, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { getAppScrollY, setAppScrollY } from "../../utils/scrollPosition";
+
+const DEBUG_BROKEN_IMAGE_SRC = "data:image/png;base64,invalid";
 
 const MovieModal = ({
   title,
@@ -17,15 +19,36 @@ const MovieModal = ({
   isLoggedIn = false,
   sourcePath = "/",
   sourceTag = "top10",
-  debugState,
+  debugState = "success",
 }) => {
   const navigate = useNavigate();
   const openedScrollYRef = useRef(0);
   const shouldRestoreOnUnmountRef = useRef(true);
+
   const displayTitle = title || name || "제목 없음";
   const imgPath = backdrop_path || poster_path;
   const detailType = media_type || "movie";
   const detailId = id;
+
+  const [isImageError, setIsImageError] = useState(false);
+
+  useEffect(() => {
+    setIsImageError(false);
+  }, [imgPath, debugState]);
+
+  const shouldForceImageError =
+    debugState === "image-error" || debugState === "cdn-fail";
+
+  const shouldHideImage = debugState === "no-image";
+
+  const imageSrc = shouldForceImageError
+    ? DEBUG_BROKEN_IMAGE_SRC
+    : imgPath
+    ? `https://image.tmdb.org/t/p/original${imgPath}`
+    : null;
+
+  const showHeroImage = !shouldHideImage && !isImageError && Boolean(imageSrc);
+  const showFallbackHero = shouldHideImage || isImageError || !imageSrc;
 
   const close = useCallback(() => {
     setModalOpen(false);
@@ -36,8 +59,6 @@ const MovieModal = ({
     shouldRestoreOnUnmountRef.current = false;
     close();
 
-    // 로그인이 아니면 로그인 페이지로 이동하면서
-    // 클릭한 콘텐츠 정보를 state로 함께 전달합니다.
     if (!isLoggedIn) {
       navigate("/login", {
         state: {
@@ -56,7 +77,6 @@ const MovieModal = ({
       return;
     }
 
-    // 로그인 상태면 바로 detail로 이동합니다.
     if (detailId) {
       navigate(`/detail/${detailType}/${detailId}`, {
         state: {
@@ -95,6 +115,7 @@ const MovieModal = ({
     const lockWindowY = window.scrollY || 0;
     const appScrollY = getAppScrollY();
     openedScrollYRef.current = appScrollY;
+
     const prevOverflow = document.body.style.overflow;
     const prevPosition = document.body.style.position;
     const prevTop = document.body.style.top;
@@ -107,6 +128,7 @@ const MovieModal = ({
     document.body.style.position = "fixed";
     document.body.style.top = `-${lockWindowY}px`;
     document.body.style.width = "100%";
+
     if (layoutEl) {
       layoutEl.style.overflowY = "hidden";
       layoutEl.style.touchAction = "none";
@@ -122,6 +144,7 @@ const MovieModal = ({
       document.body.style.position = prevPosition;
       document.body.style.top = prevTop;
       document.body.style.width = prevWidth;
+
       if (layoutEl) {
         layoutEl.style.overflowY = prevLayoutOverflowY;
         layoutEl.style.touchAction = prevLayoutTouchAction;
@@ -151,15 +174,30 @@ const MovieModal = ({
           ×
         </CloseButton>
 
-        {imgPath && (
+        {showHeroImage && (
           <Hero>
             <HeroImg
-              src={`https://image.tmdb.org/t/p/original${imgPath}`}
+              src={imageSrc}
               alt={displayTitle}
               loading="lazy"
+              onError={() => {
+                setIsImageError(true);
+              }}
             />
             <HeroShade />
           </Hero>
+        )}
+
+        {showFallbackHero && (
+          <FallbackHero>
+            <FallbackHeroInner>
+              <FallbackBadge>이미지 준비 중</FallbackBadge>
+              <FallbackTitle>{displayTitle}</FallbackTitle>
+              <FallbackDesc>
+                콘텐츠 이미지를 불러올 수 없어 기본 화면으로 표시하고 있습니다.
+              </FallbackDesc>
+            </FallbackHeroInner>
+          </FallbackHero>
         )}
 
         <Content>
@@ -200,6 +238,7 @@ const MovieModal = ({
 };
 
 export default MovieModal;
+
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -230,8 +269,13 @@ const Overlay = styled.div`
 const Modal = styled.div`
   position: relative;
   z-index: 20001;
-  width: min(920px, calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)));
-  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  width: min(
+    920px,
+    calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right))
+  );
+  max-height: calc(
+    100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
 
   background: rgba(15, 17, 20, 0.98);
   border-radius: 14px;
@@ -243,8 +287,12 @@ const Modal = styled.div`
   isolation: isolate;
 
   @media (max-width: 768px) {
-    width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 20px);
-    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
+    width: calc(
+      100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 20px
+    );
+    max-height: calc(
+      100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px
+    );
     border-radius: 16px;
   }
 `;
@@ -321,6 +369,81 @@ const HeroShade = styled.div`
     rgba(0, 0, 0, 0) 30%,
     rgba(0, 0, 0, 0.75) 100%
   );
+`;
+
+const FallbackHero = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    #10141d;
+
+  display: flex;
+  align-items: flex-end;
+
+  @media (max-width: 768px) {
+    aspect-ratio: 16 / 8.4;
+  }
+
+  @media (max-width: 480px) {
+    aspect-ratio: 16 / 7.8;
+  }
+
+  @media (max-width: 360px) {
+    aspect-ratio: 16 / 7.2;
+  }
+`;
+
+const FallbackHeroInner = styled.div`
+  width: 100%;
+  padding: 24px;
+
+  @media (max-width: 768px) {
+    padding: 18px;
+  }
+
+  @media (max-width: 390px) {
+    padding: 14px;
+  }
+`;
+
+const FallbackBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+`;
+
+const FallbackTitle = styled.div`
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+`;
+
+const FallbackDesc = styled.p`
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+
+  @media (max-width: 390px) {
+    font-size: 12px;
+  }
 `;
 
 const Content = styled.div`

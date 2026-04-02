@@ -21,8 +21,9 @@ const SKELETON_COUNT = 10;
 const ERROR_FALLBACK_COUNT = 6;
 const IMG_BASE = "https://image.tmdb.org/t/p/original";
 const ROW_SWIPE_KEY = "row:swipe:v1";
+const DEBUG_BROKEN_IMAGE_SRC = "/__debug__/force-image-error.jpg";
 
-// Row ?ㅼ??댄봽 ?곹깭 罹먯떆
+// Row 공용 스와이프 상태 캐시
 const ROW_CACHE = new Map();
 
 function loadSwipeMap() {
@@ -41,6 +42,7 @@ function normalizeSwipeState(raw) {
   if (typeof raw === "number") {
     return { activeIndex: raw, translate: null, progress: null };
   }
+
   if (raw && typeof raw === "object") {
     return {
       activeIndex: Number.isFinite(Number(raw.activeIndex))
@@ -49,17 +51,21 @@ function normalizeSwipeState(raw) {
       translate: Number.isFinite(Number(raw.translate))
         ? Number(raw.translate)
         : null,
-      progress: Number.isFinite(Number(raw.progress)) ? Number(raw.progress) : null,
+      progress: Number.isFinite(Number(raw.progress))
+        ? Number(raw.progress)
+        : null,
     };
   }
+
   return { activeIndex: 0, translate: null, progress: null };
 }
 
-/* =========================================================
-   移대뱶 誘몃뵒???뚮뜑留?
-   - ?대?吏媛 ?녾굅??濡쒕뱶???ㅽ뙣?섎㈃ fallback UI瑜??쒖떆?⑸땲??
-   - Top10 ?붾쾭洹??곹깭?먯꽌??以묒븰 ?덈궡 臾멸뎄瑜??④퍡 ?몄텧?⑸땲??
-========================================================= */
+/**
+ * 카드 미디어 영역
+ * - no-image: 이미지 경로 자체가 없음
+ * - cdn-fail: 이미지를 아예 숨기고 fallback UI만 표시
+ * - image-error: 존재하지 않는 이미지 경로를 넣어 onError를 강제로 발생시킴
+ */
 function CardMedia({
   imgPath,
   altText,
@@ -72,8 +78,20 @@ function CardMedia({
 }) {
   const [imgError, setImgError] = useState(false);
 
-  const hasImage = Boolean(imgPath) && !imgError && !forceFailImage;
+  useEffect(() => {
+    setImgError(false);
+  }, [imgPath, forceFailImage, debugState]);
+
   const isSuccessState = !debugState || debugState === "success";
+
+  const shouldForceImageError =
+    debugState === "image-error" && Boolean(imgPath) && !forceFailImage;
+
+  const imageSrc = shouldForceImageError
+    ? DEBUG_BROKEN_IMAGE_SRC
+    : `${IMG_BASE}${imgPath}`;
+
+  const hasImage = Boolean(imgPath) && !imgError && !forceFailImage;
   const showFallbackBadge = isSuccessState;
   const showCenteredReadyLabel = isTop10 && forceFailImage;
 
@@ -81,7 +99,7 @@ function CardMedia({
     <>
       {hasImage ? (
         <img
-          src={`${IMG_BASE}${imgPath}`}
+          src={imageSrc}
           alt={altText}
           loading="lazy"
           onError={() => {
@@ -91,11 +109,11 @@ function CardMedia({
       ) : (
         <FallbackMedia $isTop10={isTop10}>
           {showCenteredReadyLabel && (
-            <CenteredFallbackLabel>{"\uC774\uBBF8\uC9C0\uB97C \uC900\uBE44 \uC911\uC785\uB2C8\uB2E4"}</CenteredFallbackLabel>
+            <CenteredFallbackLabel>이미지를 준비 중입니다</CenteredFallbackLabel>
           )}
           <FallbackInner>
-            {showFallbackBadge && <FallbackBadge>{"\uC774\uBBF8\uC9C0 \uC900\uBE44 \uC911"}</FallbackBadge>}
-            <FallbackTitle>{titleText || "\uC81C\uBAA9\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4"}</FallbackTitle>
+            {showFallbackBadge && <FallbackBadge>이미지 준비 중</FallbackBadge>}
+            <FallbackTitle>{titleText || "제목을 불러오지 못했습니다"}</FallbackTitle>
             {!!yearText && <FallbackMeta>{yearText}</FallbackMeta>}
           </FallbackInner>
         </FallbackMedia>
@@ -121,14 +139,14 @@ function DefaultRowErrorState() {
           <FiAlertCircle />
         </DefaultStateIcon>
         <DefaultStateText>
-          <DefaultStateTitle>{"\uCF58\uD150\uCE20\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4."}</DefaultStateTitle>
+          <DefaultStateTitle>콘텐츠를 불러오지 못했습니다.</DefaultStateTitle>
           <DefaultStateDesc>
-            {"\uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574 \uC8FC\uC138\uC694. \uBB38\uC81C\uAC00 \uACC4\uC18D\uB418\uBA74 \uD398\uC774\uC9C0\uB97C \uC0C8\uB85C\uACE0\uCE68\uD574 \uC8FC\uC138\uC694."}
+            잠시 후 다시 시도해 주세요. 문제가 계속되면 페이지를 새로고침해 주세요.
           </DefaultStateDesc>
         </DefaultStateText>
         <DefaultStateRetry type="button" onClick={() => window.location.reload()}>
           <FiRefreshCw />
-          <span>{"\uC0C8\uB85C\uACE0\uCE68"}</span>
+          <span>새로고침</span>
         </DefaultStateRetry>
       </DefaultStateBox>
     </DefaultStateWrap>
@@ -143,9 +161,9 @@ function DefaultRowEmptyState() {
           <FiInbox />
         </DefaultStateIcon>
         <DefaultStateText>
-          <DefaultStateTitle>{"\uD45C\uC2DC\uD560 \uCF58\uD150\uCE20\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."}</DefaultStateTitle>
+          <DefaultStateTitle>표시할 콘텐츠가 없습니다.</DefaultStateTitle>
           <DefaultStateDesc>
-            {"\uB2E4\uB978 \uCE74\uD14C\uACE0\uB9AC\uB97C \uC120\uD0DD\uD558\uAC70\uB098 \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574 \uC8FC\uC138\uC694."}
+            다른 카테고리를 선택하거나 잠시 후 다시 시도해 주세요.
           </DefaultStateDesc>
         </DefaultStateText>
       </DefaultStateBox>
@@ -164,18 +182,17 @@ const Row = ({
   onLoaded,
   query: queryProp,
 
-  // 湲곕낯 Row / Top10 怨듯넻 props
+  // 기본 Row / Top10 공통 props
   variant = "default", // "default" | "top10"
   limit,
   disableOverlay = false,
   useExternalNav = false,
   onSwiperReady,
   onNavStateChange,
-  emptyMessage = "\uD45C\uC2DC\uD560 \uCF58\uD150\uCE20\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.",
-  errorMessage = "\uCF58\uD150\uCE20\uB97C \uBD88\uB7EC\uC624\uB294 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.",
+  emptyMessage = "표시할 콘텐츠가 없습니다.",
+  errorMessage = "콘텐츠를 불러오는 중 오류가 발생했습니다.",
 
-  // ?붾쾭洹몄슜 媛뺤젣 ?곹깭
-  // "loading" | "error" | "empty" | "no-image" | "cdn-fail"
+  // "loading" | "error" | "empty" | "no-image" | "image-error" | "cdn-fail"
   debugState,
 }) => {
   const [movies, setMovies] = useState([]);
@@ -194,6 +211,7 @@ const Row = ({
     isBeginning: true,
     isEnd: false,
   });
+
   const navStateRef = useRef({
     isBeginning: true,
     isEnd: false,
@@ -203,11 +221,14 @@ const Row = ({
   const isLoggedIn = Boolean(userData);
   const sourcePath = location.pathname || "/";
   const sourceTag = isTop10 ? "top10" : "row";
+
   const rowRouteKey = useMemo(
     () => `${location.pathname || "/"}${location.search || ""}`,
     [location.pathname, location.search]
   );
+
   const swipeStoreKey = useMemo(() => `${rowRouteKey}::${id}`, [rowRouteKey, id]);
+
   const isReloadEntry = useMemo(() => {
     try {
       const nav = performance.getEntriesByType("navigation")?.[0];
@@ -216,17 +237,21 @@ const Row = ({
       return false;
     }
   }, []);
+
   const isDetailRoute = location.pathname.startsWith("/detail/");
+
   const hasRestoreEntry = isDetailRoute
     ? isReloadEntry
     : location.state?.restoreScroll === true ||
       navActionType === "POP" ||
       isReloadEntry;
+
   const restoreSwipeState = useMemo(() => {
     if (!hasRestoreEntry) return normalizeSwipeState(0);
     const map = loadSwipeMap();
     return normalizeSwipeState(map[swipeStoreKey]);
   }, [hasRestoreEntry, swipeStoreKey]);
+
   const shouldRestoreSwipe =
     hasRestoreEntry &&
     (restoreSwipeState.activeIndex > 0 ||
@@ -235,9 +260,6 @@ const Row = ({
       (Number.isFinite(restoreSwipeState.progress) &&
         Number(restoreSwipeState.progress) > 0.01));
 
-  /* -----------------------------
-     터치 기기 여부를 감지해 인터랙션 방식을 분기
-  ----------------------------- */
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
@@ -248,10 +270,11 @@ const Row = ({
 
     const sync = () => {
       const hasTouchPoints =
-        Number(window.navigator?.maxTouchPoints || window.navigator?.msMaxTouchPoints || 0) >
-        0;
-      const touchCapable = hasTouchPoints || mqTouch.matches || mqAnyCoarse.matches;
+        Number(
+          window.navigator?.maxTouchPoints || window.navigator?.msMaxTouchPoints || 0
+        ) > 0;
 
+      const touchCapable = hasTouchPoints || mqTouch.matches || mqAnyCoarse.matches;
       setIsTouchDevice(touchCapable);
     };
 
@@ -265,7 +288,6 @@ const Row = ({
     };
   }, []);
 
-  /* -----------------------------`r`n     API ??汝뷴젆?琉????????ろ떀癲?UI ?????????饔낅떽??????蹂Β??????????r`n  ----------------------------- */
   const queryObj = useMemo(() => {
     const src = queryProp ?? fetchUrl;
     if (!src) return null;
@@ -299,7 +321,6 @@ const Row = ({
     return typeof src === "string" ? src : JSON.stringify(src ?? {});
   }, [queryProp, fetchUrl]);
 
-  /* -----------------------------`r`n     API ??汝뷴젆?琉????????ろ떀癲?UI ?????????饔낅떽??????蹂Β??????????r`n  ----------------------------- */
   useEffect(() => {
     if (debugState === "loading") {
       setIsLoading(true);
@@ -385,9 +406,6 @@ const Row = ({
     };
   }, [queryObj, queryKey, id, onLoaded, debugState]);
 
-  /* -----------------------------
-     API ??棺堉?뤃???????リ틖濾?UI ????癲????轅붽틓????볥??????????
-  ----------------------------- */
   const normalizedMovies = useMemo(() => {
     const sourceMovies = movies.map((movie) => ({
       ...movie,
@@ -396,7 +414,7 @@ const Row = ({
         movie?.name ||
         movie?.original_title ||
         movie?.original_name ||
-        "\uC81C\uBAA9 \uC5C6\uB294 \uCF58\uD150\uCE20",
+        "제목 없는 콘텐츠",
       _dateText: movie?.release_date || movie?.first_air_date || "",
       _yearText: (movie?.release_date || movie?.first_air_date || "").slice(0, 4),
       _imgPath: movie?.backdrop_path || movie?.poster_path || "",
@@ -411,7 +429,7 @@ const Row = ({
           }))
         : Array.from({ length: isTop10 ? 10 : 6 }, (_, idx) => ({
             id: `no-image-${id}-${idx}`,
-            _titleText: `\uC774\uBBF8\uC9C0 \uC5C6\uC74C \uCF58\uD150\uCE20 ${idx + 1}`,
+            _titleText: `이미지 없음 콘텐츠 ${idx + 1}`,
             _yearText: "2025",
             _imgPath: "",
             _altText: "fallback movie",
@@ -436,7 +454,7 @@ const Row = ({
         (_, i) => ({
           id: `fb-${id}-${i}`,
           _fb: true,
-          _titleText: "\uC774\uBBF8\uC9C0\uB97C \uBD88\uB7EC\uC62C \uC218 \uC5C6\uB294 \uCF58\uD150\uCE20",
+          _titleText: "이미지를 불러올 수 없는 콘텐츠",
           _yearText: "",
         })
       ),
@@ -446,8 +464,6 @@ const Row = ({
   const handleClick = (movie) => {
     if (movie?._fb || movie?._sk) return;
 
-    // 移대뱶 ?대┃ 吏곸쟾???꾩옱 ?ㅼ??댄띁 ?ㅻ퉬寃뚯씠???곹깭瑜???踰????숆린?뷀빀?덈떎.
-    // ?곗튂/?ㅻ낫??留덉슦???대뒓 ?낅젰?대뱺 ?숈씪???곸꽭 ?대룞 ?먮쫫???좎??섍린 ?꾪븳 泥섎━?낅땲??
     if (swiperRef.current && !swiperRef.current.destroyed) {
       syncNav(swiperRef.current);
     }
@@ -459,7 +475,8 @@ const Row = ({
       }
 
       const typeGuess = navType || movie?.media_type || "movie";
-        navigate(`/detail/${typeGuess}/${movie.id}`, {
+
+      navigate(`/detail/${typeGuess}/${movie.id}`, {
         replace: true,
         state: {
           from: location.pathname + location.search,
@@ -475,43 +492,44 @@ const Row = ({
     setModalOpen(true);
     setMovieSelection({
       ...movie,
-      // no-image / cdn-fail ?붾쾭洹??곹깭?먯꽌??紐⑤떖 ?대?吏???④꺼??fallback ?곹깭瑜??쇨??섍쾶 ?뺤씤?⑸땲??
       backdrop_path: shouldHideModalImage ? null : movie?.backdrop_path,
       poster_path: shouldHideModalImage ? null : movie?.poster_path,
+      rowDebugState: debugState,
     });
   };
 
   const syncNav = useCallback(
-  (swiper) => {
-    const nextState = {
-      isBeginning: swiper.isBeginning,
-      isEnd: swiper.isEnd,
-    };
-    const prevState = navStateRef.current;
-
-    if (
-      prevState.isBeginning !== nextState.isBeginning ||
-      prevState.isEnd !== nextState.isEnd
-    ) {
-      navStateRef.current = nextState;
-      setNavState(nextState);
-      onNavStateChange?.(nextState);
-    }
-
-    const activeIndex = Number(swiper?.activeIndex ?? 0);
-
-    if (!isLoading && Number.isFinite(activeIndex) && activeIndex >= 0) {
-      const map = loadSwipeMap();
-      map[swipeStoreKey] = {
-        activeIndex,
-        translate: Number(swiper?.translate ?? 0),
-        progress: Number(swiper?.progress ?? 0),
+    (swiper) => {
+      const nextState = {
+        isBeginning: swiper.isBeginning,
+        isEnd: swiper.isEnd,
       };
-      saveSwipeMap(map);
-    }
-  },
-  [onNavStateChange, swipeStoreKey, isLoading]
-);
+
+      const prevState = navStateRef.current;
+
+      if (
+        prevState.isBeginning !== nextState.isBeginning ||
+        prevState.isEnd !== nextState.isEnd
+      ) {
+        navStateRef.current = nextState;
+        setNavState(nextState);
+        onNavStateChange?.(nextState);
+      }
+
+      const activeIndex = Number(swiper?.activeIndex ?? 0);
+
+      if (!isLoading && Number.isFinite(activeIndex) && activeIndex >= 0) {
+        const map = loadSwipeMap();
+        map[swipeStoreKey] = {
+          activeIndex,
+          translate: Number(swiper?.translate ?? 0),
+          progress: Number(swiper?.progress ?? 0),
+        };
+        saveSwipeMap(map);
+      }
+    },
+    [onNavStateChange, swipeStoreKey, isLoading]
+  );
 
   const restoreSwipePosition = useCallback(
     (swiper, targetStateRaw) => {
@@ -535,8 +553,10 @@ const Row = ({
         if (hasTranslate) {
           const a = Number(swiper.minTranslate?.());
           const b = Number(swiper.maxTranslate?.());
-          const lower = Number.isFinite(a) && Number.isFinite(b) ? Math.min(a, b) : null;
-          const upper = Number.isFinite(a) && Number.isFinite(b) ? Math.max(a, b) : null;
+          const lower =
+            Number.isFinite(a) && Number.isFinite(b) ? Math.min(a, b) : null;
+          const upper =
+            Number.isFinite(a) && Number.isFinite(b) ? Math.max(a, b) : null;
 
           boundedTranslate =
             lower !== null && upper !== null
@@ -564,10 +584,12 @@ const Row = ({
         const reachedByIndex =
           Math.abs(current - boundedIndex) <= 1 ||
           (swiper.isEnd && boundedIndex >= maxIndex - 1);
+
         const reachedByTranslate =
           boundedTranslate !== null &&
           Number.isFinite(swiper.translate) &&
           Math.abs(Number(swiper.translate) - boundedTranslate) <= 2;
+
         const reached = reachedByIndex || reachedByTranslate;
 
         if (reached || tries >= maxTries) return;
@@ -583,36 +605,35 @@ const Row = ({
     [syncNav]
   );
 
-  /* -----------------------------
-     로딩이 끝난 뒤 스와이퍼 치수와 저장된 위치를 다시 동기화
-  ----------------------------- */
   useEffect(() => {
-  const swiper = swiperRef.current;
-  if (!swiper) return;
-  if (isLoading) return;
-  if (hasError) return;
-  if (!limitedMovies.length) return;
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+    if (isLoading) return;
+    if (hasError) return;
+    if (!limitedMovies.length) return;
 
-  const rafId = requestAnimationFrame(() => {
-    if (!swiper || swiper.destroyed) return;
+    const rafId = requestAnimationFrame(() => {
+      if (!swiper || swiper.destroyed) return;
 
-    swiper.update();
-    if (shouldRestoreSwipe) {
-      restoreSwipePosition(swiper, restoreSwipeState);
-    }
-    syncNav(swiper);
-  });
+      swiper.update();
 
-  return () => cancelAnimationFrame(rafId);
-}, [
-  isLoading,
-  hasError,
-  limitedMovies.length,
-  shouldRestoreSwipe,
-  restoreSwipeState,
-  restoreSwipePosition,
-  syncNav,
-]);
+      if (shouldRestoreSwipe) {
+        restoreSwipePosition(swiper, restoreSwipeState);
+      }
+
+      syncNav(swiper);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [
+    isLoading,
+    hasError,
+    limitedMovies.length,
+    shouldRestoreSwipe,
+    restoreSwipeState,
+    restoreSwipePosition,
+    syncNav,
+  ]);
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -629,16 +650,12 @@ const Row = ({
     swiper.update?.();
   }, [isLoading]);
 
-  /* -----------------------------
-     내부 화살표 사용 여부와 좌우 상태 계산
-  ----------------------------- */
-  const useInternalArrows = !isLoading && !isTouchDevice && !useExternalNav && !isTop10;
+  const useInternalArrows =
+    !isLoading && !isTouchDevice && !useExternalNav && !isTop10;
+
   const showLeft = useInternalArrows && !navState.isBeginning;
   const disableRight = useInternalArrows && navState.isEnd;
 
-  /* -----------------------------
-     로딩 중 표시할 스켈레톤 카드 준비
-  ----------------------------- */
   const skeletonSlides = useMemo(
     () =>
       Array.from({ length: SKELETON_COUNT }, (_, i) => ({
@@ -656,8 +673,11 @@ const Row = ({
 
   const showOverlay = !disableOverlay && !isTop10;
   const isForcedCdnFail = debugState === "cdn-fail";
+
   const showBadge =
-    showRank && (!debugState || debugState === "success" || debugState === "loading");
+    showRank &&
+    (!debugState || debugState === "success" || debugState === "loading");
+
   const showDefaultErrorState = !isTop10 && debugState === "error";
   const showDefaultEmptyState = !isTop10 && debugState === "empty";
 
@@ -712,142 +732,145 @@ const Row = ({
       ) : (
         <RowShell
           className="rowShell"
+          data-testid="row-shell"
           data-left={showLeft ? "1" : "0"}
           data-loading={isLoading ? "1" : "0"}
           data-touch={isTouchDevice ? "1" : "0"}
           data-variant={isTop10 ? "top10" : "default"}
           $isTop10={isTop10}
         >
-        {useInternalArrows && (
-          <ArrowZone
-            className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
-            type="button"
-            aria-label={"\uC774\uC804 \uCF58\uD150\uCE20"}
-            aria-hidden={!showLeft}
-            onClick={() => {
-              if (!showLeft) return;
-              swiperRef.current?.slidePrev();
-            }}
-          >
-            <ArrowButton aria-hidden="true">
-              <ArrowIconLeft />
-            </ArrowButton>
-          </ArrowZone>
-        )}
+          {useInternalArrows && (
+            <ArrowZone
+              className={`arrowZone left ${showLeft ? "" : "isHidden"}`}
+              type="button"
+              data-testid="row-prev-button"
+              aria-label="이전 콘텐츠"
+              aria-hidden={!showLeft}
+              onClick={() => {
+                if (!showLeft) return;
+                swiperRef.current?.slidePrev();
+              }}
+            >
+              <ArrowButton aria-hidden="true">
+                <ArrowIconLeft />
+              </ArrowButton>
+            </ArrowZone>
+          )}
 
-        {useInternalArrows && (
-          <ArrowZone
-            className="arrowZone right"
-            type="button"
-            aria-label={"\uB2E4\uC74C \uCF58\uD150\uCE20"}
-            disabled={disableRight}
-            aria-disabled={disableRight}
-            onClick={() => {
-              if (disableRight) return;
-              swiperRef.current?.slideNext();
-            }}
-          >
-            <ArrowButton aria-hidden="true">
-              <ArrowIconRight />
-            </ArrowButton>
-          </ArrowZone>
-        )}
+          {useInternalArrows && (
+            <ArrowZone
+              className="arrowZone right"
+              type="button"
+              data-testid="row-next-button"
+              aria-label="다음 콘텐츠"
+              disabled={disableRight}
+              aria-disabled={disableRight}
+              onClick={() => {
+                if (disableRight) return;
+                swiperRef.current?.slideNext();
+              }}
+            >
+              <ArrowButton aria-hidden="true">
+                <ArrowIconRight />
+              </ArrowButton>
+            </ArrowZone>
+          )}
 
-        <SwiperArea
-          className="swiperArea"
-          $isTop10={isTop10}
-          data-variant={isTop10 ? "top10" : "default"}
-        >
-          <Swiper
-            modules={[A11y]}
-            onSwiper={(swiper) => {
-              swiperRef.current = swiper;
-              if (!isLoading) {
-                syncNav(swiper);
-              }
-              onSwiperReady?.(swiper);
-            }}
-            onSlideChange={syncNav}
-            onResize={syncNav}
-            {...(isTop10 ? top10SwiperProps : defaultSwiperProps)}
+          <SwiperArea
+            className="swiperArea"
+            $isTop10={isTop10}
+            data-variant={isTop10 ? "top10" : "default"}
           >
-            {renderList.map((movie, index) => {
-              if (movie?._sk) {
+            <Swiper
+              modules={[A11y]}
+              onSwiper={(swiper) => {
+                swiperRef.current = swiper;
+                if (!isLoading) {
+                  syncNav(swiper);
+                }
+                onSwiperReady?.(swiper);
+              }}
+              onSlideChange={syncNav}
+              onResize={syncNav}
+              {...(isTop10 ? top10SwiperProps : defaultSwiperProps)}
+            >
+              {renderList.map((movie, index) => {
+                if (movie?._sk) {
+                  return (
+                    <SwiperSlide key={movie.id}>
+                      <Wrap className="skWrap" aria-hidden="true" $isTop10={isTop10}>
+                        <div className="skCard" />
+                        <div className="skMeta">
+                          <div className="skTitle" />
+                          <div className="skYear" />
+                        </div>
+                      </Wrap>
+                    </SwiperSlide>
+                  );
+                }
+
+                if (movie?._fb) {
+                  return (
+                    <SwiperSlide key={movie.id}>
+                      <Wrap className="fbWrap" aria-hidden="true" $isTop10={isTop10}>
+                        {showBadge && <RankBadge $isTop10={isTop10}>{index + 1}</RankBadge>}
+                        <FallbackMedia $isTop10={isTop10}>
+                          <FallbackInner>
+                            {!debugState && <FallbackBadge>이미지 없음</FallbackBadge>}
+                            <FallbackTitle>{movie._titleText}</FallbackTitle>
+                          </FallbackInner>
+                        </FallbackMedia>
+                      </Wrap>
+                    </SwiperSlide>
+                  );
+                }
+
+                const titleText = movie._titleText;
+                const yearText = movie._yearText;
+                const imgPath = movie._imgPath;
+                const altText = movie._altText;
+                const rank = index + 1;
+
                 return (
                   <SwiperSlide key={movie.id}>
-                    <Wrap className="skWrap" aria-hidden="true" $isTop10={isTop10}>
-                      <div className="skCard" />
-                      <div className="skMeta">
-                        <div className="skTitle" />
-                        <div className="skYear" />
-                      </div>
+                    <Wrap
+                      onClick={() => handleClick(movie)}
+                      onKeyDown={(e) => handleCardKeyDown(e, movie)}
+                      role="button"
+                      tabIndex={0}
+                      data-testid="row-card"
+                      $isTop10={isTop10}
+                    >
+                      {showBadge && <RankBadge $isTop10={isTop10}>{rank}</RankBadge>}
+
+                      <CardMedia
+                        imgPath={imgPath}
+                        altText={altText}
+                        titleText={titleText}
+                        yearText={yearText}
+                        isTop10={isTop10}
+                        showOverlay={showOverlay}
+                        forceFailImage={isForcedCdnFail}
+                        debugState={debugState}
+                      />
                     </Wrap>
                   </SwiperSlide>
                 );
-              }
+              })}
+            </Swiper>
 
-              if (movie?._fb) {
-                return (
-                  <SwiperSlide key={movie.id}>
-                    <Wrap className="fbWrap" aria-hidden="true" $isTop10={isTop10}>
-                      {showBadge && <RankBadge $isTop10={isTop10}>{index + 1}</RankBadge>}
-                      <FallbackMedia $isTop10={isTop10}>
-                        <FallbackInner>
-                          {!debugState && <FallbackBadge>{"\uC774\uBBF8\uC9C0 \uC5C6\uC74C"}</FallbackBadge>}
-                          <FallbackTitle>{movie._titleText}</FallbackTitle>
-                        </FallbackInner>
-                      </FallbackMedia>
-                    </Wrap>
-                  </SwiperSlide>
-                );
-              }
+            {!isLoading && hasError && (
+              <RowHint role="status" $isTop10={isTop10}>
+                {errorMessage}
+              </RowHint>
+            )}
 
-              const titleText = movie._titleText;
-              const yearText = movie._yearText;
-              const imgPath = movie._imgPath;
-              const altText = movie._altText;
-              const rank = index + 1;
-
-              return (
-                <SwiperSlide key={movie.id}>
-                  <Wrap
-                    onClick={() => handleClick(movie)}
-                    onKeyDown={(e) => handleCardKeyDown(e, movie)}
-                    role="button"
-                    tabIndex={0}
-                    data-testid="row-card"
-                    $isTop10={isTop10}
-                  >
-                    {showBadge && <RankBadge $isTop10={isTop10}>{rank}</RankBadge>}
-
-                    <CardMedia
-                      imgPath={imgPath}
-                      altText={altText}
-                      titleText={titleText}
-                      yearText={yearText}
-                      isTop10={isTop10}
-                      showOverlay={showOverlay}
-                      forceFailImage={isForcedCdnFail}
-                      debugState={debugState}
-                    />
-                  </Wrap>
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
-
-          {!isLoading && hasError && (
-            <RowHint role="status" $isTop10={isTop10}>
-              {errorMessage}
-            </RowHint>
-          )}
-
-          {!isLoading && !hasError && limitedMovies.length === 0 && (
-            <RowHint role="status" $isTop10={isTop10}>
-              {emptyMessage}
-            </RowHint>
-          )}
-        </SwiperArea>
+            {!isLoading && !hasError && limitedMovies.length === 0 && (
+              <RowHint role="status" $isTop10={isTop10}>
+                {emptyMessage}
+              </RowHint>
+            )}
+          </SwiperArea>
         </RowShell>
       )}
 

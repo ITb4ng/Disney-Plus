@@ -108,7 +108,7 @@ export default function FooterSection() {
           <div className="footer-row footer-row-lang">
             <div className="footer-lang">
               <label className="footer-lang-label" htmlFor="language-selector">
-                {"\uC5B8\uC5B4"}
+                언어
               </label>
 
               <select id="language-selector" className="footer-lang-select" defaultValue="ko-kr">
@@ -162,7 +162,7 @@ export default function FooterSection() {
 
           <div className="footer-row footer-row-logo">
             <div className="footer-logo">
-              <Link to="/" className="footer-logo-link" aria-label={"\uD648\uC73C\uB85C \uC774\uB3D9"}>
+              <Link to="/" className="footer-logo-link" aria-label="홈으로 이동">
                 <img
                   src="/images/logo.svg"
                   alt="Disney+"

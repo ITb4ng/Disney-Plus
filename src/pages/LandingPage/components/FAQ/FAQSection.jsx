@@ -5,7 +5,7 @@ import FAQItem from "./FAQItem";
 export default function FAQSection() {
   return (
     <section className="faq-section" data-restore-anchor="landing-faq">
-      <h2 className="faq-title">{"\uC790\uC8FC \uBB3B\uB294 \uC9C8\uBB38"}</h2>
+      <h2 className="faq-title">자주 묻는 질문</h2>
       <div className="faq-list">
         {faqList.map((item) => (
           <FAQItem key={item.id} item={item} />

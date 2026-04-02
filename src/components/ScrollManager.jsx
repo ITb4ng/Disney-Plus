@@ -143,7 +143,7 @@ function getSectionSnapshot(scrollEl, routeKey) {
 
     if (visibleRatio <= 0) return;
 
-    if (isLatePageAnchor(anchorKey) && (!latePageAllowed || visibleRatio < 0.5)) {
+    if (isLatePageAnchor(anchorKey) && visibleRatio < 0.5) {
       return;
     }
 
@@ -221,6 +221,7 @@ function findSectionTarget(scrollEl, snapshot) {
 function normalizeSnapshotForRestore(scrollEl, snapshot, fallbackY) {
   if (!snapshot) return null;
   if (!isLatePageAnchor(snapshot.anchorKey)) return snapshot;
+  if ((snapshot.visibleRatio || 0) >= 0.5) return snapshot;
   if (canUseLatePageSnapshot(scrollEl, fallbackY)) return snapshot;
   return null;
 }
@@ -243,7 +244,15 @@ function findSectionTargetFromY(scrollEl, savedY, snapshot) {
     const bottom = top + height;
     const anchorKey = getAnchorKey(section, index);
 
-    if (isLatePageAnchor(anchorKey) && !latePageAllowed) {
+    if (
+      isLatePageAnchor(anchorKey) &&
+      !latePageAllowed &&
+      !(
+        snapshot &&
+        snapshot.anchorKey === anchorKey &&
+        (snapshot.visibleRatio || 0) >= 0.5
+      )
+    ) {
       return;
     }
 
@@ -312,6 +321,7 @@ export default function ScrollManager({ onRestoreComplete }) {
   const handledEntryRef = useRef("");
   const forceCompleteTimerRef = useRef(null);
   const topPinFrameRef = useRef(null);
+  const overflowAnchorRef = useRef(null);
 
   const routeKey = useMemo(
     () => `${location.pathname}${location.search}`,
@@ -375,6 +385,11 @@ export default function ScrollManager({ onRestoreComplete }) {
 
     const el = scrollElRef.current || getScrollEl();
     scrollElRef.current = el;
+
+    if (!isDocEl(el) && el instanceof HTMLElement) {
+      overflowAnchorRef.current = el.style.overflowAnchor;
+      el.style.overflowAnchor = "none";
+    }
 
     const scrollMap = loadJsonMap(SCROLL_MAP_KEY);
     const sectionMap = loadJsonMap(SECTION_MAP_KEY);
@@ -463,6 +478,9 @@ export default function ScrollManager({ onRestoreComplete }) {
         setY(el, targetY);
         isRestoringRef.current = false;
         persistScroll(targetY);
+        if (!isDocEl(el) && el instanceof HTMLElement) {
+          el.style.overflowAnchor = overflowAnchorRef.current || "";
+        }
         onRestoreComplete?.();
       };
 
@@ -476,6 +494,7 @@ export default function ScrollManager({ onRestoreComplete }) {
         const maxY = getMaxScrollableY(el);
         const nextTarget = resolveNonRestoreTarget();
         const boundedTarget = Math.min(Math.max(0, nextTarget.y || 0), maxY);
+        const requiredStableFrames = nextTarget.waitForMaxDepth ? Number.POSITIVE_INFINITY : 12;
 
         setY(el, boundedTarget);
 
@@ -488,9 +507,9 @@ export default function ScrollManager({ onRestoreComplete }) {
 
         if (
           ((!nextTarget.waitForAnchor &&
-            stableMaxYCount >= 12 &&
+            stableMaxYCount >= requiredStableFrames &&
             Math.abs(getY(el) - boundedTarget) <= 2) ||
-            tries >= 180)
+            tries >= (nextTarget.waitForMaxDepth ? 240 : 180))
         ) {
           finishNonRestore(boundedTarget);
           return;
@@ -515,7 +534,7 @@ export default function ScrollManager({ onRestoreComplete }) {
             keepNonRestoreTargetPinned();
             forceCompleteTimerRef.current = window.setTimeout(
               () => finishNonRestore(Math.max(0, resolveNonRestoreTarget().y || 0)),
-              4000
+              nextTarget.waitForMaxDepth ? 5200 : 4000
             );
             return;
           }
@@ -531,6 +550,9 @@ export default function ScrollManager({ onRestoreComplete }) {
           cancelAnimationFrame(topPinFrameRef.current);
           topPinFrameRef.current = null;
         }
+        if (!isDocEl(el) && el instanceof HTMLElement) {
+          el.style.overflowAnchor = overflowAnchorRef.current || "";
+        }
       };
     }
 
@@ -542,6 +564,9 @@ export default function ScrollManager({ onRestoreComplete }) {
         forceCompleteTimerRef.current = null;
       }
       persistScroll(getY(el));
+      if (!isDocEl(el) && el instanceof HTMLElement) {
+        el.style.overflowAnchor = overflowAnchorRef.current || "";
+      }
       onRestoreComplete?.();
     };
 
@@ -648,6 +673,9 @@ export default function ScrollManager({ onRestoreComplete }) {
       if (topPinFrameRef.current) {
         cancelAnimationFrame(topPinFrameRef.current);
         topPinFrameRef.current = null;
+      }
+      if (!isDocEl(el) && el instanceof HTMLElement) {
+        el.style.overflowAnchor = overflowAnchorRef.current || "";
       }
       window.removeEventListener("wheel", handleUserScrollIntent, true);
       window.removeEventListener("touchmove", handleUserScrollIntent, true);

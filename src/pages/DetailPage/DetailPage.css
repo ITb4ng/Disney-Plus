@@ -6,7 +6,73 @@
   background: #090b13;
   color: rgba(255, 255, 255, 0.92);
 }
+.detail__heroFallback {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: flex-end;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    #10141d;
+}
 
+.detail__heroFallbackInner {
+  width: 100%;
+  padding: clamp(20px, 3vw, 36px);
+}
+
+.detail__heroFallbackBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.detail__heroFallbackTitle {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+}
+
+.detail__heroFallbackDesc {
+  margin: 10px 0 0;
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 768px) {
+  .detail__heroFallbackInner {
+    padding: 18px;
+  }
+
+  .detail__heroFallbackDesc {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 390px) {
+  .detail__heroFallbackInner {
+    padding: 14px;
+  }
+
+  .detail__heroFallbackDesc {
+    font-size: 12px;
+  }
+}
 /* =========================
    HERO (Background Section)
    - JS에서 background-image로 주입

@@ -8,6 +8,7 @@ import { FaAngleDown } from "react-icons/fa6";
 const IMAGE_TIMEOUT_MS = 8000;
 const AUTO_RESUME_DELAY_MS = 12000;
 const INITIAL_NEIGHBOR_PREFETCH_DELAY_MS = 1600;
+const DEBUG_BROKEN_IMAGE_SRC = "/__debug__/force-image-error.jpg";
 
 function loadImage(url) {
   return new Promise((resolve, reject) => {
@@ -55,6 +56,8 @@ export default function HeroSection({ debugState = "success" }) {
   const isDebugLoading = debugState === "loading";
   const isDebugError = debugState === "error";
   const isDebugEmpty = debugState === "empty";
+  const isDebugNoImage = debugState === "no-image";
+  const isDebugImageError = debugState === "image-error";
   const isDebugCdnFail = debugState === "cdn-fail";
 
   const mode = isMd ? "md" : "xl";
@@ -64,14 +67,23 @@ export default function HeroSection({ debugState = "success" }) {
     (idx) => {
       const slide = slides[idx];
       if (!slide) return `missing-${idx}`;
-      return `${slide.id}:${mode}`;
+      const imageDebugKey = isDebugCdnFail
+        ? "cdn-fail"
+        : isDebugImageError
+          ? "image-error"
+          : isDebugNoImage
+            ? "no-image"
+            : "normal";
+      return `${slide.id}:${mode}:${imageDebugKey}`;
     },
-    [mode]
+    [isDebugCdnFail, isDebugImageError, isDebugNoImage, mode]
   );
 
   const getCandidateUrls = useCallback(
     (idx) => {
       if (isDebugCdnFail) return [];
+      if (isDebugNoImage) return [];
+      if (isDebugImageError) return [DEBUG_BROKEN_IMAGE_SRC];
 
       const slide = slides[idx];
       if (!slide?.image) return [];
@@ -81,7 +93,7 @@ export default function HeroSection({ debugState = "success" }) {
 
       return [...new Set([preferred, secondary].filter(Boolean))];
     },
-    [isMd, isDebugCdnFail]
+    [isDebugCdnFail, isDebugImageError, isDebugNoImage, isMd]
   );
 
   const resolveSlideImage = useCallback(
@@ -356,7 +368,7 @@ export default function HeroSection({ debugState = "success" }) {
 
       {activeState.status === "failed" && !isDebugError && !showEmpty && (
         <div className="hero-state hero-state--soft" aria-live="polite">
-          <p>Fallback background is shown due to unstable image source.</p>
+          <p>이미지 오류를 감지해 기본 배경으로 안전하게 표시하고 있습니다.</p>
         </div>
       )}
     </section>
