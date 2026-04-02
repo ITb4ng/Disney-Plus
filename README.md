@@ -16,8 +16,11 @@
 ---
 
 ## 🌐 Live
+### 현재 리뉴얼 버전
+- **Vercel Production**: 👉 [https://b4ng-disney-plus.vercel.app/](https://b4ng-disney-plus.vercel.app/)
 
-👉 https://b4ng-disney-plus.vercel.app/
+### 과거 초기 버전
+- **Firebase Hosting (Legacy)**: [https://react-disney-project-6834d.web.app/](https://react-disney-project-6834d.web.app/)
 
 ---
 
