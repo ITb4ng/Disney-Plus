@@ -101,11 +101,6 @@ export default function MainPage() {
     allowed: [...COMMON_DEBUG_STATES, "image-error"],
   });
 
-  const bannerDebugState =
-    bannerDebugRaw === "no-image" || bannerDebugRaw === "cdn-fail"
-      ? "image-error"
-      : bannerDebugRaw;
-
   return (
     <>
       {showDemoBanner && <DemoBanner onClose={() => setShowDemoBanner(false)} />}
@@ -115,7 +110,7 @@ export default function MainPage() {
           $variant="banner"
           data-restore-anchor="main-banner"
         >
-          <Banner debugState={bannerDebugState} />
+          <Banner debugState={bannerDebugRaw} />
         </SectionBlock>
 
         {isGuest && (

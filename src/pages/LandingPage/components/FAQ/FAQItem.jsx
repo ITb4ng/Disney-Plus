@@ -2,7 +2,7 @@ import { useId } from "react";
 import { HiOutlinePlus } from "react-icons/hi2";
 
 function renderAnswer(answer) {
-  // 줄바꿈 뒤에 "-"가 오면 첫 문단과 불릿 리스트로 분리합니다.
+  // 줄바꿈 뒤에 "-"가 있으면 첫 문단과 불릿 리스트로 분리합니다.
   if (answer.includes("\n- ")) {
     const [first, ...bullets] = answer.split("\n- ");
     return (

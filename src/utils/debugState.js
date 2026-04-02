@@ -4,6 +4,7 @@ export const COMMON_DEBUG_STATES = [
   "error",
   "empty",
   "no-image",
+  "image-error",
   "cdn-fail",
 ];
 

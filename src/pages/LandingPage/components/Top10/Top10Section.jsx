@@ -78,7 +78,10 @@ export default function Top10Section({ id, userData, debugState }) {
   const isCdnFail = debugState === "cdn-fail";
   const isStateLayout = !!debugState && debugState !== "success";
   const rowDebugState =
-    debugState === "loading" || debugState === "no-image" || debugState === "cdn-fail"
+    debugState === "loading" ||
+    debugState === "no-image" ||
+    debugState === "image-error" ||
+    debugState === "cdn-fail"
       ? debugState
       : undefined;
 

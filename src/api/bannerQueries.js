@@ -1,34 +1,73 @@
 import tmdbAxios from "./tmdbaxios";
-// import requests from "./request";
+import { getEnabledBannerSeeds, pickWeightedRandomSeed } from "./bannerPickRandom";
 
-export async function fetchBannerNowPlaying() {
-  const seedId = 194797; //66732, 71446, 93405, 94605 , 110316 , 214582, 194797 ,119769, 982843(movie)
+function hasUsableBannerFields(detail) {
+  if (!detail || typeof detail !== "object") return false;
 
-  // 1️⃣ seed 기반 추천 목록
-  const res = await tmdbAxios.get("", {
-    params: {
-      path: `tv/${seedId}/recommendations`,
-      language: "ko-KR",
-    },
-  });
+  const hasId = typeof detail.id === "number";
+  const hasTitle =
+    typeof detail.title === "string" ||
+    typeof detail.name === "string" ||
+    typeof detail.original_title === "string" ||
+    typeof detail.original_name === "string";
+  const hasVisual = Boolean(detail.backdrop_path || detail.poster_path);
 
-  const results = Array.isArray(res.data?.results) ? res.data.results : [];
-  if (!results.length) return null;
+  return hasId && hasTitle && hasVisual;
+}
 
-  const picked = results[Math.floor(Math.random() * results.length)];
-  if (!picked?.id) return null;
-
-  // 2️⃣ 상세 정보
+async function fetchSeedDetail(seed) {
   const { data: detail } = await tmdbAxios.get("", {
     params: {
-      path: `${picked.media_type}/${picked.id}`,
+      path: `${seed.type}/${seed.id}`,
       append_to_response: "videos",
       language: "ko-KR",
     },
   });
 
+  if (!detail?.id) return null;
+  if (!hasUsableBannerFields(detail)) return null;
+
   return {
     ...detail,
-    media_type: picked.media_type,
+    media_type: seed.type,
+    banner_seed: {
+      id: seed.id,
+      type: seed.type,
+      key: seed.key,
+      title: seed.title,
+      weight: seed.weight,
+      note: seed.note,
+    },
   };
+}
+
+export async function fetchBannerNowPlaying() {
+  const enabledSeeds = getEnabledBannerSeeds();
+  if (!enabledSeeds.length) return null;
+
+  const tried = new Set();
+
+  while (tried.size < enabledSeeds.length) {
+    const remainingSeeds = enabledSeeds.filter(
+      (seed) => !tried.has(`${seed.type}:${seed.id}`)
+    );
+
+    const pickedSeed = pickWeightedRandomSeed(remainingSeeds);
+    if (!pickedSeed) return null;
+
+    const seedKey = `${pickedSeed.type}:${pickedSeed.id}`;
+    tried.add(seedKey);
+
+    try {
+      const detail = await fetchSeedDetail(pickedSeed);
+      if (detail) return detail;
+
+      console.error(`❌ Unusable banner seed skipped: ${seedKey}`);
+    } catch (error) {
+      console.error(`❌ Failed banner seed skipped: ${seedKey}`, error);
+    }
+  }
+
+  console.error("❌ No usable banner seed found");
+  return null;
 }

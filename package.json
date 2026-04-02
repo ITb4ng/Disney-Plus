@@ -17,6 +17,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^11.0.5",
     "styled-components": "^6.0.7",
     "swiper": "^11.0.3",
     "web-vitals": "^2.1.4"
@@ -26,6 +27,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "test:feedback": "playwright test tests/feedback-responsive.spec.js tests/feedback-visual.spec.js --project=chromium",
+    "test:feedback:responsive": "playwright test tests/feedback-responsive.spec.js --project=chromium",
+    "test:feedback:visual": "playwright test tests/feedback-visual.spec.js --project=chromium",
+    "test:feedback:visual:update": "playwright test tests/feedback-visual.spec.js --project=chromium --update-snapshots",
     "server": "npm --prefix server run start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "firebase:deploy": "cd firebase && firebase --config firebase.json --project react-disney-project-6834d deploy",

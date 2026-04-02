@@ -308,6 +308,7 @@ const SearchPage = () => {
   const results = searchQuery.data || [];
   const debugList =
     normalizedSearchDebugState === "no-image" ||
+    normalizedSearchDebugState === "image-error" ||
     normalizedSearchDebugState === "cdn-fail"
       ? results.length > 0
         ? results
@@ -319,8 +320,8 @@ const SearchPage = () => {
             release_date: "2025-01-01",
             first_air_date: "2025-01-01",
             vote_average: 7.5,
-            backdrop_path: null,
-            poster_path: null,
+            backdrop_path: "/debug-search-image.jpg",
+            poster_path: "/debug-search-image.jpg",
           }))
       : results;
   const hasResults = debugList.length > 0;

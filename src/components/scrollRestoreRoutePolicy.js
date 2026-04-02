@@ -61,6 +61,15 @@ function clamp01(value) {
   return Math.max(0, Math.min(1, value));
 }
 
+function shouldRestoreFooterToBottom(sectionSnapshot) {
+  if (sectionSnapshot?.anchorKey !== "app-footer") return false;
+
+  const visibleRatio = Number(sectionSnapshot.visibleRatio || 0);
+  const pageRatio = Number(sectionSnapshot.pageRatio || 0);
+
+  return visibleRatio >= 0.75 && pageRatio >= 0.9;
+}
+
 const LANDING_HERO_ANCHOR = "landing-hero";
 const LANDING_RELOAD_ANCHORS = new Set([
   LANDING_HERO_ANCHOR,
@@ -113,11 +122,20 @@ function getLandingCompareY(scrollEl, savedY, sectionSnapshot) {
 
 function resolveLandingTarget(scrollEl, savedY, sectionSnapshot, resolveSectionTarget) {
   const landingSections = getLandingSections(scrollEl, resolveSectionTarget);
+  const maxY = getMaxScrollableY(scrollEl);
 
   if (landingSections.length === 0) {
     return {
       y: 0,
       pinUntilStable: true,
+    };
+  }
+
+  if (shouldRestoreFooterToBottom(sectionSnapshot)) {
+    return {
+      y: maxY,
+      pinUntilStable: true,
+      waitForMaxDepth: true,
     };
   }
 

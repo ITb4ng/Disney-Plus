@@ -14,7 +14,6 @@ import FeedbackPage from "./pages/FeedbackPage";
 import FeedbackForm from "./pages/FeedbackPage/FeedbackForm";
 import Footer from "./pages/LandingPage/components/Footer/FooterSection";
 import NotFoundPage from "./pages/NotFound";
-import "./styles/badges.css";
 
 const Layout = () => {
   const { pathname } = useLocation();
