@@ -1,146 +1,156 @@
 # Disney+ Renewal
 
-디즈니 플러스 UI/UX 리뉴얼을 목표로 한 React 기반 SPA 프로젝트입니다.  
-TMDB API를 서버 프록시 구조로 안전하게 연동하여 구현했습니다.
+Disney+ 스타일의 탐색 경험을 목표로 만든 React 기반 SPA 프로젝트입니다.  
+TMDB 데이터를 프록시 서버를 통해 연동하고, 상세 페이지 전환 UX, 스크롤 복원 정책, 체험 계정 흐름, 피드백 기능까지 함께 다루고 있습니다.
 
 ---
 
-## 📦 Stable Release
+## Stable Release
 
-현재 안정화 버전: **v0.3.0**
-- 🌐 Live Demo : https://b4ng-disney-plus.vercel.app/
+- 현재 안정 버전: **v0.3.0**
+- Live Demo: https://b4ng-disney-plus.vercel.app/
 
+### Release Notes
+- [2026-03-16 v0.3.0 Release Notes](docs/release/2026-03-16-v0.3.0.md)
+- [2026-03-17 v0.3.0 Release Notes](docs/release/2026-03-17-v0.3.0.md)
 
-### 🔖 Release History
-- **v0.3.0  라우트별 스크롤 복원 정책 정리 및 Firebase 설정 정비**
-- **v0.2.4  UI State 안정화 및 테스트 환경 개선**
-- **v0.2.3  SearchPage | Nav | banner UX 개선**
-  - Nav UX 개선
-  - DetailPage preload
-  - Row 캐시 안정화
-  - iframe lazy loading
-  - useMemo 렌더링 최적화
-- **v0.2.2  Detail | Row UX 개선**
-  - Nav UX 개선
-  - DetailPage preload
-  - Row 캐시 안정화
-  - iframe lazy loading
-  - useMemo 렌더링 최적화
-- **v0.2.1  Detail UX 개선**
-  - 영화 정보기반 Detail 동기화와 콘텐츠 별 구조 분리
-  - 카드 Hover 시 영화 제목 및 출시년도 표시
-  - DetailPage 이동 시 이전 SEO 메타 정보가 잔존하는 문제 수정
-- **v0.2.0**
-  - 체험계정 UX 개선
-  - 피드백 페이지 추가
-  - 권한(관리자/작성자/체험용) 분기 정리
-  - 정렬/필터/리프레시 UX 반영
-- v0.1.1
-  - SEO 최적화 작업
-- v0.1.0
-  - DetailPage 구조 개편 및 Hero 전환 UX 개선
+### Release History
+- **v0.3.0** 라우트별 스크롤 복원 정책 정리 및 구조 안정화
+- **v0.2.4** UI 상태 안정화 및 테스트 환경 개선
+- **v0.2.3** SearchPage, Nav, Banner UX 개선
+- **v0.2.2** Detail, Row UX 개선
+- **v0.2.1** Detail UX 개선
+- **v0.2.0** 체험 계정 및 피드백 기능 추가
+- **v0.1.1** SEO 최적화
+- **v0.1.0** DetailPage 구조 개편 및 Hero 전환 UX 개선
 
-- 👉 GitHub - [v0.3.0 릴리즈 바로가기](https://github.com/ITb4ng/Disney-Plus/releases/tag/v0.3.0)에서 v0.3.0 스냅샷(zip) 다운로드 가능
-- 👉 또는 git clone 후 해당 태그로 체크아웃:
+### Stable Version Checkout
 
 ```bash
 git clone https://github.com/ITb4ng/Disney-Plus.git
 cd Disney-Plus
 git checkout v0.3.0
 ```
-## 🧪 Local 개발 실행 방법 
+
+---
+
+## Local Development
+
+### 실행 방법
+
 ```bash
 npm install
 npm run dev
 ```
+
 ### 실행 환경
 
-- Client: http://localhost:3000
-- TMDB Proxy(Server): http://localhost:4000/api/tmdb
-
-# 🚀 주요 기능
-🎬 Detail UX
- - Hero 프리로드 기반 이미지 전환
- - 스크롤 기반 비네팅 효과
- - Search → Detail 상태 유지 전환
-
-🔐 체험계정 정책
-
-체험계정은 피드백 작성 가능
-
-수정/삭제는 제한
-
-정책 안내 배너 제공
-
-📝 피드백 페이지
-
-리스트 / 빈 상태 / 로딩 상태 구현
-
-권한 기반 수정 로직 (작성자 / 관리자)
-
-정렬 / 필터 / 리프레시 UX 반영
-
-🎨 인터랙션
-
-Spotlight + 미세 Parallax 카드 효과
-
-LERP 기반 부드러운 마우스 추적
-
-모바일 환경에서 효과 최소화 처리
-
-## 🚀 Tech Stack
-- React
-- React Router
-- Styled-components
-- Swiper
-- Express (TMDB Proxy Server)
-- Vercel Deployment
-- TanStack Query (React Query)
-
-## 🌐 Deployment Strategy
-- GitHub Releases 기준으로 Stable 버전 관리
-- feature/* → Vercel Preview 검증
-- dev → 통합 개발 검증 브랜치
-- release/x.y.z → 안정화 기준 브랜치
-- main → Production 브랜치 (v1.0.0 이후 예정)
- 
+- Client: `http://localhost:3000`
+- TMDB Proxy Server: `http://localhost:4000/api/tmdb`
 
 ---
 
-## 🚧 Renewal (dev) 진행 상황
-현재 `dev` 브랜치는 Disney+ 리뉴얼 작업의 **메인 브랜치**입니다.  
-UI/UX 개선과 구조 정리를 중심으로 지속적으로 업데이트 중입니다.
+## 주요 기능
 
-## 📚 Documentation
-- `docs/release`
-  - 버전별 릴리즈 노트 보관
-  - 최신 문서: [v0.3.0 Release Notes](docs/release/2026-03-16-v0.3.0.md)
-- `docs/work`
-  - 작업 기록, 테스트 계획, 수동 점검 메모 보관
-  - 최신 작업 문서: [2026-03-16 Work](docs/work/0315/2026-03-16-work.md)
-- `docs/logs`
-  - 브랜치 개발 로그와 회고 기록 보관
-  - 최신 로그: [2026-03-16 Release v0.3.0 Log](docs/logs/2026-03-16-release-0.3.0.md)
+### Detail UX
+- Hero 프리로드 기반 이미지 전환
+- 스크롤 기반 비네팅 효과
+- Search -> Detail 전환 시 상태 전달 최적화
 
-## 📚 Development Log
-- [2026-02-23 Dev 브랜치 기본 브랜치로 승격](docs/work/2026-02-23-work.md)
-- [2026-02-26 LoginPage(root) 반응형 코어 안정화](docs/work/2026-02-26-LoginPage.md)
-- [2026-02-27 Login 체험용 계정 생성](docs/work/2026-02-27-LoginPage-Fix.md)
-- [2026-02-28 DetailPage 개선](docs/work/2026-02-28-DetailPage.md)
-- [2026-03-01 release v0.1.0 작업](docs/work/2026-03-01-work.md)
-- [2026-03-02 release v0.1.0 수정](docs/work/2026-03-02-work.md)
-- [2026-03-03 release v0.2.0 작업](docs/work/2026-03-03-work.md)
-- [2026-03-04 release v0.2.0 수정](docs/work/2026-03-04-work.md)
-- [2026-03-05 release v0.2.1 개선](docs/work/2026-03-05-work.md)
-- [2026-03-06 release v0.2.2 개선](docs/work/2026-03-06-work.md)
-- [2026-03-07 release v0.2.3 개선](docs/work/2026-03-07-work.md)
-- [2026-03-10 프로젝트 테스트 로드맵](docs/work/0310/2026-03-10-project-testing-roadmap.md)
-- [2026-03-10 스크롤 복원 수동 점검 메모](docs/work/0310/scroll-restoration-manual-test.md)
-- [2026-03-16 release v0.3.0 작업 기록](docs/work/0315/2026-03-16-work.md)
-- [2026-03-16 release v0.3.0 개발 로그](docs/logs/2026-03-16-release-0.3.0.md)
+### 스크롤 복원 정책
+- `/main`, `/`, `/detail` 라우트별 복원 정책 분리
+- 새로고침과 뒤로 가기 상황에 맞춘 복원 시점 보정
+- 오버레이 기반 새로고침 UX로 플래시 최소화
 
-  
-### 🧭 다음 작업 예정
-- *-new.disney.vercel.app 도메인 적용 
-- 크로스브라우징 테스트 중 현재 크롬에서 MovideModal이 깨지는 문제
-- 모바일 / 태블릿 공통 spacing system 재정의
+### 체험 계정 정책
+- 체험 계정 로그인 지원
+- 피드백 작성 가능
+- 수정과 삭제는 제한
+- 권한 안내 배너 제공
+
+### 피드백 페이지
+- 리스트, 빈 상태, 로딩 상태 제공
+- 작성자/관리자 권한 분기
+- 정렬, 필터, 새로고침 UX 반영
+
+### 인터랙션
+- Banner 및 카드 인터랙션 강화
+- Spotlight, 패럴랙스, Hover 상태 처리
+- 모바일 환경에서는 과도한 효과를 줄이는 방향으로 보정
+
+---
+
+## Tech Stack
+
+- React
+- React Router
+- Styled Components
+- Swiper
+- TanStack Query
+- Firebase
+- Express (TMDB Proxy Server)
+- Vercel
+- Playwright
+
+---
+
+## Branch Strategy
+
+- `feature/*`: 기능 단위 작업 브랜치
+- `dev`: 통합 개발 브랜치
+- `release/x.y.z`: 안정화 및 릴리즈 점검 브랜치
+- `main`: Production 브랜치
+
+---
+
+## Documentation
+
+### 문서 분류
+- `docs/release`: 릴리즈 기준 브랜치에서 확정된 변경 사항을 정리하는 릴리즈 노트
+- `docs/logs`: 작업 중 판단, 느낀 점, 회고를 남기는 로그 문서
+- `docs/work`: 개발 로그, 테스트 메모, 다음 액션을 간단하고 실무적으로 정리하는 작업 문서
+- `docs/work/archive`: 초기 작업 기록을 보관하는 아카이브 폴더
+- `docs/work/test-notes`: 수동 테스트 기준, 스크롤 복원 점검, URL 매트릭스를 모아두는 폴더
+
+### Release
+- [2026-03-16 v0.3.0 Release Notes](docs/release/2026-03-16-v0.3.0.md)
+- [2026-03-17 v0.3.0 Release Notes](docs/release/2026-03-17-v0.3.0.md)
+
+### Logs
+- [2026-03-09 Release Log v0.2.4](docs/logs/2026-03-09-release-log-0.2.4.md)
+- [2026-03-10 Retrospective](docs/logs/2026-03-10-retrospective.md)
+- [2026-03-16 Release Log v0.3.0](docs/logs/2026-03-16-release-log-0.3.0.md)
+- [2026-03-17 Release Log v0.3.0](docs/logs/2026-03-17-release-log-0.3.0.md)
+
+### Work
+- [2026-02-23 Work](docs/work/archive/2026-02-23-work.md)
+- [2026-02-26 LoginPage](docs/work/archive/2026-02-26-LoginPage.md)
+- [2026-02-27 LoginPage Fix](docs/work/archive/2026-02-27-LoginPage-Fix.md)
+- [2026-02-28 DetailPage](docs/work/archive/2026-02-28-DetailPage.md)
+- [2026-03-01 Work](docs/work/archive/2026-03-01-work.md)
+- [2026-03-02 Work](docs/work/archive/2026-03-02-work.md)
+- [2026-03-03 Work](docs/work/archive/2026-03-03-work.md)
+- [2026-03-04 Work](docs/work/archive/2026-03-04-work.md)
+- [2026-03-05 Work](docs/work/archive/2026-03-05-work.md)
+- [2026-03-06 Work](docs/work/archive/2026-03-06-work.md)
+- [2026-03-07 Work](docs/work/archive/2026-03-07-work.md)
+- [2026-03-10 Project Testing Roadmap](docs/work/0310/2026-03-10-project-testing-roadmap.md)
+- [2026-03-10 Work](docs/work/0310/2026-03-10-work.md)
+- [2026-03-16 Work](docs/work/0315/2026-03-16-work.md)
+- [2026-03-17 Work](docs/work/0317/2026-03-17-work.md)
+
+### Test Notes
+- [Debug URL Matrix](docs/work/test-notes/debug-url-matrix.md)
+- [Scroll Test](docs/work/test-notes/scroll-test.md)
+
+---
+
+## Dev Branch Status
+
+현재 `dev` 브랜치는 Disney+ Renewal 작업의 통합 개발 브랜치입니다.  
+UI/UX 개선, 구조 정리, 테스트 정비를 중심으로 지속적으로 업데이트하고 있습니다.
+
+### 현재 점검 중인 항목
+- 브라우저별 스크롤 복원 검증
+- 모바일/태블릿 공통 spacing 시스템 정리
+- 메인 페이지와 랜딩 페이지의 인터랙션 미세 조정

@@ -23,7 +23,7 @@ const IMG_BASE = "https://image.tmdb.org/t/p/original";
 const ROW_SWIPE_KEY = "row:swipe:v1";
 const DEBUG_BROKEN_IMAGE_SRC = "/__debug__/force-image-error.jpg";
 
-// Row 공용 스와이프 상태 캐시
+// 공용 데이터 상태 캐시
 const ROW_CACHE = new Map();
 
 function loadSwipeMap() {
@@ -62,8 +62,8 @@ function normalizeSwipeState(raw) {
 
 /**
  * 카드 미디어 영역
- * - no-image: 이미지 경로 자체가 없음
- * - cdn-fail: 이미지를 아예 숨기고 fallback UI만 표시
+ * - no-image: 이미지 경로 자ccb4가 없음
+ * - cdn-fail: 이미지를 숨기고 fallback UI만 표시
  * - image-error: 존재하지 않는 이미지 경로를 넣어 onError를 강제로 발생시킴
  */
 function CardMedia({

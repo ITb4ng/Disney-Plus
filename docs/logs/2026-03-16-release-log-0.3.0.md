@@ -1,11 +1,5 @@
-<style>
-body {
-  font-family: "Noto Sans KR", sans-serif;
-  line-height: 1.7;
-}
-</style>
 
-# 2026-03-16 브랜치 개발 로그
+# 2026-03-16 회고
 - `09c8a9c`
 - 브랜치 `release/0.3.0`
 - 기준 커밋: `887f402` (2026-03-16) `feat: state 기반 UI 안정화 및 테스트 구조 개선 (#11)`
